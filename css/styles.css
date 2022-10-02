@@ -12,7 +12,7 @@ body.active {
     z-index: -1;
 }
 .no-js #experience-timeline > div {
-    background: #001a2c;
+    background: #224543;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #dcd9d9;
@@ -61,7 +61,7 @@ header {
 }
 header ul {
     display: inline-block;
-    background: #002945;
+    background: #224543;
     text-align: center;
     padding: 10px;
     margin: 0;
@@ -73,30 +73,30 @@ header li {
 }
 header a {
     display: block;
-    color: #cacad4;
+    color: #d1d3d5;
     padding: 10px;
 }
 
 header span {
     display: block;
-    color: #cacad4;
+    color: #d1d3d5;
     padding: 10px;
 }
 header a:hover {
-    color: #ffffff;
+    color: #f9f9fa;
     text-decoration: none;
-    background: #003356;
+    background: #4f7370;
     border-radius: 4px;
 }
 
 header span:hover {
-    color: #ffffff;
+    color: #f9f9fa;
     text-decoration: none;
-    background: #003356;
+    background: #4f7370;
     border-radius: 4px;
 }
 header a:focus {
-    color: #cacad4;
+    color: #f9f9fa;
     text-decoration: none;
 }
 header.active {
@@ -115,23 +115,23 @@ header.sticky {
     position: fixed;
     right: 15px;
     top: 10px;
-    color: #cacad4;
+    color: #ededee;
     font-size: 1.5em;
     z-index: 20;
     padding: 0 7px;
     border-radius: 4px;
-    background: #002945;
+    background: #4f7370;
 }
 #mobile-menu-close {
     display: none;
     text-align: right;
     width: 100%;
-    background: #002945;
+    background: #4f7370;
     font-size: 1.5em;
     padding-right: 15px;
     padding-top: 10px;
     cursor: pointer;
-    color: #cacad4;
+    color: #ededee;
 }
 #mobile-menu-close span {
     font-size: 0.5em;
@@ -148,7 +148,7 @@ footer {
 }
 .copyright p {
     margin: 0;
-    color: #cacad4;
+    color: #ededee;
 }
 .top {
     text-align: center;
@@ -164,7 +164,7 @@ footer {
     text-align: center;
 }
 .top i {
-    color: #74808a;
+    color: #ededee;
 }
 .social {
     text-align: right;
@@ -180,23 +180,23 @@ footer {
 }
 .social a {
     display: block;
-    color: #cacad4;
+    color: #ededee;
     padding: 10px;
 }
 .social a:hover {
-    color: #3498db;
+    color: #728f8d;
 }
 .btn-rounded-white {
     display: inline-block;
-    color: #fff;
+    color: #d1d3d5;
     padding: 15px 25px;
-    border: 3px solid #fff;
+    border: 3px solid #4f7370;
     border-radius: 30px;
-    transition: 0.5s ease all;
+    transition: 0.3s ease all;
 }
 .btn-rounded-white:hover {
-    color: #3498db;
-    background: #fff;
+    color: #f9f9fa;
+    background: #4f7370;
     text-decoration: none;
 }
 .shadow {
@@ -221,10 +221,10 @@ footer {
     left: 0;
     right: 0;
     margin: 0 auto;
-    background: #5b90c9;
+    background: #4f7370;
 }
 .background-alt {
-    background: #f2f2f5;
+    background: #101212;
 }
 #lead {
     position: relative;
@@ -249,7 +249,7 @@ footer {
     margin: 0;
 }
 #lead-content h1 {
-    color: #fff;
+    color: #f9f9fa;
     font-weight: 900;
     font-size: 5em;
     text-transform: uppercase;
@@ -257,7 +257,7 @@ footer {
     line-height: 0.9em;
 }
 #lead-content h2 {
-    color: #a0cfee;
+    color: #4f7370;
     font-weight: 500;
     font-size: 2.25em;
     margin-bottom: 15px;
@@ -270,7 +270,7 @@ footer {
     right: 0;
     bottom: 0;
     left: 0;
-    background: rgba(4, 30, 54, 0.8);
+    background: rgba(56, 64, 71, 0.5);
     z-index: 1;
 }
 #lead-down {
@@ -281,7 +281,7 @@ footer {
     text-align: center;
     z-index: 10;
     bottom: 15px;
-    color: #fff;
+    color: #d1d3d5;
 }
 #lead-down span {
     cursor: pointer;
@@ -290,7 +290,7 @@ footer {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    border: 3px solid #a0cfee;
+    border: 3px solid #4f7370;
     text-align: center;
 }
 #lead-down i {
@@ -311,23 +311,24 @@ footer {
 }
 #about {
     padding: 75px 15px;
-    border-bottom: 1px solid #dcd9d9;
-    background: #0b2137;
+    border-bottom: 1px solid #676d72;
+    background: #101212;
 }
 #about h2 {
-    color: #374054;
+    color: #ededee;
 }
 #about p {
-    color: #74808a;
+    color: #d1d3d5;
     margin: 0;
 }
 #experience {
     padding: 50px 15px;
     text-align: center;
-    border-bottom: 1px solid #dcd9d9;
+    border-bottom: 1px solid #676d72;
+
 }
 #experience h2 {
-    color: #374054;
+    color: #ededee;
 }
 #experience-timeline {
     margin: 30px auto 0 auto;
@@ -343,7 +344,7 @@ footer {
     right: auto;
     height: 100%;
     width: 3px;
-    background: #3498db;
+    background: #4f7370;
     z-index: 0;
 }
 #experience-timeline:after {
@@ -351,15 +352,15 @@ footer {
     content: "";
     width: 3px;
     height: 40px;
-    background: #3498db;
-    background: linear-gradient(to bottom, #3498db, rgba(52, 152, 219, 0));
+    background: #4f7370;
+    background: linear-gradient(to bottom, #4f7370, rgba(79, 115, 112, 0));
     top: 100%;
     left: 303px;
 }
 .vtimeline-content {
     margin-left: 350px;
-    background: #fff;
-    border: 1px solid #e6e6e6;
+    background: #676d72;
+    border: 1px solid #344242;
     padding: 15px;
     border-radius: 3px;
     text-align: left;
@@ -367,18 +368,18 @@ footer {
 .vtimeline-content h3 {
     font-size: 1.5em;
     font-weight: 300;
-    color: #374054;
+    color: #ededee;
     display: inline-block;
     margin: 0;
 }
 .vtimeline-content h4 {
     font-size: 1.2em;
     font-weight: 300;
-    color: #7e8890;
+    color: #ededee;
     margin: 0 0 15px 0;
 }
 .vtimeline-content p {
-    color: #74808a;
+    color: #d1d3d5;
     font-size: 0.9em;
     margin: 0;
 }
@@ -390,10 +391,10 @@ footer {
 }
 .vtimeline-icon {
     position: relative;
-    color: #fff;
+    color: #ededee;
     width: 50px;
     height: 50px;
-    background: #3498db;
+    background: #4f7370;
     border-radius: 50%;
     float: left;
     z-index: 99;
@@ -411,36 +412,37 @@ footer {
     left: 0;
     top: 10px;
     font-weight: 300;
-    color: #374054;
+    color: #c2c4c6;
 }
 #education {
     padding: 50px 15px 20px 15px;
-    border-bottom: 1px solid #dcd9d9;
+    border-bottom: 1px solid #676d72;
     text-align: center;
+    background: #344242;
 }
 #education h2 {
-    color: #374054;
+    color: #ededee;
     margin-bottom: 50px;
 }
 .education-block {
     max-width: 700px;
     margin: 0 auto 30px auto;
     padding: 15px;
-    border: 1px solid #dcd9d9;
+    border: 1px solid #676d72;
     text-align: left;
 }
 .education-block h3 {
     font-weight: 500;
     float: left;
     margin: 0;
-    color: #374054;
+    color: #f9f9fa;
 }
 .education-block span {
-    color: #74808a;
+    color: #d1d3d5;
     float: right;
 }
 .education-block h4 {
-    color: #74808a;
+    color: #9ca0a4;
     clear: both;
     font-weight: 500;
     margin: 0 0 15px 0;
@@ -448,7 +450,7 @@ footer {
 .education-block p,
 .education-block ul {
     margin: 0;
-    color: #74808a;
+    color: #d1d3d5;
     font-size: 0.9em;
 }
 .education-block ul {
@@ -456,11 +458,12 @@ footer {
 }
 #projects {
     padding: 50px 15px;
-    border-bottom: 1px solid #dcd9d9;
+    border-bottom: 1px solid #676d72;
     text-align: center;
+
 }
 #projects h2 {
-    color: #374054;
+    color: #ededee;
     margin-bottom: 50px;
 }
 .project {
@@ -468,7 +471,7 @@ footer {
     max-width: 900px;
     margin: 0 auto 30px auto;
     overflow: hidden;
-    background: #fff;
+    background: #676d72;
     border-radius: 4px;
 }
 .project-image {
@@ -532,7 +535,7 @@ footer {
 }
 #contact h2 {
     margin: 0 0 15px 0;
-    color: #fff;
+    color: #374054;
     font-weight: 500;
 }
 #contact-form {
@@ -597,7 +600,7 @@ footer {
 .optional-section {
     padding: 50px 15px;
     text-align: center;
-    border-top: 1px solid #dcd9d9;
+    border-top: 1px solid #676d72;
 }
 
 .optional-section h2 {
@@ -608,7 +611,7 @@ footer {
     max-width: 700px;
     margin: 0 auto 30px auto;
     padding: 15px;
-    border: 1px solid #dcd9d9;
+    border: 1px solid #676d72;
     background: #fff;
     text-align: left;
 }
@@ -636,6 +639,42 @@ footer {
 .optional-section-block ul {
     padding: 0 0 0 15px;
 }
+
+.animated-text span {
+    display: none;
+    line-height: 1;
+}
+
+.animated-text span.active {
+    display: inline;
+}
+
+.animated-text:after {
+    content: ".";
+    display: inline;
+    width: 6px;
+    text-indent: 0;
+    background: var(--col-icon);
+    animation: blink 0.3s infinite alternate;
+}
+.datawords{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@keyframes blink {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
 
 @media only screen and (max-width: 750px) {
     #experience-timeline:before,
@@ -754,3 +793,5 @@ footer {
         padding: 5px 10px;
     }
 }
+
+

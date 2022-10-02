@@ -155,6 +155,7 @@ function translateElement(element) {
 
 // Change link depending on language
 function changePortfolioDlLink() {
+
     var link = document.getElementById("cv-dl")
     link.getAttribute("href");
     if (locale == "no") {
