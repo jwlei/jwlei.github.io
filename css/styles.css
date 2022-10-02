@@ -12,7 +12,7 @@ body.active {
     z-index: -1;
 }
 .no-js #experience-timeline > div {
-    background: #fff;
+    background: #001a2c;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #dcd9d9;
@@ -61,7 +61,7 @@ header {
 }
 header ul {
     display: inline-block;
-    background: #fff;
+    background: #002945;
     text-align: center;
     padding: 10px;
     margin: 0;
@@ -73,30 +73,30 @@ header li {
 }
 header a {
     display: block;
-    color: #3498db;
+    color: #cacad4;
     padding: 10px;
 }
 
 header span {
     display: block;
-    color: #3498db;
+    color: #cacad4;
     padding: 10px;
 }
 header a:hover {
-    color: #217dbb;
+    color: #ffffff;
     text-decoration: none;
-    background: #eee;
+    background: #003356;
     border-radius: 4px;
 }
 
 header span:hover {
-    color: #217dbb;
+    color: #ffffff;
     text-decoration: none;
-    background: #eee;
+    background: #003356;
     border-radius: 4px;
 }
 header a:focus {
-    color: #3498db;
+    color: #cacad4;
     text-decoration: none;
 }
 header.active {
@@ -115,23 +115,23 @@ header.sticky {
     position: fixed;
     right: 15px;
     top: 10px;
-    color: #3498db;
+    color: #cacad4;
     font-size: 1.5em;
     z-index: 20;
     padding: 0 7px;
     border-radius: 4px;
-    background: #fff;
+    background: #002945;
 }
 #mobile-menu-close {
     display: none;
     text-align: right;
     width: 100%;
-    background: #fff;
+    background: #002945;
     font-size: 1.5em;
     padding-right: 15px;
     padding-top: 10px;
     cursor: pointer;
-    color: #3498db;
+    color: #cacad4;
 }
 #mobile-menu-close span {
     font-size: 0.5em;
@@ -148,7 +148,7 @@ footer {
 }
 .copyright p {
     margin: 0;
-    color: #74808a;
+    color: #cacad4;
 }
 .top {
     text-align: center;
@@ -180,7 +180,7 @@ footer {
 }
 .social a {
     display: block;
-    color: #74808a;
+    color: #cacad4;
     padding: 10px;
 }
 .social a:hover {
@@ -221,7 +221,7 @@ footer {
     left: 0;
     right: 0;
     margin: 0 auto;
-    background: #3498db;
+    background: #5b90c9;
 }
 .background-alt {
     background: #f2f2f5;
@@ -312,6 +312,7 @@ footer {
 #about {
     padding: 75px 15px;
     border-bottom: 1px solid #dcd9d9;
+    background: #0b2137;
 }
 #about h2 {
     color: #374054;

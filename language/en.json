@@ -4,6 +4,7 @@
   "about-me": "About me",
   "experience": "Experience",
   "education": "Education",
+  "projects": "Projects",
   "skills": "Skills",
   "contact": "Contact",
 
@@ -40,10 +41,10 @@
 
   "project-link": "View Project",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
-  "project-2-desc": "Development of a deep learning model and Python application for accurate\n real-time detection and warning of game close to public roads.",
+  "project-2-desc": "Development of a deep learning model and Python application for accurate real-time detection and warning of game close to public roads.",
 
   "project-1": "EZBuild",
-  "project-1-desc": "A modification for the game Valheim that allows players to select tools \nand build structures in a more efficient way using a pipette tool.",
+  "project-1-desc": "A modification for the game Valheim that allows players to select tools and build structures in a more efficient way using a pipette tool.",
 
   "contact-form-title": "Contact me",
   "contact-form-submit-btn": "Send",
