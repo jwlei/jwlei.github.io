@@ -11,7 +11,7 @@
   "job-title": "Software Engineer",
   "dl-portfolio": "Download portfolio",
 
-  "about-me-content": "Ambitious developer and family man situated in Norway. \n\n ",
+  "about-me-content": "Ambitious developer and family man situated in Norway. \n\n I love learning new technologies and further improving myself.",
 
   "employer-3": "NAV",
   "employer-3-date": "September 2022 - Present",
@@ -30,20 +30,20 @@
 
   "education-2": "Western University of Applied Sciences",
   "education-2-date": "Aug 2019 - June 2022",
-  "education-2-field": "Bachelor of Science in Computer Science",
-  "education-2-desc": "Specialization in Web- and mobile technology \n Advanced web-applications, mobile and distributed systems. \n\n Bsc. thesis on detection and warning of game in vicinity of roads using deep learning.",
+  "education-2-field": "B.Sc in Computer Science",
+  "education-2-desc": "Specialization in Web- and mobile technology \n Advanced web-applications, mobile and distributed systems. \n\n B.Sc thesis on detection and warning of game in vicinity of roads using deep learning.",
 
   "education-1": "Saxion University of Applied Sciences",
   "education-1-date": "August 2016 - August 2019",
-  "education-1-field": "Bachelor of Science in Physiotherapy",
+  "education-1-field": "B.Sc in Physiotherapy",
   "education-1-desc": "Aborted.",
 
   "project-link": "View Project",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
-  "project-2-desc": "Development of a deep learning model and Python application for accurate real-time\n detection and warning of game close to public roads.",
+  "project-2-desc": "Development of a deep learning model and Python application for accurate\n real-time detection and warning of game close to public roads.",
 
-  "project-1": "placeholder",
-  "project-1-desc": "placeholder",
+  "project-1": "EZBuild",
+  "project-1-desc": "A modification for the game Valheim that allows players to select tools \nand build structures in a more efficient way using a pipette tool.",
 
   "contact-form-title": "Contact me",
   "contact-form-submit-btn": "Send",

@@ -1,3 +1,52 @@
 {
-  "tag": "innhold"
+  "title": "Portfolio",
+  "menu-close": "Lukk",
+  "about-me": "Om meg",
+  "experience": "Erfaring",
+  "education": "Utdanning",
+  "skills": "Ferdigheter",
+  "contact": "Kontakt",
+
+  "name": "Joachim Leiros",
+  "job-title": "Dataingeniør",
+  "dl-portfolio": "Last ned CV",
+
+  "about-me-content": "Ambisiøs utvikler og familiemann. \n\nLiker å lære nye teknologier og utvikle ferdighetene mine. ",
+
+  "employer-3": "NAV",
+  "employer-3-date": "September 2022 - Nå",
+  "employer-3-job": "Spesialkonsulent",
+  "employer-3-desc": "Systemansvarlig, økonomisk- og gjeldsrådgiver",
+
+  "employer-2": "Røde Kors Haugland Rehabiliteringssenter",
+  "employer-2-date": "September 2020 - September 2022",
+  "employer-2-job": "Resepsjonsmedarbeider",
+  "employer-2-desc": "Daglig drift, kundekontakt og salg.",
+
+  "employer-1": "Selecta A/S",
+  "employer-1-date": "August 2016 - August 2019",
+  "employer-1-job": "Service konsulent",
+  "employer-1-desc": "Vedlikehold og service av bønne-til-kopp kaffemaskiner og vanndispensere.",
+
+  "education-2": "Høgskulen på Vestlandet",
+  "education-2-date": "Aug 2019 - June 2022",
+  "education-2-field": "B.Sc i Informasjonsteknologi",
+  "education-2-desc": "Spesialisert i Web- og mobilteknologi. \n Avanserte web-applikasjoner, mobile og distribuerte systemer. \n\n Hovedoppgave om utvikling av en dyplæringsmodell og program for nøyaktig gjenkjenning og varsling av hjortevilt ved vei i sanntid.",
+
+  "education-1": "Saxion University of Applied Sciences",
+  "education-1-date": "August 2016 - August 2019",
+  "education-1-field": "B.Sc in Fysioterapi",
+  "education-1-desc": "Avbrutt.",
+
+  "project-link": "Se prosjekt",
+  "project-2": "Detektering og varsling av hjortevilt ved veibane ved bruk av dyplæring",
+  "project-2-desc": "Utvikling av en dyplæringsmodell og python program for nøyaktig\n sanntids deteksjon og varsling av hjortevilt nær offentlig veier.",
+
+  "project-1": "EZBuild",
+  "project-1-desc": "En modifikasjon for spillet Valheim som lar spillere enklere velge\n verktøy og bygge strukturer ved bruk av en pipette-funksjonalitet.",
+
+  "contact-form-title": "Kontakt meg",
+  "contact-form-submit-btn": "Send",
+  "placeholder-email": "Din e-post",
+  "placeholder-message": "Din melding"
 }
