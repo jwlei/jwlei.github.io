@@ -20,7 +20,7 @@ body.active {
 .no-js #experience-timeline > div h3 {
     font-size: 1.5em;
     font-weight: 300;
-    color: #374054;
+    color: #B0BEC5;
     display: inline-block;
     margin: 0;
 }
@@ -61,12 +61,12 @@ header {
 }
 header ul {
     display: inline-block;
-    background: #224543;
+    background: #212121;
     text-align: center;
-    padding: 10px;
+    padding: 3px;
     margin: 0;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
 }
 header li {
     display: inline-block;
@@ -85,7 +85,7 @@ header span {
 header a:hover {
     color: #f9f9fa;
     text-decoration: none;
-    background: #4f7370;
+    background: #3F3F3F;
     border-radius: 4px;
 }
 
@@ -109,6 +109,10 @@ header.sticky {
 #menu.active {
     display: block;
 }
+
+#menu-lang.active {
+    display: block;
+}
 #mobile-menu-open {
     display: none;
     cursor: pointer;
@@ -120,13 +124,13 @@ header.sticky {
     z-index: 20;
     padding: 0 7px;
     border-radius: 4px;
-    background: #4f7370;
+    background: #212121;
 }
 #mobile-menu-close {
     display: none;
     text-align: right;
     width: 100%;
-    background: #4f7370;
+    background: #212121;
     font-size: 1.5em;
     padding-right: 15px;
     padding-top: 10px;
@@ -141,7 +145,8 @@ header.sticky {
     vertical-align: middle;
 }
 footer {
-    padding: 50px 0;
+    padding: 30px 0;
+    background: linear-gradient(to top, #212121, rgba(33, 33, 33, 0.0));
 }
 .copyright {
     padding-top: 20px;
@@ -205,6 +210,10 @@ footer {
 .shadow-large {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08), 0 3px 6px rgba(0, 0, 0, 0.15);
 }
+
+.shadow-x-large {
+    box-shadow: 0 6px 9px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.15);
+}
 .heading {
     position: relative;
     display: inline-block;
@@ -223,15 +232,33 @@ footer {
     margin: 0 auto;
     background: #4f7370;
 }
-.background-alt {
-    background: #101212;
+
+#bg {
+    background: url(../media/images/lead-bg.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    z-index: -1;
 }
+
+#bg-overlay {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(56, 64, 71, 0.5);
+    z-index: 0;
+}
+
 #lead {
     position: relative;
     height: 100vh;
     min-height: 500px;
-    max-height: 1080px;
-    background: url(../images/lead-bg.jpg);
+    max-height: 1440px;
     background-size: cover;
     padding: 15px;
     overflow: hidden;
@@ -262,17 +289,7 @@ footer {
     font-size: 2.25em;
     margin-bottom: 15px;
 }
-#lead-overlay {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(56, 64, 71, 0.5);
-    z-index: 1;
-}
+
 #lead-down {
     position: absolute;
     left: 0;
@@ -310,12 +327,15 @@ footer {
     }
 }
 #about {
+    position: relative;
+    width: 80vw;
+    height: 60vh;
+    margin: 10vh 10vw;
     padding: 75px 15px;
-    border-bottom: 1px solid #676d72;
-    background: #101212;
+    background: #212121;
 }
 #about h2 {
-    color: #ededee;
+    color: #B0BEC5;
 }
 #about p {
     color: #d1d3d5;
@@ -324,11 +344,12 @@ footer {
 #experience {
     padding: 50px 15px;
     text-align: center;
-    border-bottom: 1px solid #676d72;
+    margin: 10vh 10vw;
+    background: #212121;
 
 }
 #experience h2 {
-    color: #ededee;
+    color: #B0BEC5;
 }
 #experience-timeline {
     margin: 30px auto 0 auto;
@@ -359,7 +380,7 @@ footer {
 }
 .vtimeline-content {
     margin-left: 350px;
-    background: #676d72;
+    background: #B0BEC5;
     border: 1px solid #344242;
     padding: 15px;
     border-radius: 3px;
@@ -368,7 +389,7 @@ footer {
 .vtimeline-content h3 {
     font-size: 1.5em;
     font-weight: 300;
-    color: #ededee;
+    color: #B0BEC5;
     display: inline-block;
     margin: 0;
 }
@@ -416,12 +437,12 @@ footer {
 }
 #education {
     padding: 50px 15px 20px 15px;
-    border-bottom: 1px solid #676d72;
     text-align: center;
-    background: #344242;
+    background: #212121;
+    margin: 10vh 10vw;
 }
 #education h2 {
-    color: #ededee;
+    color: #B0BEC5;
     margin-bottom: 50px;
 }
 .education-block {
@@ -435,7 +456,7 @@ footer {
     font-weight: 500;
     float: left;
     margin: 0;
-    color: #f9f9fa;
+    color: #B0BEC5;
 }
 .education-block span {
     color: #d1d3d5;
@@ -458,24 +479,28 @@ footer {
 }
 #projects {
     padding: 50px 15px;
-    border-bottom: 1px solid #676d72;
     text-align: center;
+    margin: 10vh 10vw;
+    background: #212121;
+    border: 1px solid #292929;
 
 }
 #projects h2 {
-    color: #ededee;
+    color: #B0BEC5;
     margin-bottom: 50px;
 }
 .project {
     position: relative;
-    max-width: 900px;
-    margin: 0 auto 30px auto;
+    max-width: 80vw;
+    margin: 5vw;
     overflow: hidden;
-    background: #676d72;
+    background: #292929;
     border-radius: 4px;
+
 }
-.project-image {
+.project-image, .project-video {
     float: left;
+    margin-bottom: -5px;
 }
 .project-info {
     position: absolute;
@@ -487,7 +512,7 @@ footer {
 .project-info h3 {
     font-size: 1.5em;
     font-weight: 300;
-    color: #374054;
+    color: #B0BEC5;
     margin: 0 0 15px 0;
 }
 .project-info p {
@@ -507,9 +532,11 @@ footer {
 #skills {
     padding: 50px 15px;
     text-align: center;
+    margin: 10vh 10vw;
+    background: #282828;
 }
 #skills h2 {
-    color: #374054;
+    color: #B0BEC5;
     margin-bottom: 50px;
 }
 #skills ul {
@@ -530,12 +557,14 @@ footer {
 }
 #contact {
     padding: 50px 15px;
-    background: #3498db;
+    background: #292929;
     text-align: center;
+    margin: 10vh 10vw;
+
 }
 #contact h2 {
     margin: 0 0 15px 0;
-    color: #374054;
+    color: #B0BEC5;
     font-weight: 500;
 }
 #contact-form {
@@ -604,7 +633,7 @@ footer {
 }
 
 .optional-section h2 {
-    color: #374054;
+    color: #B0BEC5;
 }
 
 .optional-section-block {
@@ -619,7 +648,7 @@ footer {
 .optional-section-block h3 {
     font-weight: 500;
     margin: 0 0 15px 0;
-    color: #374054;
+    color: #B0BEC5;
 }
 
 .optional-section-block h4 {
@@ -638,30 +667,6 @@ footer {
 
 .optional-section-block ul {
     padding: 0 0 0 15px;
-}
-
-.animated-text span {
-    display: none;
-    line-height: 1;
-}
-
-.animated-text span.active {
-    display: inline;
-}
-
-.animated-text:after {
-    content: ".";
-    display: inline;
-    width: 6px;
-    text-indent: 0;
-    background: var(--col-icon);
-    animation: blink 0.3s infinite alternate;
-}
-.datawords{
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 @keyframes blink {
@@ -701,7 +706,6 @@ footer {
     #lead {
         height: auto;
         min-height: auto;
-        max-height: auto;
         padding: 100px 15px;
     }
     #lead-content {
