@@ -23,35 +23,35 @@
         <div id="mobile-menu-close">
             <span i18n-key="menu-close"></span> <i class="fa fa-times" aria-hidden="true"></i>
         </div>
-
-        <ul id="menu" class="shadow">
-            <li>
-                <a i18n-key="about-me" href="#about"></a>
-            </li>
-            <li>
-                <a i18n-key="experience" href="#experience"></a>
-            </li>
-            <li>
-                <a i18n-key="education" href="#education"></a>
-            </li>
-            <li>
-                <a i18n-key="projects" href="#projects"></a>
-            </li>
-            <li>
-                <a i18n-key="skills" href="#skills"></a>
-            </li>
-            <li>
-                <a i18n-key="contact" href="#contact"></a>
-            </li>
-        </ul>
-        <ul id="menu-lang" class="shadow">
-            <li>
-                <a href="#" i18n-lang-switcher onclick="setLocale('no');">NO</a>
-            </li>
-            <li>
-                <a href="#" i18n-lang-switcher onclick="setLocale('en');">EN</a>
-            </li>
-        </ul>
+        <!-- End #mobile-menu-close -->
+        <div id="navbar" class="shadow">
+            <ul id="menu">
+                <li>
+                    <a i18n-key="about-me" href="#about"></a>
+                </li>
+                <li>
+                    <a i18n-key="experience" href="#experience"></a>
+                </li>
+                <li>
+                    <a i18n-key="education" href="#education"></a>
+                </li>
+                <li>
+                    <a i18n-key="projects" href="#projects"></a>
+                </li>
+                <li>
+                    <a i18n-key="skills" href="#skills"></a>
+                </li>
+                <li>
+                    <a i18n-key="contact" href="#contact"></a>
+                </li>
+                <li class="menu-lang">
+                    <a href="#" i18n-lang-switcher onclick="setLocale('no');">NO</a>
+                </li>
+                <li class="menu-lang">
+                    <a href="#" i18n-lang-switcher onclick="setLocale('en');">EN</a>
+                </li>
+            </ul>
+        </div>
     </header>
     <!-- End header -->
     <div id="bg">
@@ -95,19 +95,19 @@
             <div id="experience" class="shadow-x-large">
                 <h2 i18n-key="experience" class="heading"></h2>
                 <div id="experience-timeline">
-                    <div i18n-key="employer-3-date" id="timeline3" data-date="September 2022">
+                    <div id="timeline3" data-date="September 2022 - t.d. ">
                         <h3 i18n-key="employer-3"></h3>
                         <h4 i18n-key="employer-3-job"></h4>
                         <p i18n-key="employer-3-desc"></p>
                     </div>
 
-                    <div i18n-key="employer-2-date" id="timeline2" data-date="">
+                    <div id="timeline2" data-date="September 2020 - September 2022">
                         <h3 i18n-key="employer-2"></h3>
                         <h4 i18n-key="employer-2-job"></h4>
                         <p i18n-key="employer-2-desc"></p>
                     </div>
 
-                    <div i18n-key="employer-1-date" id="timeline1" data-date="">
+                    <div id="timeline1" data-date="August 2016 - August 2019">
                         <h3 i18n-key="employer-1"></h3>
                         <h4 i18n-key="employer-1-job"></h4>
                         <p i18n-key="employer-1-desc"></p>

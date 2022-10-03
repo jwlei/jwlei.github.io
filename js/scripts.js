@@ -195,3 +195,23 @@ function translateTimeline() {
     pMsg.getAttribute("placeholder");
     pMsg.setAttribute("placeholder", document.innerText = translation);
 }
+
+
+// When the user scrolls down 80px from the top of the document, resize the navbar's padding and the logo's font size
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+    var menuLang = document.getElementsByClassName("menu-lang");
+    if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
+        document.getElementById("navbar").style.padding = "3px 10px";
+        document.getElementById("navbar").style.fontSize = "0.9em";
+        menuLang.setAttribute("style", "font-size: 0.8em");
+        menuLang.setAttribute("style", "padding: 3px 5px");
+
+    } else {
+        document.getElementById("navbar").style.padding = "16px 10px";
+        document.getElementById("navbar").style.fontSize = "1em";
+        menuLang.setAttribute("style", "font-size: 0.9em");
+        menuLang.setAttribute("style", "padding: 16px 5px");
+    }
+}
