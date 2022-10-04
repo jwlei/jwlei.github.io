@@ -1,3 +1,16 @@
+html, body {
+    margin: 0;
+    height:100%;
+    width:100%;
+    padding:0;
+}
+
+section {
+    display: block;
+    height: 100vh;
+    box-sizing:border-box;
+}
+
 body {
     font-family: "Lato", sans-serif;
     font-size: 16px;
@@ -163,10 +176,10 @@ body.active {
     top: 10px;
     color: #B0BEC5;
     font-size: 1.5em;
-    z-index: 20;
     padding: 0 7px;
     border-radius: 1px;
     background: #212121;
+    z-index: 999;
 }
 #mobile-menu-close {
     display: none;
@@ -186,11 +199,6 @@ body.active {
 #mobile-menu-close i {
     vertical-align: middle;
 }
-
-
-
-
-
 
 footer {
     padding: 30px 0;
@@ -274,7 +282,7 @@ footer {
     content: "";
     top: 100%;
     height: 1px;
-    width: 50px;
+    width: 75px;
     left: 0;
     right: 0;
     margin: 0 auto;
@@ -374,14 +382,19 @@ footer {
         transform: scale(1, 1);
     }
 }
-#about {
+
+#about, #experience, #education, #skills, #portfolio, #contact {
     position: relative;
+    top: 10vh;
     width: 80vw;
-    height: 60vh;
+    height: 80vh;
     margin: 10vh 10vw;
-    padding: 75px 15px;
+    padding: 30px 15px;
+    text-align: center;
     background: #212121;
+    border: 1px solid #292929;
 }
+
 #about h2 {
     color: #FFFFFF;
 }
@@ -389,20 +402,15 @@ footer {
     color: #B0BEC5;
     margin: 0;
 }
-#experience {
-    padding: 50px 15px;
-    text-align: center;
-    margin: 10vh 10vw;
-    background: #212121;
 
-}
 #experience h2 {
     color: #FFFFFF;
 }
 #experience-timeline {
-    margin: 30px auto 0 auto;
+    margin: 10px auto 0 auto;
     position: relative;
-    max-width: 1000px;
+    max-width: 75vw;
+    max-height: 75vh;
 }
 #experience-timeline:before {
     position: absolute;
@@ -428,12 +436,12 @@ footer {
 }
 .vtimeline-content {
     margin-left: 350px;
+    margin-right: 5vw;
     background: #292929;
     border: 1px solid #292929;
-    padding: 15px;
+    padding: 10px;
     border-radius: 1px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-
     text-align: left;
 }
 .vtimeline-content h3 {
@@ -485,12 +493,7 @@ footer {
     font-weight: 300;
     color: #c2c4c6;
 }
-#education {
-    padding: 50px 15px 20px 15px;
-    text-align: center;
-    background: #212121;
-    margin: 10vh 10vw;
-}
+
 #education h2 {
     color: #FFFFFF;
     margin-bottom: 50px;
@@ -530,21 +533,14 @@ footer {
 .education-block ul {
     padding: 0 0 0 15px;
 }
-#projects {
-    padding: 50px 15px;
-    text-align: center;
-    margin: 10vh 10vw;
-    background: #212121;
-    border: 1px solid #292929;
 
-}
 #projects h2 {
     color: #FFFFFF;
     margin-bottom: 50px;
 }
 .project {
     position: relative;
-    max-width: 80vw;
+    max-width: 67vw;
     margin: 5vw;
     overflow: hidden;
     background: #292929;
@@ -585,12 +581,7 @@ footer {
 #more-projects {
     display: none;
 }
-#skills {
-    padding: 50px 15px;
-    text-align: center;
-    margin: 10vh 10vw;
-    background: #212121;
-}
+
 #skills h2 {
     color: #FFFFFF;
     margin-bottom: 50px;
@@ -613,13 +604,7 @@ footer {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 
 }
-#contact {
-    padding: 50px 15px;
-    background: #212121;
-    text-align: center;
-    margin: 10vh 10vw;
 
-}
 #contact h2 {
     margin: 0 0 15px 0;
     color: #FFFFFF;
@@ -687,7 +672,7 @@ footer {
 }
 
 .optional-section {
-    padding: 50px 15px;
+    padding: 30px 15px;
     text-align: center;
     border-top: 1px solid #676d72;
 }

@@ -84,6 +84,71 @@
             $('#more-projects').fadeIn(300);
         });
     });
+
+    (function() {
+        var delay = false;
+
+        $(document).on('mousewheel DOMMouseScroll', function(event) {
+            event.preventDefault();
+            if(delay) return;
+
+            delay = true;
+            setTimeout(function(){delay = false},200)
+
+            var wd = event.originalEvent.wheelDelta || -event.originalEvent.detail;
+
+            var links = document.getElementsByTagName('section');
+            var link;
+            if(wd < 0) {
+                link = findNext(links);
+            }
+            else {
+                link = findPrevious(links);
+            }
+
+            animate(link);
+        });
+
+        $('body').keydown(function(e){
+            if(e.keyCode == 8){
+                e.preventDefault();
+                // user has pressed backspace
+                var links = document.getElementsByTagName('section');
+                link = findPrevious(links);
+                animate(link);
+            }
+            if(e.keyCode == 32){
+                e.preventDefault();
+                // user has pressed space
+                var section = document.getElementsByTagName('section');
+                link = findNext(section);
+                animate(link);
+            }
+        });
+
+        function findNext(section) {
+            for(var i = 0 ; i < section.length ; i++) {
+                var t = section[i].getClientRects()[0].top;
+                if(t >= 40) return section[i];
+            }
+        }
+
+        function findPrevious(section) {
+            for(var i = section.length-1 ; i >= 0 ; i--) {
+                var t = section[i].getClientRects()[0].top;
+                if(t < -20) return section[i];
+            }
+        }
+
+        function animate(section) {
+            if( section ) {
+                $('html,body').animate({
+                    scrollTop: section.offsetTop
+                });
+            }
+        }
+    })();
+
 })(jQuery);
 
 // -----------------------------------------------------------------------------------

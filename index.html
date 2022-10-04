@@ -57,199 +57,211 @@
     <div id="bg">
         <div id="bg-overlay">
             <!-- Start #lead -->
-            <div id="lead">
-                <div id="lead-content">
-                    <h1 i18n-key="name"></h1>
-                    <h2 i18n-key="job-title"></h2>
-                    <a i18n-key="dl-portfolio" id="cv-dl" href="#" class="btn-rounded-white"></a>
-                </div>
-                <!-- End #lead-content -->
+            <section id="one">
+                <div id="lead">
+                    <div id="lead-content">
+                        <h1 i18n-key="name"></h1>
+                        <h2 i18n-key="job-title"></h2>
+                        <a i18n-key="dl-portfolio" id="cv-dl" href="#" class="btn-rounded-white"></a>
+                    </div>
+                    <!-- End #lead-content -->
 
-                <!-- Start #lead-down -->
-                <div id="lead-down">
-                    <span>
-                        <i class="fa fa-chevron-down" aria-hidden="true"></i>
-                    </span>
+                    <!-- Start #lead-down -->
+                    <div id="lead-down">
+                        <span>
+                            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <!-- End #lead-down -->
                 </div>
-                <!-- End #lead-down -->
-            </div>
-            <!-- End #lead -->
-
+                <!-- End #lead -->
+            </section>
             <!-- Start #about -->
-            <div id="about" class="shadow-x-large">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h2 i18n-key="about-me" class="heading"></h2>
-                        </div>
-                        <div class="col-md-8">
-                            <p i18n-key="about-me-content">
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- End #about -->
-
-            <!-- Start #experience -->
-            <div id="experience" class="shadow-x-large">
-                <h2 i18n-key="experience" class="heading"></h2>
-                <div id="experience-timeline">
-                    <div id="timeline3" data-date="September 2022 - t.d. ">
-                        <h3 i18n-key="employer-3"></h3>
-                        <h4 i18n-key="employer-3-job"></h4>
-                        <p i18n-key="employer-3-desc"></p>
-                    </div>
-
-                    <div id="timeline2" data-date="September 2020 - September 2022">
-                        <h3 i18n-key="employer-2"></h3>
-                        <h4 i18n-key="employer-2-job"></h4>
-                        <p i18n-key="employer-2-desc"></p>
-                    </div>
-
-                    <div id="timeline1" data-date="August 2016 - August 2019">
-                        <h3 i18n-key="employer-1"></h3>
-                        <h4 i18n-key="employer-1-job"></h4>
-                        <p i18n-key="employer-1-desc"></p>
-                    </div>
-                </div>
-            </div>
-            <!-- End #experience -->
-
-            <!-- Start #education -->
-
-            <div id="education" class="shadow-x-large">
-                <h2 i18n-key="education" class="heading"></h2>
-                <!-- Start .education-block -->
-                <div class="education-block">
-                    <h3 i18n-key="education-2"></h3>
-                    <span i18n-key="education-2-date" class="education-date"></span>
-                    <h4 i18n-key="education-2-field"></h4>
-                    <p i18n-key="education-2-desc"></p>
-                </div>
-                <!-- End .education-block -->
-
-                <!-- Start .education-block -->
-                <div class="education-block">
-                    <h3 i18n-key="education-1"></h3>
-                    <span i18n-key="education-1-date" class="education-date"></span>
-                    <h4 i18n-key="education-1-field"></h4>
-                    <p i18n-key="education-1-desc"></p>
-                </div>
-                <!-- End .education-block -->
-            </div>
-            <!-- End #education -->
-
-            <!-- Start #projects -->
-            <div id="projects" class="shadow-x-large">
-                <h2 i18n-key="projects" class="heading"></h2>
-                <div class="container">
-                    <div class="row">
-                        <!-- Start .project -->
-                        <div class="project shadow-large">
-                            <!-- Start .project-image -->
-                            <div class="project-video">
-                                <video autoplay loop width="300" height="300">
-                                    <source src="/media/projects/video/dwls-demo.webm"
-                                            type="video/webm">
-                                </video>
+            <section id="two">
+                <div id="about" class="shadow-x-large">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h2 i18n-key="about-me" class="heading"></h2>
                             </div>
-                            <!-- End .project-image -->
-
-                            <!-- Start .project-info -->
-                            <div class="project-info">
-                                <h3 i18n-key="project-2"></h3>
-                                <p i18n-key="project-2-desc">
-
+                            <div class="col-md-8">
+                                <p i18n-key="about-me-content">
                                 </p>
-                                <a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2"></a>
                             </div>
-                            <!-- End .project-info -->
                         </div>
-                        <!-- End .project -->
+                    </div>
+                </div>
+                <!-- End #about -->
+            </section>
 
-                        <div class="project shadow-large">
-                            <!-- Start .project-image -->
-                            <div class="project-image">
-                                <img src="media/projects/valheim-logo.jpg"/>
+            <section id="three">
+                <!-- Start #experience -->
+                <div id="experience" class="shadow-x-large">
+                    <h2 i18n-key="experience" class="heading"></h2>
+                    <div id="experience-timeline">
+                        <div id="timeline3" data-date="September 2022 - t.d. ">
+                            <h3 i18n-key="employer-3"></h3>
+                            <h4 i18n-key="employer-3-job"></h4>
+                            <p i18n-key="employer-3-desc"></p>
+                        </div>
+
+                        <div id="timeline2" data-date="September 2020 - September 2022">
+                            <h3 i18n-key="employer-2"></h3>
+                            <h4 i18n-key="employer-2-job"></h4>
+                            <p i18n-key="employer-2-desc"></p>
+                        </div>
+
+                        <div id="timeline1" data-date="August 2016 - August 2019">
+                            <h3 i18n-key="employer-1"></h3>
+                            <h4 i18n-key="employer-1-job"></h4>
+                            <p i18n-key="employer-1-desc"></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- End #experience -->
+            </section>
+
+            <section id="four">
+                <!-- Start #education -->
+                <div id="education" class="shadow-x-large">
+                    <h2 i18n-key="education" class="heading"></h2>
+                    <!-- Start .education-block -->
+                    <div class="education-block">
+                        <h3 i18n-key="education-2"></h3>
+                        <span i18n-key="education-2-date" class="education-date"></span>
+                        <h4 i18n-key="education-2-field"></h4>
+                        <p i18n-key="education-2-desc"></p>
+                    </div>
+                    <!-- End .education-block -->
+
+                    <!-- Start .education-block -->
+                    <div class="education-block">
+                        <h3 i18n-key="education-1"></h3>
+                        <span i18n-key="education-1-date" class="education-date"></span>
+                        <h4 i18n-key="education-1-field"></h4>
+                        <p i18n-key="education-1-desc"></p>
+                    </div>
+                    <!-- End .education-block -->
+                </div>
+                <!-- End #education -->
+            </section>
+
+            <section id="five">
+                <!-- Start #projects -->
+                <div id="projects" class="shadow-x-large">
+                    <h2 i18n-key="projects" class="heading"></h2>
+                    <div class="container">
+                        <div class="row">
+                            <!-- Start .project -->
+                            <div class="project shadow-large">
+                                <!-- Start .project-image -->
+                                <div class="project-video">
+                                    <video autoplay loop width="300" height="300">
+                                        <source src="/media/projects/video/dwls-demo.webm"
+                                                type="video/webm">
+                                    </video>
+                                </div>
+                                <!-- End .project-image -->
+
+                                <!-- Start .project-info -->
+                                <div class="project-info">
+                                    <h3 i18n-key="project-2"></h3>
+                                    <p i18n-key="project-2-desc">
+
+                                    </p>
+                                    <a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2"></a>
+                                </div>
+                                <!-- End .project-info -->
                             </div>
-                            <!-- End .project-image -->
+                            <!-- End .project -->
 
-                            <!-- Start .project-info -->
-                            <div class="project-info">
-                                <h3 i18n-key="project-1"></h3>
-                                <p i18n-key="project-1-desc">
+                            <div class="project shadow-large">
+                                <!-- Start .project-image -->
+                                <div class="project-image">
+                                    <img src="media/projects/valheim-logo.jpg"/>
+                                </div>
+                                <!-- End .project-image -->
 
+                                <!-- Start .project-info -->
+                                <div class="project-info">
+                                    <h3 i18n-key="project-1"></h3>
+                                    <p i18n-key="project-1-desc">
+
+                                    </p>
+                                    <a i18n-key="project-link" href="https://github.com/jwlei/EZBuild"></a>
+                                </div>
+                                <!-- End .project-info -->
+                            </div>
+                            <!-- End .project -->
+                        </div>
+                    </div>
+                </div>
+                <!-- End #projects -->
+            </section>
+
+            <section id="six">
+                <!-- Start #skills -->
+                <div id="skills" class="shadow-x-large">
+                    <h2 i18n-key="skills" class="heading">Skills</h2>
+                    <ul>
+                        <li>Java</li>
+                        <li>JavaScript</li>
+                        <li>C#</li>
+                        <li>Python</li>
+                        <li>HTML5</li>
+                        <li>CSS3</li>
+                        <li>WCAG 2.1</li>
+                        <li>Spring MVC</li>
+                        <li>React</li>
+                    </ul>
+                </div>
+                <!-- End #skills -->
+            </section>
+
+            <section id="seven">
+                <!-- Start #contact -->
+                <div id="contact" class="shadow-x-large">
+                    <h2 i18n-key="contact-form-title"></h2>
+                    <div id="contact-form">
+                        <form method="POST" action="https://formspree.io/f/mjvzrygo">
+                            <input type="hidden" name="_subject" value="Contact request from personal website" />
+                            <input i18n-key="placeholder-email" id="p-email" type="email" name="_replyto" placeholder="" required>
+                            <textarea i18n-key="placeholder-message" id="p-msg" name="message" placeholder="test" required></textarea>
+                            <button i18n-key="contact-form-submit-btn" type="submit"></button>
+                        </form>
+                    </div>
+                    <!-- End #contact-form -->
+                </div>
+                <!-- End #contact -->
+
+                <footer>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-5 copyright">
+                                <p>
+                                    Copyright &copy; <span id="current-year">2022</span> Joachim Leiros
                                 </p>
-                                <a i18n-key="project-link" href="https://github.com/jwlei/EZBuild"></a>
                             </div>
-                            <!-- End .project-info -->
-                        </div>
-                        <!-- End .project -->
-                    </div>
-                </div>
-            </div>
-            <!-- End #projects -->
-
-            <!-- Start #skills -->
-            <div id="skills" class="shadow-x-large">
-                <h2 i18n-key="skills" class="heading">Skills</h2>
-                <ul>
-                    <li>Java</li>
-                    <li>JavaScript</li>
-                    <li>C#</li>
-                    <li>Python</li>
-                    <li>HTML5</li>
-                    <li>CSS3</li>
-                    <li>WCAG 2.1</li>
-                    <li>Spring MVC</li>
-                    <li>React</li>
-                </ul>
-            </div>
-            <!-- End #skills -->
-
-            <!-- Start #contact -->
-            <div id="contact" class="shadow-x-large">
-                <h2 i18n-key="contact-form-title"></h2>
-                <div id="contact-form">
-                    <form method="POST" action="https://formspree.io/f/mjvzrygo">
-                        <input type="hidden" name="_subject" value="Contact request from personal website" />
-                        <input i18n-key="placeholder-email" id="p-email" type="email" name="_replyto" placeholder="" required>
-                        <textarea i18n-key="placeholder-message" id="p-msg" name="message" placeholder="test" required></textarea>
-                        <button i18n-key="contact-form-submit-btn" type="submit"></button>
-                    </form>
-                </div>
-                <!-- End #contact-form -->
-            </div>
-            <!-- End #contact -->
-
-            <footer>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-sm-5 copyright">
-                            <p>
-                                Copyright &copy; <span id="current-year">2022</span> Joachim Leiros
-                            </p>
-                        </div>
-                        <div class="col-sm-2 top">
-                            <span id="to-top">
-                                <i class="fa fa-chevron-up" aria-hidden="true"></i>
-                            </span>
-                        </div>
-                        <div class="col-sm-5 social">
-                            <ul>
-                                <li>
-                                    <a href="https://github.com/jwlei" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
-                                </li>
-                                <li>
-                                    <a href="https://www.linkedin.com/in/joachim-leiros-8a9b1b22a/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
-                                </li>
-                            </ul>
+                            <div class="col-sm-2 top">
+                                <span id="to-top">
+                                    <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="col-sm-5 social">
+                                <ul>
+                                    <li>
+                                        <a href="https://github.com/jwlei" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+                                    </li>
+                                    <li>
+                                        <a href="https://www.linkedin.com/in/joachim-leiros-8a9b1b22a/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </footer>
-            <!-- End footer -->
+                </footer>
+                <!-- End footer -->
+            </section>
         </div>
         <!-- End bg-overlay -->
     </div>
