@@ -21,7 +21,7 @@
         }, Math.abs(window.pageYOffset - $(heading).offset().top) / 1);
 
         // Hide the menu once clicked if mobile
-        if ($('header').hasClass('active')) {
+        if ($('navbar').hasClass('active')) {
             $('header, body').removeClass('active');
         }
     });
@@ -43,7 +43,6 @@
 
     // Create timeline
     $('#experience-timeline').each(function() {
-
         $this = $(this); // Store reference to this
         $userContent = $this.children('div'); // user content
 
@@ -85,77 +84,84 @@
         });
     });
 
-    (function() {
-        var delay = false;
+    // MOUSE SCROLL
+    // var delay = false;
+    // $(document).on('mousewheel DOMMouseScroll', function(event) {
+    //     event.preventDefault();
+    //     if(delay) return;
+    //
+    //     delay = true;
+    //     setTimeout(function(){delay = false},700 )
+    //
+    //     var wd = event.originalEvent.wheelDelta || -event.originalEvent.detail;
+    //
+    //     var links = document.getElementsByTagName('section');
+    //     var link;
+    //     if(wd < 0) {
+    //         link = findNext(links);
+    //     }
+    //     else {
+    //         link = findPrevious(links);
+    //     }
+    //
+    //     animate(link);
+    // });
 
-        $(document).on('mousewheel DOMMouseScroll', function(event) {
-            event.preventDefault();
-            if(delay) return;
-
-            delay = true;
-            setTimeout(function(){delay = false},200)
-
-            var wd = event.originalEvent.wheelDelta || -event.originalEvent.detail;
-
+    $('body').keydown(function(e){
+        if(e.keyCode === 8){
+            e.preventDefault();
+            // user has pressed backspace
             var links = document.getElementsByTagName('section');
-            var link;
-            if(wd < 0) {
-                link = findNext(links);
-            }
-            else {
-                link = findPrevious(links);
-            }
-
+            link = findPrevious(links);
             animate(link);
-        });
-
-        $('body').keydown(function(e){
-            if(e.keyCode == 8){
-                e.preventDefault();
-                // user has pressed backspace
-                var links = document.getElementsByTagName('section');
-                link = findPrevious(links);
-                animate(link);
-            }
-            if(e.keyCode == 32){
-                e.preventDefault();
-                // user has pressed space
-                var section = document.getElementsByTagName('section');
-                link = findNext(section);
-                animate(link);
-            }
-        });
-
-        function findNext(section) {
-            for(var i = 0 ; i < section.length ; i++) {
-                var t = section[i].getClientRects()[0].top;
-                if(t >= 40) return section[i];
-            }
         }
-
-        function findPrevious(section) {
-            for(var i = section.length-1 ; i >= 0 ; i--) {
-                var t = section[i].getClientRects()[0].top;
-                if(t < -20) return section[i];
-            }
+        if(e.keyCode === 32){
+            e.preventDefault();
+            // user has pressed space
+            var section = document.getElementsByTagName('section');
+            link = findNext(section);
+            animate(link);
         }
+    });
 
-        function animate(section) {
-            if( section ) {
-                $('html,body').animate({
-                    scrollTop: section.offsetTop
-                });
-            }
+    function findNext(section) {
+        for(var i = 0 ; i < section.length ; i++) {
+            var t = section[i].getClientRects()[0].top;
+            if(t >= 40) return section[i];
         }
-    })();
+    }
 
+    function findPrevious(section) {
+        for(var i = section.length-1 ; i >= 0 ; i--) {
+            var t = section[i].getClientRects()[0].top;
+            if(t < -20) return section[i];
+        }
+    }
+
+    function animate(section) {
+        if( section ) {
+            $('html,body').animate({
+                scrollTop: section.offsetTop
+            });
+        }
+    }
 })(jQuery);
 
+
+
+
+
+
+
+
+
+
+
 // -----------------------------------------------------------------------------------
-
-// The locale our app first shows
-const defaultLocale = 'no';
-
+// LANGUAGE
+// -----------------------------------------------------------------------------------
+const defaultLocale = 'en';
+const supportedLocales = ['en', 'no'];
 // The active locale
 let locale;
 
@@ -164,15 +170,35 @@ let translations = {};
 
 // When the page content is ready...
 document.addEventListener("DOMContentLoaded", () => {
-    // Translate the page to the default locale
-    setLocale(defaultLocale);
-    bindLocaleSwitcher(defaultLocale);
+    const initialLocale =
+        supportedOrDefault(browserLocales(true));
+    setLocale(initialLocale);
+    bindLocaleSwitcher(initialLocale);
 });
 
-// Whenever the user selects a new locale, we
-// load the locale's translations and update
-// the page
+
+function isSupported(locale) {
+    // Check if locale is supported
+    return supportedLocales.indexOf(locale) > -1;
+}
+
+function supportedOrDefault(locales) {
+    // Retrieve the first locale we support from the given
+    // array, or return our default locale
+    return locales.find(isSupported) || defaultLocale;
+}
+
+function browserLocales(languageCodeOnly = false) {
+    return navigator.languages.map((locale) =>
+        languageCodeOnly ? locale.split("-")[0] : locale,
+    );
+}
+
+
 function bindLocaleSwitcher(initialValue) {
+    // Whenever the user selects a new locale, we
+    // load the locale's translations and update
+    // the page
     const switcher = document.querySelector("[i18n-lang-switcher]");
     switcher.value = initialValue;
     switcher.onchange = (e) => {
@@ -181,9 +207,18 @@ function bindLocaleSwitcher(initialValue) {
     };
 }
 
-// Load translations for the given locale and translate
-// the page to this locale
+async function getLocale(){
+    if(navigator.language === ('no' || 'nb' || 'nn')){
+        return 'no';
+    } else {
+        return 'en';
+    }
+}
+
+
 async function setLocale(newLocale) {
+    // Load translations for the given locale and translate
+    // the page to this locale
     if (newLocale === locale) return;
 
     const newTranslations = await fetchTranslationsFor(newLocale);
@@ -193,37 +228,39 @@ async function setLocale(newLocale) {
     translatePage();
 }
 
-// Retrieve translations JSON object for the given
-// locale over the network
+
 async function fetchTranslationsFor(newLocale) {
+    // Retrieve translations JSON object for the given
+    // locale over the network
     const response = await fetch(`/language/${newLocale}.json`);
     return await response.json();
 }
 
-// Replace the inner text of each element that has a
-// data-i18n-key attribute with the translation corresponding
-// to its data-i18n-key
+
 function translatePage() {
+    // Replace the inner text of each element that has a
+    // data-i18n-key attribute with the translation corresponding
+    // to its data-i18n-key
     document.querySelectorAll("[i18n-key]").forEach(translateElement);
     changePortfolioDlLink()
-    translateTimeline()
 }
 
-// Replace the inner text of the given HTML element
-// with the translation in the active locale,
-// corresponding to the element's data-i18n-key
+
 function translateElement(element) {
+    // Replace the inner text of the given HTML element
+    // with the translation in the active locale,
+    // corresponding to the element's data-i18n-key
     const key = element.getAttribute("i18n-key");
-    const translation = translations[key];
-    element.innerText = translation;
+    element.innerText = translations[key];
 }
 
-// Change link depending on language
-function changePortfolioDlLink() {
 
-    var link = document.getElementById("cv-dl")
+function changePortfolioDlLink() {
+    // Change link depending on language
+    const link = document.getElementById("cv-dl");
     link.getAttribute("href");
-    if (locale == "no") {
+
+    if (locale === "no") {
         link.setAttribute("href",
         "/files/cv_no.pdf");
     } else {
@@ -231,42 +268,23 @@ function changePortfolioDlLink() {
         "/files/cv_en.pdf");
     }
 }
-
-//Change Timeline on lang change
-function translateTimeline() {
-    const translation = translations[key];
-    document.innerText = translation;
-
-    var date1 = document.getElementById("timeline1")
-    var date2 = document.getElementById("timeline2")
-    var date3 = document.getElementById("timeline3")
-
-    var pEmail = document.getElementById("pEmail")
-    var pMsg = document.getElementById("pMsg")
+// -----------------------------------------------------------------------------------
+// END LANGUAGE
+// -----------------------------------------------------------------------------------
 
 
-    date1.getAttribute("data-date");
-    date1.setAttribute("data-date", document.innerText = translation);
-
-    date2.getAttribute("data-date");
-    date2.setAttribute("data-date", document.innerText = translation);
-
-    date3.getAttribute("data-date");
-    date3.setAttribute("data-date", document.innerText = translation);
-
-    pEmail.getAttribute("placeholder");
-    pEmail.setAttribute("placeholder", document.innerText = translation);
-
-    pMsg.getAttribute("placeholder");
-    pMsg.setAttribute("placeholder", document.innerText = translation);
-}
+// -----------------------------------------------------------------------------------
+// ANIMATION
+// -----------------------------------------------------------------------------------
 
 
-// When the user scrolls down 80px from the top of the document, resize the navbar's padding and the logo's font size
+
 window.onscroll = function() {scrollFunction()};
 
 function scrollFunction() {
+    // When the user scrolls down 80px from the top of the document, resize the navbar padding and the logo's font size
     var menuLang = document.getElementsByClassName("menu-lang");
+
     if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
         document.getElementById("navbar").style.padding = "3px 10px";
         document.getElementById("navbar").style.fontSize = "0.9em";

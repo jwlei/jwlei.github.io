@@ -26,38 +26,25 @@
         <!-- End #mobile-menu-close -->
         <div id="navbar" class="shadow">
             <ul id="menu">
-                <li>
-                    <a i18n-key="about-me" href="#about"></a>
-                </li>
-                <li>
-                    <a i18n-key="experience" href="#experience"></a>
-                </li>
-                <li>
-                    <a i18n-key="education" href="#education"></a>
-                </li>
-                <li>
-                    <a i18n-key="projects" href="#projects"></a>
-                </li>
-                <li>
-                    <a i18n-key="skills" href="#skills"></a>
-                </li>
-                <li>
-                    <a i18n-key="contact" href="#contact"></a>
-                </li>
-                <li class="menu-lang">
-                    <a href="#" i18n-lang-switcher onclick="setLocale('no');">NO</a>
-                </li>
-                <li class="menu-lang">
-                    <a href="#" i18n-lang-switcher onclick="setLocale('en');">EN</a>
-                </li>
+                <li><a i18n-key="about-me" href="#about-section"></a></li>
+                <li><a i18n-key="experience" href="#experience-section"></a></li>
+                <li><a i18n-key="education" href="#education-section"></a></li>
+                <li><a i18n-key="projects" href="#project-section"></a></li>
+                <li><a i18n-key="skills" href="#skills-section"></a></li>
+                <li><a i18n-key="contact" href="#contact-footer-section"></a></li>
+
+                <li class="menu-lang"><a href="#" i18n-lang-switcher onclick="setLocale('no');">NO</a></li>
+                <li class="menu-lang"><a href="#" i18n-lang-switcher onclick="setLocale('en');">EN</a></li>
             </ul>
         </div>
     </header>
     <!-- End header -->
+
     <div id="bg">
         <div id="bg-overlay">
+
             <!-- Start #lead -->
-            <section id="one">
+            <section id="lead-section">
                 <div id="lead">
                     <div id="lead-content">
                         <h1 i18n-key="name"></h1>
@@ -74,10 +61,11 @@
                     </div>
                     <!-- End #lead-down -->
                 </div>
-                <!-- End #lead -->
             </section>
+            <!-- End #lead -->
+
             <!-- Start #about -->
-            <section id="two">
+            <section id="about-section">
                 <div id="about" class="shadow-x-large">
                     <div class="container">
                         <div class="row">
@@ -91,11 +79,11 @@
                         </div>
                     </div>
                 </div>
-                <!-- End #about -->
             </section>
+            <!-- End #about -->
 
-            <section id="three">
-                <!-- Start #experience -->
+            <!-- Start #experience -->
+            <section id="experience-section">
                 <div id="experience" class="shadow-x-large">
                     <h2 i18n-key="experience" class="heading"></h2>
                     <div id="experience-timeline">
@@ -118,13 +106,14 @@
                         </div>
                     </div>
                 </div>
-                <!-- End #experience -->
             </section>
+            <!-- End #experience -->
 
-            <section id="four">
-                <!-- Start #education -->
+            <!-- Start #education -->
+            <section id="education-section">
                 <div id="education" class="shadow-x-large">
                     <h2 i18n-key="education" class="heading"></h2>
+
                     <!-- Start .education-block -->
                     <div class="education-block">
                         <h3 i18n-key="education-2"></h3>
@@ -142,12 +131,13 @@
                         <p i18n-key="education-1-desc"></p>
                     </div>
                     <!-- End .education-block -->
-                </div>
-                <!-- End #education -->
-            </section>
 
-            <section id="five">
-                <!-- Start #projects -->
+                </div>
+            </section>
+            <!-- End #education -->
+
+            <!-- Start #projects -->
+            <section id="project-section">
                 <div id="projects" class="shadow-x-large">
                     <h2 i18n-key="projects" class="heading"></h2>
                     <div class="container">
@@ -175,6 +165,7 @@
                             </div>
                             <!-- End .project -->
 
+                            <!-- Start .project -->
                             <div class="project shadow-large">
                                 <!-- Start .project-image -->
                                 <div class="project-image">
@@ -196,11 +187,11 @@
                         </div>
                     </div>
                 </div>
-                <!-- End #projects -->
             </section>
+            <!-- End #projects -->
 
-            <section id="six">
-                <!-- Start #skills -->
+            <!-- Start #skills -->
+            <section id="skills-section">
                 <div id="skills" class="shadow-x-large">
                     <h2 i18n-key="skills" class="heading">Skills</h2>
                     <ul>
@@ -215,11 +206,12 @@
                         <li>React</li>
                     </ul>
                 </div>
-                <!-- End #skills -->
             </section>
+            <!-- End #skills -->
 
-            <section id="seven">
-                <!-- Start #contact -->
+            <!-- Start #contact and footer-->
+            <section id="contact-footer-section">
+                <!-- Start #contact-->
                 <div id="contact" class="shadow-x-large">
                     <h2 i18n-key="contact-form-title"></h2>
                     <div id="contact-form">
@@ -230,10 +222,10 @@
                             <button i18n-key="contact-form-submit-btn" type="submit"></button>
                         </form>
                     </div>
-                    <!-- End #contact-form -->
                 </div>
-                <!-- End #contact -->
+                <!-- #contact-form -->
 
+                <!-- Start footer -->
                 <footer>
                     <div class="container">
                         <div class="row">
@@ -262,11 +254,12 @@
                 </footer>
                 <!-- End footer -->
             </section>
+            <!-- End #contact and footer-->
+
         </div>
         <!-- End bg-overlay -->
     </div>
     <!-- End bg -->
-
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="js/scripts.js"></script>
