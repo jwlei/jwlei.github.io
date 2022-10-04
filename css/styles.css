@@ -107,14 +107,14 @@ body.active {
     color: #FFFFFF;
     text-decoration: none;
     background: #4f7370;
-    border-radius: 4px;
+    border-radius: 1px;
 }
 
 #navbar span:hover {
     color: #FFFFFF;
     text-decoration: none;
     background: #4f7370;
-    border-radius: 4px;
+    border-radius: 1px;
 }
 #navbar a:focus {
     color: #FFFFFF;
@@ -165,7 +165,7 @@ body.active {
     font-size: 1.5em;
     z-index: 20;
     padding: 0 7px;
-    border-radius: 4px;
+    border-radius: 1px;
     background: #212121;
 }
 #mobile-menu-close {
@@ -383,10 +383,10 @@ footer {
     background: #212121;
 }
 #about h2 {
-    color: #B0BEC5;
+    color: #FFFFFF;
 }
 #about p {
-    color: #d1d3d5;
+    color: #B0BEC5;
     margin: 0;
 }
 #experience {
@@ -397,7 +397,7 @@ footer {
 
 }
 #experience h2 {
-    color: #B0BEC5;
+    color: #FFFFFF;
 }
 #experience-timeline {
     margin: 30px auto 0 auto;
@@ -428,27 +428,29 @@ footer {
 }
 .vtimeline-content {
     margin-left: 350px;
-    background: #B0BEC5;
-    border: 1px solid #344242;
+    background: #292929;
+    border: 1px solid #292929;
     padding: 15px;
-    border-radius: 3px;
+    border-radius: 1px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
     text-align: left;
 }
 .vtimeline-content h3 {
     font-size: 1.5em;
     font-weight: 300;
-    color: #B0BEC5;
+    color: #FFFFFF;
     display: inline-block;
     margin: 0;
 }
 .vtimeline-content h4 {
     font-size: 1.2em;
     font-weight: 300;
-    color: #ededee;
+    color: #B0BEC5;
     margin: 0 0 15px 0;
 }
 .vtimeline-content p {
-    color: #d1d3d5;
+    color: #B0BEC5;
     font-size: 0.9em;
     margin: 0;
 }
@@ -460,7 +462,7 @@ footer {
 }
 .vtimeline-icon {
     position: relative;
-    color: #ededee;
+    color: #B0BEC5;
     width: 50px;
     height: 50px;
     background: #4f7370;
@@ -490,28 +492,31 @@ footer {
     margin: 10vh 10vw;
 }
 #education h2 {
-    color: #B0BEC5;
+    color: #FFFFFF;
     margin-bottom: 50px;
 }
 .education-block {
     max-width: 700px;
     margin: 0 auto 30px auto;
     padding: 15px;
-    border: 1px solid #676d72;
+    border: 1px solid #292929;
     text-align: left;
+    background: #292929;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
 }
 .education-block h3 {
     font-weight: 500;
     float: left;
     margin: 0;
-    color: #B0BEC5;
+    color: #FFFFFF;
 }
 .education-block span {
-    color: #d1d3d5;
+    color: #B0BEC5;
     float: right;
 }
 .education-block h4 {
-    color: #9ca0a4;
+    color: #B0BEC5;
     clear: both;
     font-weight: 500;
     margin: 0 0 15px 0;
@@ -519,7 +524,7 @@ footer {
 .education-block p,
 .education-block ul {
     margin: 0;
-    color: #d1d3d5;
+    color: #B0BEC5;
     font-size: 0.9em;
 }
 .education-block ul {
@@ -534,7 +539,7 @@ footer {
 
 }
 #projects h2 {
-    color: #B0BEC5;
+    color: #FFFFFF;
     margin-bottom: 50px;
 }
 .project {
@@ -543,8 +548,11 @@ footer {
     margin: 5vw;
     overflow: hidden;
     background: #292929;
-    border-radius: 4px;
+    border-radius: 1px;
+}
 
+.project a {
+    color: #4f7370;
 }
 .project-image, .project-video {
     float: left;
@@ -560,11 +568,11 @@ footer {
 .project-info h3 {
     font-size: 1.5em;
     font-weight: 300;
-    color: #B0BEC5;
+    color: #FFFFFF;
     margin: 0 0 15px 0;
 }
 .project-info p {
-    color: #74808a;
+    color: #B0BEC5;
     margin: 0 0 15px 0;
     font-size: 0.9em;
 }
@@ -581,10 +589,10 @@ footer {
     padding: 50px 15px;
     text-align: center;
     margin: 10vh 10vw;
-    background: #282828;
+    background: #212121;
 }
 #skills h2 {
-    color: #B0BEC5;
+    color: #FFFFFF;
     margin-bottom: 50px;
 }
 #skills ul {
@@ -597,22 +605,24 @@ footer {
     display: inline-block;
     margin: 7px;
     padding: 5px 10px;
-    color: #374054;
-    background: #e4e4ea;
+    color: #B0BEC5;
+    background: #292929;
     list-style: none;
     cursor: default;
     font-size: 1.2em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
 }
 #contact {
     padding: 50px 15px;
-    background: #292929;
+    background: #212121;
     text-align: center;
     margin: 10vh 10vw;
 
 }
 #contact h2 {
     margin: 0 0 15px 0;
-    color: #B0BEC5;
+    color: #FFFFFF;
     font-weight: 500;
 }
 #contact-form {
@@ -624,35 +634,37 @@ footer {
     display: block;
     width: 100%;
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 1px;
     border: none;
     margin-bottom: 10px;
-    background: #1d6fa5;
-    color: #fff;
+    background: #292929;
+    color: #B0BEC5;
     transition: 0.5s ease all;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
 }
 #contact-form input::-webkit-input-placeholder,
 #contact-form textarea::-webkit-input-placeholder {
-    color: #fff;
+    color: #B0BEC5;
 }
 #contact-form input:-moz-placeholder,
 #contact-form textarea:-moz-placeholder {
-    color: #fff;
+    color: #B0BEC5;
     opacity: 1;
 }
 #contact-form input::-moz-placeholder,
 #contact-form textarea::-moz-placeholder {
-    color: #fff;
+    color: #B0BEC5;
     opacity: 1;
 }
 #contact-form input:-ms-input-placeholder,
 #contact-form textarea:-ms-input-placeholder {
-    color: #fff;
+    color: #B0BEC5;
 }
 #contact-form input:focus,
 #contact-form textarea:focus {
     outline: none;
-    background: #16527a;
+    background: #323232;
 }
 #contact-form textarea {
     height: 150px;
@@ -661,11 +673,11 @@ footer {
 #contact-form button {
     display: block;
     width: 100%;
-    background: #fff;
-    border-radius: 4px;
+    background: #4f7370;
+    border-radius: 1px;
     padding: 5px 10px;
     border: none;
-    color: #3498db;
+    color: #B0BEC5;
     font-weight: 700;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: 0.5s ease all;
@@ -793,7 +805,7 @@ footer {
         height: 100%;
         overflow-y: auto;
         box-shadow: none;
-        border-radius: 0;
+        border-radius: 1px;
         width: 100%;
     }
     #menu li {
