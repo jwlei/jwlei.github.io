@@ -7,7 +7,7 @@
     $('html').removeClass('no-js');
 
     // Animate to section when nav is clicked
-    $('header a').click(function(e) {
+    $('navbar a').click(function(e) {
 
         // Treat as normal link if no-scroll class
         if ($(this).hasClass('no-scroll')) return;
@@ -21,7 +21,7 @@
         }, Math.abs(window.pageYOffset - $(heading).offset().top) / 1);
 
         // Hide the menu once clicked if mobile
-        if ($('navbar').hasClass('active')) {
+        if ($('header').hasClass('active')) {
             $('header, body').removeClass('active');
         }
     });
@@ -35,7 +35,7 @@
 
     // Scroll to first element
     $('#lead-down span').click(function() {
-        var scrollDistance = $('#lead').next().offset().top;
+        var scrollDistance = $('#lead-section').next().offset().top;
         $('html, body').animate({
             scrollTop: scrollDistance + 'px'
         }, 500);
@@ -108,16 +108,16 @@
     // });
 
     $('body').keydown(function(e){
-        if(e.keyCode === 8){
+        if(e.keyCode === 8 || e.keyCode === 33 ){
             e.preventDefault();
-            // user has pressed backspace
+            // user has pressed backspace or page up
             var links = document.getElementsByTagName('section');
             link = findPrevious(links);
             animate(link);
         }
-        if(e.keyCode === 32){
+        if(e.keyCode === 32 || e.keyCode === 34){
             e.preventDefault();
-            // user has pressed space
+            // user has pressed space or page down
             var section = document.getElementsByTagName('section');
             link = findNext(section);
             animate(link);
@@ -290,7 +290,6 @@ function scrollFunction() {
         document.getElementById("navbar").style.fontSize = "0.9em";
         menuLang.setAttribute("style", "font-size: 0.8em");
         menuLang.setAttribute("style", "padding: 3px 5px");
-
     } else {
         document.getElementById("navbar").style.padding = "16px 10px";
         document.getElementById("navbar").style.fontSize = "1em";
