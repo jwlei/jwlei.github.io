@@ -7,8 +7,12 @@ html, body {
 }
 
 section {
-    display: block;
-    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
     box-sizing:border-box;
 }
 
@@ -34,47 +38,6 @@ body {
     z-index: -1;
 }
 
-
-/*
-body {
-    font-family: "Lato", sans-serif;
-    font-size: 16px;
-    background: url(../media/images/lead-bg.jpg) fixed, center, no-repeat;
-    background-size: cover;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    &:after {
-        content: "";
-        position: absolute;
-        background: png_base64(rgba(56, 64, 71, 0.5));
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        z-index: -1;
-  }
-}
-*/
-/* 
-#bg-overlay {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(56, 64, 71, 0.5);
-}
-*/ 
-
 body.active {
     overflow: hidden;
     z-index: -1;
@@ -89,21 +52,26 @@ footer {
 
 /* ------------------ CONTAINERS ------------------ */
 #about, #experience, #education, #projects, #skills, #contact {
-    position: relative;
-    top: 10vh;
-    margin: 20%;
-    min-width: 60%;
-    max-width: 80%;
-    max-height: 80%;
-    padding: 30px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    position: relative;;
+    width: 100%;
+    height: 100%;
+    padding-top: 50px;
     text-align: center;
     background: #212121;
     border: 1px solid #292929;
 }
 
+#lead {
+    width: 100%;
+}
 
 
-/* ------------------ NAVBAR ------------------ */
+
+    /* ------------------ NAVBAR ------------------ */
 header {
     position: fixed;
     display: flex;
@@ -127,7 +95,8 @@ header {
 }
 
 header ul {
-    display: inline-block;
+    display: flex;
+    flex-direction: row;
     text-align: center;
     padding: 1px;
     margin: 0;
@@ -181,6 +150,12 @@ header.active {
 
 /* ------------------ LEAD ------------------ */
 #lead {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    background: none;
+    border: none;
     position: relative;
     height: 100vh;
     padding: 15px;
@@ -269,6 +244,7 @@ header.active {
     max-width: 75vw;
     max-height: 60vh;
 }
+
 #experience-timeline:before {
     position: absolute;
     content: "";
@@ -281,6 +257,7 @@ header.active {
     background: #4f7370;
     z-index: 0;
 }
+
 #experience-timeline:after {
     position: absolute;
     content: "";
@@ -587,6 +564,9 @@ header.active {
     color: #728f8d;
 }
 
+.copyright {
+    color: #B0BEC5;
+}
 
 
 /* ------------------ MISC STYLING ------------------ */
@@ -753,30 +733,28 @@ header.active {
 /* ------------------ MEDIA QUERIES ------------------ */
 @media only screen and (max-width: 992px) {
     #about, #experience, #education, #projects, #skills, #contact {
-        position: relative;
-        top: 10vh;
-        min-width: 95vw;
-        max-width: 95vw;
-        min-height: 60vh;
-        max-height: 95vh;
-        margin: 5vh 5vw;
-        padding: 30px 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
+        position: relative;;
+        width: 100%;
+        padding-top: 50px;
         text-align: center;
         background: #212121;
-        border: 1px solid #292929;
+        border: none;
+    }
+
+    #lead {
+        width: 100%;
+        height: 100%;
     }
     
         section {
             display: block;
-            max-height: 100%;
             box-sizing:border-box;
     }
-    
-    #lead {
-        height: auto;
-        min-height: 100%;
-        padding: 100px 15px;
-    }
+
     
     #lead-content {
         top: 50%;
@@ -802,21 +780,26 @@ header.active {
 
 @media only screen and (max-width: 750px) {
     #about, #experience, #education, #projects, #skills, #contact {
-        position: relative;
-        top: 5vh;
-        min-width: 95vw;
-        max-width: 95vw;
-        min-height: 60vh;
-        margin: 5vh 5vw;
-        padding: 30px 15px;
+        display: flex;
+        flex-basis: fit-content;
+        flex-direction: column;
+        justify-content: center;
+        align-content: flex-start;
+        position: relative;;
+        width: 100%;
+        padding-top: 50px;
         text-align: center;
         background: #212121;
-        border: 1px solid #292929;
+        border: none;
+    }
+
+    #lead {
+        width: 100%;
+        height: 100%;
     }
     
     section {
         display: block;
-        max-height: 100%;
         box-sizing:border-box;
     }
     
@@ -865,15 +848,15 @@ header.active {
       display: block;
       height: 100%;
       width: 100%;
-      margin: 0px;  
+      margin: 0;
       z-index: 9;
     }
     
     #menu ul {
         width: 100%;
         height: 100%;
-        margin: 0px auto;
-        padding: 0px;
+        margin: 0 auto;
+        padding: 0;
         display: flex;
         justify-content: space-evenly;
         align-items: center;
@@ -888,21 +871,26 @@ header.active {
 
 @media only screen and (max-width: 768px) {
     #about, #experience, #education, #projects, #skills, #contact {
-        position: relative;
-        top: 5vh;
-        min-width: 95vw;
-        max-width: 95vw;
-        min-height: 60vh;
-        margin: 5vh 5vw;
-        padding: 30px 15px;
+        display: flex;
+        flex-basis: fit-content;
+        flex-direction: column;
+        justify-content: center;
+        align-content: flex-start;
+        position: relative;;
+        width: 100%;
+        padding-top: 50px;
         text-align: center;
         background: #212121;
-        border: 1px solid #292929;
+        border: none;
+    }
+
+    #lead {
+        width: 100%;
+        height: 100%;
     }
     
     section {
         display: block;
-        max-height: 100%;
         box-sizing:border-box;
     }
     
@@ -938,15 +926,15 @@ header.active {
       display: block;
       height: 100%;
       width: 100%;
-      margin: 0px;  
+      margin: 0;
       z-index: 9;
     }
     
     #menu ul {
         width: 100%;
         height: 100%;
-        margin: 0px auto;
-        padding: 0px;
+        margin: 0 auto;
+        padding: 0;
         display: flex;
         justify-content: space-evenly;
         align-items: center;
@@ -1001,21 +989,26 @@ header.active {
 
 @media only screen and (max-width: 480px) {
     #about, #experience, #education, #projects, #skills, #contact {
-        position: relative;
-        top: 5vh;
-        min-width: 98vw;
-        max-width: 98vw;
-        min-height: 60vh;
-        margin: 2vh 2vw;
-        padding: 30px 15px;
+        display: flex;
+        flex-basis: fit-content;
+        flex-direction: column;
+        justify-content: center;
+        align-content: flex-start;
+        position: relative;;
+        width: 100%;
+        padding-top: 50px;
         text-align: center;
         background: #212121;
-        border: 1px solid #292929;
+        border: none;
+    }
+
+    #lead {
+        width: 100%;
+        height: 100%;
     }
     
     section {
         display: block;
-        max-height: 100%;
         box-sizing:border-box;
     }
     
