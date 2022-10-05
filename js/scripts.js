@@ -7,18 +7,10 @@
     $('html').removeClass('no-js');
 
     // Animate to section when nav is clicked
-    $('header').click(function(e) {
+    $('header a').click(function(e) {
 
         // Treat as normal link if no-scroll class
         if ($(this).hasClass('no-scroll')) return;
-
-        e.preventDefault();
-        var heading = $(this).attr('href');
-        var scrollDistance = $(heading).offset().top;
-
-        $('html, body').animate({
-            scrollTop: scrollDistance + 'px'
-        }, Math.abs(window.pageYOffset - $(heading).offset().top) / 1);
 
         // Hide the menu once clicked if mobile
         if ($('header').hasClass('active')) {
@@ -283,17 +275,58 @@ window.onscroll = function() {scrollFunction()};
 
 function scrollFunction() {
     // When the user scrolls down 80px from the top of the document, resize the navbar padding and the logo's font size
-    var menuLang = document.getElementsByClassName("menu-lang");
-
     if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
         document.getElementById("navbar").style.padding = "3px 10px";
         document.getElementById("navbar").style.fontSize = "0.9em";
-        menuLang.setAttribute("style", "font-size: 0.8em");
-        menuLang.setAttribute("style", "padding: 3px 5px");
     } else {
         document.getElementById("navbar").style.padding = "16px 10px";
         document.getElementById("navbar").style.fontSize = "1em";
-        menuLang.setAttribute("style", "font-size: 0.9em");
-        menuLang.setAttribute("style", "padding: 16px 5px");
     }
+}
+
+const carouselText = ["UI/UX", "Frontend", "Backend", "Fullstack", "JAVA"];
+
+
+
+$(document).ready(async function() {
+    carousel(carouselText, "#feature-text")
+});
+
+async function typeSentence(sentence, eleRef, delay = 100) {
+    const letters = sentence.split("");
+    let i = 0;
+    while(i < letters.length) {
+        await waitForMs(delay);
+        $(eleRef).append(letters[i]);
+        i++
+    }
+    return;
+}
+
+async function deleteSentence(eleRef) {
+    const sentence = $(eleRef).html();
+    const letters = sentence.split("");
+    let i = 0;
+    while(letters.length > 0) {
+        await waitForMs(100);
+        letters.pop();
+        $(eleRef).html(letters.join(""));
+    }
+}
+
+async function carousel(carouselList, eleRef) {
+    var i = 0;
+    while(true) {
+        updateFontColor(eleRef, carouselList[i].color)
+        await typeSentence(carouselList[i].text, eleRef);
+        await waitForMs(1500);
+        await deleteSentence(eleRef);
+        await waitForMs(500);
+        i++
+        if(i >= carouselList.length) {i = 0;}
+    }
+}
+
+function waitForMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
 }

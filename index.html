@@ -22,22 +22,34 @@
 		<i class="fa fa-bars" aria-hidden="true"></i>
 	    </div>
 	    <!-- End #mobile-menu-toggle -->
-	    <header id="navbar" class="shadow">
+	    <header class="shadow">
 		<div id="mobile-menu-close">
 		    <span i18n-key="menu-close"></span> <i class="fa fa-times" aria-hidden="true"></i>
 		</div>
 		<!-- End #mobile-menu-close -->
 		    <ul id="menu">
-			<li><a i18n-key="about-me" href="#about-section"></a></li>
-			<li><a i18n-key="experience" href="#experience-section"></a></li>
-			<li><a i18n-key="education" href="#education-section"></a></li>
-			<li><a i18n-key="projects" href="#project-section"></a></li>
-			<li><a i18n-key="skills" href="#skills-section"></a></li>
-			<li><a i18n-key="contact" href="#contact-footer-section"></a></li>
+				<li><a i18n-key="about-me" href="#about-section"></a></li>
+				<li><a i18n-key="experience" href="#experience-section"></a></li>
+				<li><a i18n-key="education" href="#education-section"></a></li>
+				<li><a i18n-key="projects" href="#project-section"></a></li>
+				<li><a i18n-key="skills" href="#skills-section"></a></li>
+				<li><a i18n-key="contact" href="#contact-footer-section"></a></li>
+			</ul>
 
-			<li class="menu-lang"><a href="#" i18n-lang-switcher onclick="setLocale('no');">NO</a></li>
-			<li class="menu-lang"><a href="#" i18n-lang-switcher onclick="setLocale('en');">EN</a></li>
-		    </ul>
+			<ul id="menu-lang">
+
+				<li class="menu-lang">
+					<img src="media/images/icons/no_flag.ico" alt="NORWEGIAN"
+						 i18n-lang-switcher onclick="setLocale('no');"
+						 width="20px" height="20px">
+				</li>
+
+				<li class="menu-lang">
+					<img src="media/images/icons/en_flag.ico" alt="ENGLISH"
+						 i18n-lang-switcher onclick="setLocale('en');"
+						 width="20px" height="20px">
+				</li>
+			</ul>
 	    </header>
 	    <!-- End header -->
 
@@ -47,6 +59,11 @@
 		    <div id="lead-content">
 			<h1 i18n-key="name"></h1>
 			<h2 i18n-key="job-title"></h2>
+				<div class="typing-container">
+					<span id="sentence" class="sentence">Here, take this </span>
+					<span id="feature-text"></span>
+					<span class="input-cursor"></span>
+				</div>
 			<a i18n-key="dl-portfolio" id="cv-dl" href="#" class="btn-rounded-white"></a>
 		    </div>
 		    <!-- End #lead-content -->
