@@ -957,6 +957,7 @@ header.active {
     #lead-content a {
         padding: 10px 20px;
     }
+
     #lead-down {
         display: none;
     }
@@ -1011,12 +1012,7 @@ header.active {
         display: block;
         box-sizing:border-box;
     }
-    
-    #lead {
-        height: auto;
-        min-height: 100%;
-        padding: 100px 15px;
-    }
+
     
     #lead-content {
         top: 50%;
@@ -1024,7 +1020,10 @@ header.active {
         transform: translate(-50%, -50%);
         text-align: center;
     }
-    
+
+    #lead-down {
+        display: none;
+    }
     
     #lead-content h1 {
         font-size: 1.5em;
