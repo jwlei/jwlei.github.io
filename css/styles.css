@@ -10,13 +10,17 @@ html, body {
     padding:0;
 }
 
+html {
+    scroll-behavior:smooth
+}
+
 section {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 100%;
+    width: 100vw;
     box-sizing:border-box;
 }
 
@@ -32,7 +36,7 @@ body {
     background-repeat: no-repeat, no-repeat;
     background-size: cover;
     height: 100%;
-    width: 100%;
+    width: 100vw;
     top: 31px;
     right: 0;
     bottom: 0;
@@ -64,6 +68,8 @@ footer {
     position: relative;
     width: 100%;
     height: 100%;
+    max-width: 800px;
+    margin: 10%;
     text-align: center;
     background: #212121;
     border: 1px solid #292929;
@@ -202,6 +208,13 @@ header img:hover {
     color: #4f7370;
     font-weight: 500;
     font-size: 2.25em;
+    margin-bottom: 15px;
+}
+
+#lead-content span {
+    color: #B0BEC5;
+    font-weight: 400;
+    font-size: 2em;
     margin-bottom: 15px;
 }
 
@@ -353,7 +366,7 @@ header img:hover {
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: flex-start;
-    min-width: 50%;
+    width: 80%;
     margin: 0 auto 30px auto;
     padding: 15px;
     border: 1px solid #292929;
@@ -402,9 +415,8 @@ header img:hover {
 
 .project {
     position: relative;
-    max-width: 90%;
+    width: 80%;
     max-height: 300px;
-    margin: 5vw;
     overflow: hidden;
     background: #292929;
     border-radius: 1px;
@@ -415,9 +427,9 @@ header img:hover {
     margin-bottom: -5px;
 }
 .project-info {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    display: flex;
+    justify-items: center;
+    flex-direction: column;
     margin-left: 300px;
     padding: 15px;
 }
@@ -477,7 +489,8 @@ header img:hover {
     font-weight: 500;
 }
 #contact-form {
-    max-width: 500px;
+    width: 80%;
+    min-height: 65%;
     margin: 0 auto;
 }
 #contact-form input,
@@ -518,7 +531,7 @@ header img:hover {
     background: #323232;
 }
 #contact-form textarea {
-    height: 150px;
+    height: 25%;
     resize: none;
 }
 #contact-form button {
@@ -613,18 +626,53 @@ header img:hover {
     background: #4f7370;
 }
 
+.row {
+    display: flex;
+    justify-content:center;
+}
+
+.row ul:after {
+    position: absolute;
+    content: "";
+    top: 100%;
+    height: 1px;
+    max-width: 40%;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    background: #4f7370;
+}
+
 .btn-rounded {
     display: inline-block;
     color: #d1d3d5;
     padding: 15px 25px;
     border: 3px solid #4f7370;
     border-radius: 30px;
+    margin-top: 5%;
     transition: 0.3s ease all;
 }
 .btn-rounded:hover {
     color: #f9f9fa;
     background: #4f7370;
     text-decoration: none;
+}
+
+.typing-container {
+    position: relative;
+    height: 10%;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10%;
+}
+.input-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 30px;
+    background-color: white;
+    margin-left: 8px;
+    animation: blink .6s linear infinite alternate;
+    margin-bottom: 10%;
 }
 
 
@@ -659,6 +707,13 @@ header img:hover {
     100% {
         transform: translateY(0);
     }
+}
+
+@keyframes blink {
+    0% {opacity: 1;}
+    40% {opacity: 1;}
+    60% {opacity: 0;}
+    100% {opacity: 0;}
 }
 
 
@@ -712,11 +767,11 @@ header img:hover {
     display: none;
     cursor: pointer;
     position: fixed;
-    right: 15px;
+    left: 15px;
     top: 10px;
     color: #B0BEC5;
     font-size: 1.5em;
-    padding: 0 7px;
+    padding: 5px;
     border-radius: 1px;
     background: #212121;
     z-index: 999;
@@ -725,14 +780,16 @@ header img:hover {
 
 #mobile-menu-close {
     display: none;
-    text-align: right;
+    flex-direction: column;
+    text-align: center;
+    padding-right: 70px;
+    padding-bottom: 20px;
     width: 100%;
-    background: #212121;
     font-size: 1.5em;
-    padding-right: 15px;
-    padding-top: 10px;
+    right: 25px;
     cursor: pointer;
     color: #B0BEC5;
+    vertical-align: center;
 }
 #mobile-menu-close span {
     font-size: 0.5em;
@@ -746,42 +803,102 @@ header img:hover {
 
 /* ------------------ MEDIA QUERIES ------------------ */
 @media only screen and (max-width: 992px) {
-    #about, #experience, #education, #projects, #skills, #contact {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-content: center;
-        position: relative;;
-        width: 100%;
-        padding-top: 50px;
-        text-align: center;
-        background: #212121;
-        border: none;
+
+    body {
+        top: 0;
+        height: 100vh;
+        width: 100vw;
     }
 
-    #lead {
-        width: 100%;
+    section {
+        box-sizing:border-box;
+        height: auto;
+    }
+    
+    #about, #experience, #education, #projects, #skills, #contact {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: none;
+}
+
+    #mobile-menu-open, #mobile-menu-close {
+        display: flex;
+    }
+    
+    #navbar {
+        transform: translateX(-100%);
+        -webkit-transform: translateX(-100%);
+    }
+
+    header {
+        position: fixed;
+        display: none;
+        z-index: 999;
+        justify-content: space-evenly;
+        animation: none;
+        bottom: 0;
+        width: 150px;
         height: 100%;
     }
     
-        section {
-            display: block;
-            box-sizing:border-box;
-    }
-
-    
-    #lead-content {
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+    footer {
         text-align: center;
     }
+
+    #menu {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        top: 5%;
+        height: 70%;
+        width: 100%;
+        margin: 0;
+        z-index: 9;
+    }
+
+    #menu-lang {
+        position: absolute;
+        padding: 0;
+        bottom: 10%;
+        left: 2%;
+        margin: 60vh 10px;
+        list-style: none;
+        cursor: pointer;
+    }
+
+
+    #menu-buttons ul {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        justify-items: center;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        z-index: 9;
+    }
+
+    #menu li {
+        display: block;
+        margin-bottom: 10px;
+    }
+
     #lead-content h1 {
         font-size: 3em;
     }
     #lead-content h2 {
         font-size: 1.75em;
     }
+
+    #lead-content span {
+        font-size: 1.5em;
+    }
+    
+    #lead-down {
+        bottom: 10%;
+}
+    
     #about {
         text-align: center;
     }
@@ -790,52 +907,39 @@ header img:hover {
     }
 }
 
+@media only screen and (max-width: 768px) {
+    #lead-content a {
+        padding: 10px 20px;
+    }
 
+    .education-block h3,
+    .education-block span {
+        float: none;
+    }
+
+    .project-image, .project-video {
+        display: none;
+    }
+
+    .project-info {
+        position: relative;
+        margin: 0;
+        padding: 15px 15px;
+        top: auto;
+        transform: none;
+    }
+
+    .social {
+        text-align: center;
+    }
+}
 
 @media only screen and (max-width: 750px) {
-    #about, #experience, #education, #projects, #skills, #contact {
-        display: flex;
-        flex-basis: fit-content;
-        flex-direction: column;
-        justify-content: center;
-        align-content: flex-start;
-        position: relative;;
-        width: 100%;
-        padding-top: 50px;
-        text-align: center;
-        background: #212121;
-        border: none;
-    }
-
-    #lead {
-        width: 100%;
-        height: 100%;
-    }
-    
-    section {
-        display: block;
-        box-sizing:border-box;
-    }
-    
-    #lead {
-        height: auto;
-        min-height: 100%;
-        padding: 100px 15px;
-    }
-    
-    
-    #lead-content {
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-    }
-    
     #experience-timeline:before,
     #experience-timeline:after {
         left: 23px;
     }
-    
+
     .vtimeline-date {
         width: auto;
         text-align: left;
@@ -844,259 +948,67 @@ header img:hover {
         display: block;
         margin-left: 70px;
     }
-    
+
     .vtimeline-icon {
         margin-left: 0;
     }
-    
+
     .vtimeline-content {
         margin-left: 70px;
     }
-    
-        
-    #mobile-menu-open, #mobile-menu-close {
-        display: block;
-    }
-    
-    #menu {
-      display: block;
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      z-index: 9;
-    }
-    
-    #menu ul {
-        width: 100%;
-        height: 100%;
-        margin: 0 auto;
-        padding: 0;
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        z-index: 9;
-    }
-    
-    #menu li {
-        display: block;
-        margin-bottom: 10px;
-    }
+
+
+
 }
 
-@media only screen and (max-width: 768px) {
-    #about, #experience, #education, #projects, #skills, #contact {
-        display: flex;
-        flex-basis: max-content;
-        flex-direction: column;
-        justify-content: center;
-        align-content: flex-start;
-        position: relative;;
-        width: 100%;
-        padding-top: 50px;
-        text-align: center;
-        background: #212121;
-        border: none;
-    }
-
-    #lead {
-        width: 100%;
-        height: 100%;
-    }
-    
-    section {
-        display: block;
-        box-sizing:border-box;
-    }
-    
-    #lead {
-        height: auto;
-        min-height: 100%;
-        padding: 100px 15px;
-    }
-    
-    
-    #lead-content {
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-    }
-    
-    header {
-        position: fixed;
-        display: none;
-        z-index: 999;
-        animation: none;
-        bottom: 0;
-        height: 100%;
-    }
-    
-    #mobile-menu-open,
-    #mobile-menu-close {
-        display: block;
-    }
-    
-    #menu {
-      display: block;
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      z-index: 9;
-    }
-    
-    #menu ul {
-        width: 100%;
-        height: 100%;
-        margin: 0 auto;
-        padding: 0;
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        z-index: 9;
-    }
-    
-    #menu li {
-        display: block;
-        margin-bottom: 10px;
-    }
-    
-    #lead-content h1 {
-        font-size: 2em;
-    }
-    
-    #lead-content h2 {
-        font-size: 1.3em;
-    }
-    
-    #lead-content a {
-        padding: 10px 20px;
-    }
-
-    #lead-down {
-        display: none;
-    }
-    
-    .education-block h3,
-    .education-block span {
-        float: none;
-    }
-    
-    .project-image, .project-video {
-        display: none;
-    }
-    
-    .project-info {
-        position: absolute;
-        margin: 0;
-        padding: 15px 15px;
-        top: auto;
-        transform: none;
-    }
-    
-    footer {
-        text-align: center;
-    }
-    
-    .social {
-        text-align: center;
-    }
-}
 
 @media only screen and (max-width: 480px) {
-    #about, #experience, #education, #projects, #skills, #contact {
-        display: flex;
-        flex-basis: fit-content;
-        flex-direction: column;
-        justify-content: center;
-        align-content: flex-start;
-        position: relative;;
-        width: 100%;
-        padding-top: 50px;
-        text-align: center;
-        background: #212121;
-        border: none;
-    }
-
-    #lead {
-        width: 100%;
-        height: 100%;
-    }
-    
-    section {
-        display: block;
-        box-sizing:border-box;
-    }
-
-    
-    #lead-content {
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-    }
-
-    #lead-down {
-        display: none;
-    }
-    
     #lead-content h1 {
+        font-size: 2.5em;
+    }
+
+    #lead-content h2 {
         font-size: 1.5em;
     }
-    
-    #lead-content h2 {
-        font-size: 1em;
+
+    #lead-content span {
+        font-size: 1.4em;
     }
-    
+
     #lead-content a {
-        font-size: 0.9em;
+        font-size: 1em;
         padding: 5px 10px;
     }
-    
-    #mobile-menu-open, #mobile-menu-close {
-        display: block;
-    }
-    
-    #menu {
-      display: block;
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      z-index: 9;
-    }
-    
-    #menu ul {
-        width: 100%;
-        height: 100%;
-        margin: 0 auto;
-        padding: 0;
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        z-index: 9;
-    }
-    
-    #menu li {
-        display: block;
-        margin-bottom: 10px;
-    }
 }
 
-.typing-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;}
-.input-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 42px;
-    background-color: white;
-    margin-left: 8px;
-    animation: blink .6s linear infinite alternate;
+
+
+
+
+.slide-in {
+    animation: slide-in 0.5s forwards;
+    -webkit-animation: slide-in 0.5s forwards;
 }
 
-@keyframes blink {
-    0% {opacity: 1;}
-    40% {opacity: 1;}
-    60% {opacity: 0;}
-    100% {opacity: 0;}
+.slide-out {
+    animation: slide-out 0.5s forwards;
+    -webkit-animation: slide-out 0.5s forwards;
+}
+    
+@keyframes slide-in {
+    100% { transform: translateX(0%); }
+}
+
+@-webkit-keyframes slide-in {
+    100% { -webkit-transform: translateX(0%); }
+}
+    
+@keyframes slide-out {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+@-webkit-keyframes slide-out {
+    0% { -webkit-transform: translateX(0%); }
+    100% { -webkit-transform: translateX(-100%); }
 }

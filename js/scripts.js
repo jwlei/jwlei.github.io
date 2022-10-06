@@ -1,36 +1,45 @@
 (function($) {
 
+
     // Show current year
     $("#current-year").text(new Date().getFullYear());
 
     // Remove no-js class
     $('html').removeClass('no-js');
-
-    // Animate to section when nav is clicked
+    
     $('header a').click(function(e) {
 
         // Treat as normal link if no-scroll class
         if ($(this).hasClass('no-scroll')) return;
+
+        e.preventDefault();
+        var heading = $(this).attr('href');
+        var scrollDistance = $(heading).offset().top;
+
+        $('html, body').animate({
+            scrollTop: scrollDistance + 'px'
+        }, Math.abs(window.pageYOffset - $(heading).offset().top) / 1);
 
         // Hide the menu once clicked if mobile
         if ($('header').hasClass('active')) {
             $('header, body').removeClass('active');
         }
     });
-
+    
     // Scroll to top
     $('#to-top').click(function() {
         $('html, body').animate({
             scrollTop: 0
-        }, 500);
+        }, 200);
     });
+    
 
     // Scroll to first element
     $('#lead-down span').click(function() {
         var scrollDistance = $('#lead-section').next().offset().top;
         $('html, body').animate({
             scrollTop: scrollDistance + 'px'
-        }, 500);
+        }, 200);
     });
 
     // Create timeline
@@ -67,6 +76,12 @@
     $('#mobile-menu-close').click(function() {
         $('header, body').removeClass('active');
     });
+    
+    $('section').click(function() {
+        if ($('header').hasClass('active')) {
+            $('header, body').removeClass('active');
+        }
+    });
 
     // Load additional projects
     $('#view-more-projects').click(function(e){
@@ -76,28 +91,6 @@
         });
     });
 
-    // MOUSE SCROLL
-    // var delay = false;
-    // $(document).on('mousewheel DOMMouseScroll', function(event) {
-    //     event.preventDefault();
-    //     if(delay) return;
-    //
-    //     delay = true;
-    //     setTimeout(function(){delay = false},700 )
-    //
-    //     var wd = event.originalEvent.wheelDelta || -event.originalEvent.detail;
-    //
-    //     var links = document.getElementsByTagName('section');
-    //     var link;
-    //     if(wd < 0) {
-    //         link = findNext(links);
-    //     }
-    //     else {
-    //         link = findPrevious(links);
-    //     }
-    //
-    //     animate(link);
-    // });
 
     $('body').keydown(function(e){
         if(e.keyCode === 8 || e.keyCode === 33 ){
@@ -139,50 +132,59 @@
     }
 
     // -----------------------------------------------------------------------------------
-    const carouselText = ["UI/UX", "Frontend", "Backend", "Fullstack", "JAVA"];
-    $(document).ready(async function() {
-        carousel(carouselText, "#feature-text")
+    const carouselText = [
+        {text: "UI/UX"},
+        {text: "Java"},
+        {text: "Responsive Design"},
+        {text: "Artificial intelligence"},
+        {text: "Web development"},
+        {text: "Database management systems"},
+        {text: "Spring MVC"}
+    ]
+
+    jQuery(function($) {
+      carousel(carouselText, "#feature-text")
     });
 
     async function typeSentence(sentence, eleRef, delay = 100) {
-        const letters = sentence.split("");
-        let i = 0;
-        while(i < letters.length) {
-            await waitForMs(delay);
-            $(eleRef).append(letters[i]);
-            i++
-        }
+      const letters = sentence.split("");
+      let i = 0;
+      while(i < letters.length) {
+        await waitForMs(delay);
+        $(eleRef).append(letters[i]);
+        i++
+      }
+      return;
     }
 
     async function deleteSentence(eleRef) {
-        const sentence = $(eleRef).html();
-        const letters = sentence.split("");
-        let i = 0;
-        while(letters.length > 0) {
-            await waitForMs(100);
-            letters.pop();
-            $(eleRef).html(letters.join(""));
-        }
+      const sentence = $(eleRef).html();
+      const letters = sentence.split("");
+      let i = 0;
+      while(letters.length > 0) {
+        await waitForMs(100);
+        letters.pop();
+        $(eleRef).html(letters.join(""));
+      }
     }
 
     async function carousel(carouselList, eleRef) {
-        let i = 0;
+        var i = 0;
         while(true) {
-            await typeSentence(carouselList[i].text, eleRef);
-            await waitForMs(1500);
-            await deleteSentence(eleRef);
-            await waitForMs(500);
-            i++
-            if(i >= carouselList.length) {i = 0;}
+          await typeSentence(carouselList[i].text, eleRef);
+          await waitForMs(1500);
+          await deleteSentence(eleRef);
+          await waitForMs(500);
+          i++
+          if(i >= carouselList.length) {i = 0;}
         }
     }
 
     function waitForMs(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms))
+      return new Promise(resolve => setTimeout(resolve, ms))
     }
 
 })(jQuery);
-
 
 
 
@@ -329,7 +331,14 @@ function scrollFunction() {
 }
 
 
+var $slider = document.getElementById('navbar');
+var $toggle = document.getElementById('toggle');
 
+$toggle.addEventListener('click', function() {
+    var isOpen = $slider.classList.contains('slide-in');
+
+    $slider.setAttribute('class', isOpen ? 'slide-out' : 'slide-in');
+});
 
 
 

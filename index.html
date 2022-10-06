@@ -18,16 +18,17 @@
 	</head>
 
 	<body>
-	    <div id="mobile-menu-open" class="shadow-large">
+	    <div id="mobile-menu-open" class="toggle shadow-large">
 		<i class="fa fa-bars" aria-hidden="true"></i>
 	    </div>
 	    <!-- End #mobile-menu-toggle -->
-	    <header id="navbar" class="shadow">
-			<div id="mobile-menu-close">
-				<span i18n-key="menu-close"></span> <i class="fa fa-times" aria-hidden="true"></i>
+	    <header id="navbar" class="shadow slider slide-in">
+			<div id="mobile-menu-close" class="toggle">
+				<span i18n-key="menu-close"></span>
 			</div>
 			<!-- End #mobile-menu-close -->
-				<ul id="menu">
+
+				<ul id="menu" >
 					<li><a i18n-key="about-me" href="#about-section"></a></li>
 					<li><a i18n-key="experience" href="#experience-section"></a></li>
 					<li><a i18n-key="education" href="#education-section"></a></li>
@@ -37,7 +38,6 @@
 				</ul>
 
 				<ul id="menu-lang">
-
 					<li class="menu-lang">
 						<img src="media/images/icons/no_flag.ico" alt="NORWEGIAN"
 							 i18n-lang-switcher onclick="setLocale('no');"
@@ -50,6 +50,7 @@
 							 width="20px" height="20px">
 					</li>
 				</ul>
+
 	    </header>
 	    <!-- End header -->
 
@@ -60,7 +61,7 @@
 				<h1 i18n-key="name"></h1>
 				<h2 i18n-key="job-title"></h2>
 					<div class="typing-container">
-						<span id="sentence" class="sentence">Here, take this </span>
+						<span id="sentence" class="sentence"></span>
 						<span id="feature-text"></span>
 						<span class="input-cursor"></span>
 					</div>
@@ -82,14 +83,12 @@
 	    <!-- Start #about -->
 	    <section id="about-section">
 			<div id="about" class="shadow-x-large">
-				<div class="container">
-					<div class="row">
-						<div class="col-md-4">
-							<h2 i18n-key="about-me" class="heading"></h2>
-						</div>
-						<div class="col-md-8">
-							<p i18n-key="about-me-content"></p>
-						</div>
+				<div class="row">
+					<div class="col-md-4">
+						<h2 i18n-key="about-me" class="heading"></h2>
+					</div>
+					<div class="col-md-8">
+						<p i18n-key="about-me-content"></p>
 					</div>
 				</div>
 			</div>
@@ -153,31 +152,31 @@
 	    <section id="project-section">
 		<div id="projects" class="shadow-x-large">
 		    <h2 i18n-key="projects" class="heading"></h2>
-		    <div class="container">
-				<div class="row">
-					<!-- Start .project -->
-					<div class="project shadow-large">
-						<!-- Start .project-image -->
-						<div class="project-video">
-							<video autoplay loop width="300" height="300">
-							<source src="/media/projects/video/dwls-demo.webm"
-								type="video/webm">
-							</video>
-						</div>
-					<!-- End .project-image -->
-
-					<!-- Start .project-info -->
-						<div class="project-info">
-							<h3 i18n-key="project-2"></h3>
-							<p i18n-key="project-2-desc">
-
-							</p>
-							<a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2"></a>
-						</div>
-					<!-- End .project-info -->
+			<div class="row">
+				<!-- Start .project -->
+				<div class="project shadow-large">
+					<!-- Start .project-image -->
+					<div class="project-video">
+						<video autoplay loop width="300" height="300">
+						<source src="/media/projects/video/dwls-demo.webm"
+							type="video/webm">
+						</video>
 					</div>
-					<!-- End .project -->
+				<!-- End .project-image -->
 
+				<!-- Start .project-info -->
+					<div class="project-info">
+						<h3 i18n-key="project-2"></h3>
+						<p i18n-key="project-2-desc">
+
+						</p>
+						<a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2"></a>
+					</div>
+				<!-- End .project-info -->
+				</div>
+				<!-- End .project -->
+			</div>
+			<div class="row">
 					<!-- Start .project -->
 					<div class="project shadow-large">
 						<!-- Start .project-image -->
@@ -198,7 +197,7 @@
 					</div>
 					<!-- End .project -->
 				</div>
-		    </div>
+	    		</div>
 		</div>
 	    </section>
 	    <!-- End #projects -->
@@ -207,17 +206,34 @@
 	    <section id="skills-section">
 			<div id="skills" class="shadow-x-large">
 				<h2 i18n-key="skills" class="heading">Skills</h2>
-				<ul>
-				<li>Java</li>
-				<li>JavaScript</li>
-				<li>C#</li>
-				<li>Python</li>
-				<li>HTML5</li>
-				<li>CSS3</li>
-				<li>WCAG 2.1</li>
-				<li>Spring MVC</li>
-				<li>React</li>
-				</ul>
+				<div class="row">
+					<div class="col-md-4">
+						<h2 class="heading">Languages</h2>
+					</div>
+					<div class="col-md-8">
+						<ul>
+							<li>Java</li>
+							<li>JavaScript</li>
+							<li>C#</li>
+							<li>Python</li>
+							<li>HTML5</li>
+							<li>CSS3</li>
+						</ul>
+					</div>
+				</div>
+		    
+				<div class="row">
+					<div class="col-md-4">
+						<h2 class="heading">Misc</h2>
+					</div>
+					<div class="col-md-8">
+						<ul>
+							<li>WCAG 2.1</li>
+							<li>Spring MVC</li>
+							<li>React</li>
+						</ul>
+					</div>
+				</div>
 			</div>
 	    </section>
 	    <!-- End #skills -->
