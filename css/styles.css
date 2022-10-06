@@ -1,5 +1,9 @@
 /* ------------------ TAGS ------------------ */
-
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+}
 
 html, body {
     margin: 0;
@@ -17,6 +21,7 @@ section {
 }
 
 body {
+    position: relative;
     font-family: "Lato", sans-serif;
     font-size: 16px;
     background-attachment: fixed;
@@ -28,7 +33,7 @@ body {
     background-size: cover;
     height: 100%;
     width: 100%;
-    top: 0;
+    top: 31px;
     right: 0;
     bottom: 0;
     left: 0;
@@ -52,17 +57,17 @@ footer {
 
 /* ------------------ CONTAINERS ------------------ */
 #about, #experience, #education, #projects, #skills, #contact {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     justify-content: center;
     align-content: center;
-    position: relative;;
+    position: relative;
     width: 100%;
     height: 100%;
-    padding-top: 50px;
     text-align: center;
     background: #212121;
     border: 1px solid #292929;
+    padding: 20px;
 }
 
 #lead {
@@ -207,7 +212,7 @@ header img:hover {
     width: 100%;
     text-align: center;
     z-index: 10;
-    bottom: 15px;
+    bottom: 50px;
     color: #d1d3d5;
 }
 
@@ -250,8 +255,6 @@ header img:hover {
 #experience-timeline {
     margin: 10px auto 0 auto;
     position: relative;
-    max-width: 75vw;
-    max-height: 60vh;
 }
 
 #experience-timeline:before {
@@ -261,7 +264,7 @@ header img:hover {
     bottom: 0;
     left: 303px;
     right: auto;
-    height: 100%;
+    height: 82%;
     width: 3px;
     background: #4f7370;
     z-index: 0;
@@ -271,10 +274,10 @@ header img:hover {
     position: absolute;
     content: "";
     width: 3px;
-    height: 40px;
+    height: 50px;
     background: #4f7370;
     background: linear-gradient(to bottom, #4f7370, rgba(79, 115, 112, 0));
-    top: 100%;
+    top: 82%;
     left: 303px;
 }
 
@@ -346,7 +349,11 @@ header img:hover {
     margin-bottom: 50px;
 }
 .education-block {
-    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    min-width: 50%;
     margin: 0 auto 30px auto;
     padding: 15px;
     border: 1px solid #292929;
@@ -395,7 +402,7 @@ header img:hover {
 
 .project {
     position: relative;
-    max-width: 67vw;
+    max-width: 90%;
     max-height: 300px;
     margin: 5vw;
     overflow: hidden;
@@ -422,10 +429,10 @@ header img:hover {
 }
 .project-info p {
     color: #B0BEC5;
-    margin: 0 0 15px 0;
+    margin: 0 0 30px 0;
     font-size: 0.9em;
 }
-.no-image .project-info {
+.no-image, .project-info {
     position: relative;
     margin: 0;
     padding: 30px 15px;
@@ -459,7 +466,6 @@ header img:hover {
     cursor: default;
     font-size: 1.2em;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-
 }
 
 
@@ -594,7 +600,6 @@ header img:hover {
     display: inline-block;
     font-size: 2em;
     font-weight: 300;
-    margin: 0 0 30px 0;
 }
 .heading:after {
     position: absolute;
@@ -608,7 +613,7 @@ header img:hover {
     background: #4f7370;
 }
 
-.btn-rounded-white {
+.btn-rounded {
     display: inline-block;
     color: #d1d3d5;
     padding: 15px 25px;
@@ -616,7 +621,7 @@ header img:hover {
     border-radius: 30px;
     transition: 0.3s ease all;
 }
-.btn-rounded-white:hover {
+.btn-rounded:hover {
     color: #f9f9fa;
     background: #4f7370;
     text-decoration: none;
@@ -881,7 +886,7 @@ header img:hover {
 @media only screen and (max-width: 768px) {
     #about, #experience, #education, #projects, #skills, #contact {
         display: flex;
-        flex-basis: fit-content;
+        flex-basis: max-content;
         flex-direction: column;
         justify-content: center;
         align-content: flex-start;
@@ -1055,15 +1060,15 @@ header img:hover {
       display: block;
       height: 100%;
       width: 100%;
-      margin: 0px;  
+      margin: 0;
       z-index: 9;
     }
     
     #menu ul {
         width: 100%;
         height: 100%;
-        margin: 0px auto;
-        padding: 0px;
+        margin: 0 auto;
+        padding: 0;
         display: flex;
         justify-content: space-evenly;
         align-items: center;
