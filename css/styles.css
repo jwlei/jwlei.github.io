@@ -460,7 +460,7 @@ header img:hover {
 }
 
 .project a {
-    color: #4f7370;
+    color: #648a87;
 }
 
 
@@ -561,7 +561,7 @@ header img:hover {
     border-radius: 1px;
     padding: 5px 10px;
     border: none;
-    color: #B0BEC5;
+    color: #ffffff;
     font-weight: 700;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: 0.5s ease all;
@@ -703,6 +703,16 @@ header img:hover {
     animation: blink .6s linear infinite alternate;
 }
 
+.slide-in {
+    animation: slide-in 0.5s forwards;
+    -webkit-animation: slide-in 0.5s forwards;
+}
+
+.slide-out {
+    animation: slide-out 0.5s forwards;
+    -webkit-animation: slide-out 0.5s forwards;
+}
+
 
 
 /* ------------------ ANIMATIONS ------------------ */
@@ -742,6 +752,24 @@ header img:hover {
     40% {opacity: 1;}
     60% {opacity: 0;}
     100% {opacity: 0;}
+}
+
+@keyframes slide-in {
+    100% { transform: translateX(0%); }
+}
+
+@-webkit-keyframes slide-in {
+    100% { -webkit-transform: translateX(0%); }
+}
+
+@keyframes slide-out {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+@-webkit-keyframes slide-out {
+    0% { -webkit-transform: translateX(0%); }
+    100% { -webkit-transform: translateX(-100%); }
 }
 
 
@@ -1030,33 +1058,3 @@ header img:hover {
 }
 
 
-
-
-
-.slide-in {
-    animation: slide-in 0.5s forwards;
-    -webkit-animation: slide-in 0.5s forwards;
-}
-
-.slide-out {
-    animation: slide-out 0.5s forwards;
-    -webkit-animation: slide-out 0.5s forwards;
-}
-    
-@keyframes slide-in {
-    100% { transform: translateX(0%); }
-}
-
-@-webkit-keyframes slide-in {
-    100% { -webkit-transform: translateX(0%); }
-}
-    
-@keyframes slide-out {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-100%); }
-}
-
-@-webkit-keyframes slide-out {
-    0% { -webkit-transform: translateX(0%); }
-    100% { -webkit-transform: translateX(-100%); }
-}
