@@ -131,6 +131,7 @@ header a, i {
     padding-right: 10px;
     padding-left: 10px;
     transition: 0.2s ease all;
+
 }
 
 header a:hover {
@@ -139,6 +140,7 @@ header a:hover {
     color: #FFFFFF;
     background: #2A2A2A;
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+    transition: 0.3s ease-in-out;
 }
 
 header img:hover, a:focus {
@@ -671,6 +673,12 @@ header img:hover {
     background: #4f7370;
 }
 
+/*.row li:hover {*/
+/*    transition: ease-in-out 0.3s;*/
+/*    transform: scale(1.07);*/
+/*    box-shadow: 0 -5px 5px rgba(79, 115, 112, 0.30), 0 6px 6px rgba(0, 0, 0, 0.23);*/
+/*}*/
+
 .btn-rounded {
     display: inline-block;
     color: #d1d3d5;
@@ -778,6 +786,18 @@ header img:hover {
 @-webkit-keyframes slide-out {
     0% { -webkit-transform: translateX(0%); }
     100% { -webkit-transform: translateX(-100%); }
+}
+
+@keyframes scale-up {
+    0% {
+        transform: scale(0.6);
+        transform-origin: 100% 100%;
+    }
+    100% {
+        transform: scale(1);
+        transform-origin: 100% 100%;
+        opacity: 1;
+    }
 }
 
 
