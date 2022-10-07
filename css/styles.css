@@ -57,6 +57,10 @@ footer {
     background: linear-gradient(to top, #212121, rgba(33, 33, 33, 0.0));
 }
 
+footer li:after{
+    content: none;
+}
+
 
 
 /* ------------------ CONTAINERS ------------------ */
@@ -68,8 +72,8 @@ footer {
     position: relative;
     width: 100%;
     height: 100%;
-    max-width: 800px;
-    margin: 10%;
+    max-width: 1000px;
+    margin: 5%;
     text-align: center;
     background: #212121;
     border: 1px solid #292929;
@@ -224,7 +228,7 @@ header img:hover {
     position: absolute;
     left: 0;
     right: 0;
-    width: 100vw;
+    width: 100%;
     text-align: center;
     z-index: 10;
     bottom: 50px;
@@ -417,6 +421,7 @@ header img:hover {
 
 .project {
     position: relative;
+    margin-bottom: 3%;
     width: 80%;
     max-height: 300px;
     overflow: hidden;
@@ -430,10 +435,11 @@ header img:hover {
 }
 .project-info {
     display: flex;
+    justify-content: center;
     justify-items: center;
     flex-direction: column;
     margin-left: 300px;
-    padding: 15px;
+    padding: 10px;
 }
 .project-info h3 {
     font-size: 1.5em;
@@ -449,7 +455,7 @@ header img:hover {
 .no-image, .project-info {
     position: relative;
     margin: 0;
-    padding: 30px 15px;
+    padding: 15px 15px;
     transform: none;
 }
 
@@ -464,9 +470,17 @@ header img:hover {
     color: #FFFFFF;
     margin-bottom: 50px;
 }
+#skills h3:after {
+    content: none;
+}
+
+#skills h3 {
+    color: #B0BEC5;
+}
+
 #skills ul {
     display: block;
-    margin: 0 auto;
+    margin: 0 auto 20px;
     padding: 0;
     max-width: 800px;
 }
@@ -488,11 +502,15 @@ header img:hover {
 #contact h2 {
     margin: 0 0 15px 0;
     color: #FFFFFF;
-    font-weight: 500;
 }
 #contact-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 600px;
     width: 80%;
-    min-height: 65%;
+    min-height: 30%;
+    height: auto;
     margin: 0 auto;
 }
 #contact-form input,
@@ -533,7 +551,7 @@ header img:hover {
     background: #323232;
 }
 #contact-form textarea {
-    height: 25%;
+    min-height: 200px;
     resize: none;
 }
 #contact-form button {
@@ -636,9 +654,9 @@ header img:hover {
 .row ul:after {
     position: absolute;
     content: "";
-    top: 100%;
+    top: 42%;
     height: 1px;
-    max-width: 40%;
+    width: 95%;
     left: 0;
     right: 0;
     margin: 0 auto;
@@ -664,13 +682,23 @@ header img:hover {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%
 }
+
+.fa-chevron-down, .fa-chevron-up {
+    padding-left: 0;
+    padding-right: 0;
+}
+.sentence:empty:before {
+    content: "\200b";
+}
+
 .input-cursor {
     display: inline-block;
     width: 2px;
-    height: 30px;
+    height: 25px;
     background-color: white;
-    margin-left: 8px;
+    margin-left: 6px;
     margin-bottom: 0;
     animation: blink .6s linear infinite alternate;
 }
@@ -905,6 +933,16 @@ header img:hover {
     #about p {
         text-align: left;
     }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+
+    }
+
+    .row ul:after {
+        content: none;
+    }
 }
 
 @media only screen and (max-width: 768px) {
@@ -917,12 +955,22 @@ header img:hover {
         float: none;
     }
 
+    .project {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        max-height: max-content;
+    }
+
     .project-image, .project-video {
         display: none;
+        float: none;
+        margin: 0;
     }
 
     .project-info {
-        position: relative;
         margin: 0;
         padding: 15px 15px;
         top: auto;
