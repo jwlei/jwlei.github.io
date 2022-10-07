@@ -93,7 +93,7 @@
 
 
     $('body').keydown(function(e){
-        if(e.keyCode === 8 || e.keyCode === 33 ){
+        if(e.keyCode === 33 ){
             e.preventDefault();
             // user has pressed backspace or page up
             var links = document.getElementsByTagName('section');
@@ -317,9 +317,9 @@ function changePortfolioDlLink() {
 
 
 
-window.onscroll = function() {scrollFunction()};
+window.onscroll = function() {navbarShrinkOnScroll()};
 
-function scrollFunction() {
+function navbarShrinkOnScroll() {
     // When the user scrolls down 80px from the top of the document, resize the navbar padding and the logo's font size
     if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
         document.getElementById("navbar").style.padding = "3px 10px";
@@ -330,15 +330,30 @@ function scrollFunction() {
     }
 }
 
+function isScroller(el) {
+    var isScrollableWidth, isScollableHeight, elStyle;
+    elStyle = window.getComputedStyle(el, null); // Note: IE9+
+    if (elStyle.overflow === 'scroll' ||
+        elStyle.overflowX === 'scroll' ||
+        elStyle.overflowY === 'scroll') {
+        return true;
+    }
+    if (elStyle.overflow === 'auto' ||
+        elStyle.overflowX === 'auto' ||
+        elStyle.overflowY === 'auto') {
+        if (el.scrollHeight > el.clientHeight) {
+            return true;
+        }
+        if (el.scrollWidth > el.clientWidth) {
+            return true;
+        }
+    }
+    return false;
+}
 
-var $slider = document.getElementById('navbar');
-var $toggle = document.getElementById('toggle');
-
-$toggle.addEventListener('click', function() {
-    var isOpen = $slider.classList.contains('slide-in');
-
-    $slider.setAttribute('class', isOpen ? 'slide-out' : 'slide-in');
-});
-
-
-
+var els = document.querySelectorAll('body *');
+for (var i = 0, el; el = els[i]; i++) {
+    if (isScroller(el)) {
+        console.log(el);
+    }
+}

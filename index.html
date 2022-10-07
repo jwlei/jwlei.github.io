@@ -19,7 +19,7 @@
 
 	<body>
 	    <div id="mobile-menu-open" class="toggle shadow-large">
-		<i class="fa fa-bars" aria-hidden="true"></i>
+			<i class="fa fa-bars" aria-hidden="true"></i>
 	    </div>
 	    <!-- End #mobile-menu-toggle -->
 	    <header id="navbar" class="shadow slider slide-in">
@@ -30,10 +30,10 @@
 
 				<ul id="menu" >
 					<li><a i18n-key="about-me" href="#about-section"></a></li>
+					<li><a i18n-key="skills" href="#skills-section"></a></li>
 					<li><a i18n-key="experience" href="#experience-section"></a></li>
 					<li><a i18n-key="education" href="#education-section"></a></li>
 					<li><a i18n-key="projects" href="#project-section"></a></li>
-					<li><a i18n-key="skills" href="#skills-section"></a></li>
 					<li><a i18n-key="contact" href="#contact-footer-section"></a></li>
 				</ul>
 
@@ -94,6 +94,55 @@
 			</div>
 	    </section>
 	    <!-- End #about -->
+
+		<!-- Start #skills -->
+		<section id="skills-section">
+			<div id="skills" class="shadow-x-large">
+				<h2 i18n-key="skills" class="heading">Skills</h2>
+
+				<div class="row">
+					<div class="col-md-4">
+						<h3 i18n-key="languages" class="heading"></h3>
+					</div>
+					<div class="col-md-8 skill-list">
+						<ul>
+							<li>Java</li>
+							<li>JavaScript</li>
+							<li>C#</li>
+							<li>Python</li>
+							<li>HTML5</li>
+							<li>CSS3</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-4">
+						<h3 i18n-key="frameworks" class="heading">Frameworks</h3>
+					</div>
+					<div class="col-md-8 skill-list">
+						<ul>
+							<li>Spring MVC</li>
+							<li>React</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-4">
+						<h3 i18n-key="other" class="heading"></h3>
+					</div>
+					<div class="col-md-8 skill-list">
+						<ul>
+							<li>WCAG 2.1</li>
+							<li>Responsive design</li>
+							<li>React</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- End #skills -->
 
 	    <!-- Start #experience -->
 	    <section id="experience-section">
@@ -202,41 +251,7 @@
 	    </section>
 	    <!-- End #projects -->
 
-	    <!-- Start #skills -->
-	    <section id="skills-section">
-			<div id="skills" class="shadow-x-large">
-				<h2 i18n-key="skills" class="heading">Skills</h2>
-				<div class="row">
-					<div class="col-md-4">
-						<h3 class="heading">Languages</h3>
-					</div>
-					<div class="col-md-8 skill-list">
-						<ul>
-							<li>Java</li>
-							<li>JavaScript</li>
-							<li>C#</li>
-							<li>Python</li>
-							<li>HTML5</li>
-							<li>CSS3</li>
-						</ul>
-					</div>
-				</div>
-		    
-				<div class="row">
-					<div class="col-md-4">
-						<h3 class="heading">Misc</h3>
-					</div>
-					<div class="col-md-8 skill-list">
-						<ul>
-							<li>WCAG 2.1</li>
-							<li>Spring MVC</li>
-							<li>React</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-	    </section>
-	    <!-- End #skills -->
+
 
 	    <!-- Start #contact and footer-->
 	    <section id="contact-footer-section">
@@ -247,9 +262,9 @@
 				<form method="POST" action="https://formspree.io/f/mjvzrygo">
 					<input type="hidden" name="_subject" value="Contact request from personal website" />
 					<label i18n-key="placeholder-email" for="contact-form"></label>
-						<input id="p-email" type="email" name="_replyto" placeholder="" required>
+						<input i18n-key="placeholder-email" id="p-email" type="email" name="_replyto" placeholder="" required>
 					<label i18n-key="placeholder-message" for="contact-form"></label>
-						<textarea i18n-key="placeholder-message" id="p-msg" name="message" placeholder="test" required></textarea>
+						<textarea i18n-key="placeholder-message" id="p-msg" name="message" placeholder="" required></textarea>
 					<button i18n-key="contact-form-submit-btn" type="submit"></button>
 				</form>
 		    </div>

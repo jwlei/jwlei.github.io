@@ -5,7 +5,7 @@
   "experience": "Experience",
   "education": "Education",
   "projects": "Projects",
-  "skills": "Skills",
+  "skills": "Technologies and tools",
   "contact": "Contact",
 
   "name": "Joachim Leiros",
@@ -45,6 +45,10 @@
 
   "project-1": "EZBuild",
   "project-1-desc": "A modification for the game Valheim that allows players to select tools and build structures in a more efficient way using a pipette tool.",
+
+  "languages": "Languages",
+  "frameworks": "Frameworks",
+  "other": "Tools",
 
   "contact-form-title": "Contact me",
   "contact-form-submit-btn": "Send",
