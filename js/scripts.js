@@ -109,6 +109,11 @@
         }
     });
 
+    // Disable previous when on contact-form
+    jQuery('#contact-form').bind('keydown', function(e) {
+        e.stopPropagation();
+    });
+
     function findNext(section) {
         for(var i = 0 ; i < section.length ; i++) {
             var t = section[i].getClientRects()[0].top;
