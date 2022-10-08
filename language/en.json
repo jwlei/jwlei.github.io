@@ -14,6 +14,11 @@
 
   "about-me-content": "Ambitious developer and family man situated in Norway. \n\n I love learning new technologies and further improving myself.",
 
+  "languages": "Languages",
+  "frameworks": "Frameworks",
+  "libraries": "Libraries",
+  "other": "Other",
+
   "employer-3": "NAV",
   "employer-3-date": "September 2022 - Present",
   "employer-3-job": "Special consultant",
@@ -45,10 +50,6 @@
 
   "project-1": "EZBuild",
   "project-1-desc": "A modification for the game Valheim that allows players to select tools and build structures in a more efficient way using a pipette tool.",
-
-  "languages": "Languages",
-  "frameworks": "Frameworks",
-  "other": "Tools",
 
   "contact-form-title": "Contact me",
   "contact-form-submit-btn": "Send",
