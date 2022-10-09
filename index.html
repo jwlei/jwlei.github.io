@@ -283,9 +283,9 @@
 				<form method="POST" action="https://formspree.io/f/mjvzrygo">
 					<input type="hidden" name="_subject" value="Contact request from personal website" />
 					<label i18n-key="placeholder-email" for="contact-form"></label>
-						<input i18n-key="placeholder-email" id="p-email" type="email" name="_replyto" placeholder="" required>
+						<input id="p-email" type="email" name="_replyto" placeholder="email" i18n-placeholder="placeholder-email" required></input>
 					<label i18n-key="placeholder-message" for="contact-form"></label>
-						<textarea i18n-key="placeholder-message" id="p-msg" name="message" placeholder="" required></textarea>
+						<textarea id="p-msg" name="message" placeholder="Your text" i18n-placeholder="placeholder-message"  required></textarea>
 					<button i18n-key="contact-form-submit-btn" type="submit"></button>
 				</form>
 		    </div>
