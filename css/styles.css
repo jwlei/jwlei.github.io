@@ -584,7 +584,7 @@ header img:hover {
 #contact-form input:focus,
 #contact-form textarea:focus {
     outline: none;
-    background: #323232;
+    background: #3F3F3F;
 }
 #contact-form textarea {
     min-height: 200px;
@@ -604,7 +604,7 @@ header img:hover {
 }
 #contact-form button:hover {
     color: #FFFFFF;
-    background: #5f8c87;
+    background: #85b5af;
     transform: scale(1.03);
     box-shadow: 0 5px 10px rgba(79, 115, 112, 0.30), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
