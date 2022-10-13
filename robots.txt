@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: 
+Disallow: /language/
+Disallow: /js/
+Disallow: /files/
+Disallow: /css/
+Disallow: /media/
+Sitemap: http://www.jleiros.com/sitemap.xml
