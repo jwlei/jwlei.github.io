@@ -1,6 +1,5 @@
 (function($) {
 
-
     // Show current year
     $("#current-year").text(new Date().getFullYear());
 
