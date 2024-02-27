@@ -1,8 +1,8 @@
 {
   "meta-description": "Personlig portfolio side",
   "meta-keywords": "Joachim Leiros, portolio, cv, teknologier, kontakt, ansett, java",
-  
-  
+
+
   "title": "Joachim Leiros | Personlig nettside",
   "menu-close": "Lukk",
   "about-me": "Om meg",
@@ -22,7 +22,7 @@
   "frameworks": "Rammeverk",
   "libraries": "Biblioteker",
   "other": "Annet",
-  
+
   "employer-4": "Hansen Technologies",
   "employer-4-date": "Mars 2023 - Nå",
   "employer-4-job": "Prosjektkonsulent",
@@ -49,6 +49,9 @@
 
   "project-1": "EZBuild",
   "project-1-desc": "En modifikasjon for spillet Valheim som strømlinjeformer hvordan en velger verktøy og strukturer, ved bruk av en pipette-funksjonalitet.",
+
+  "project-0": "Boms og President",
+  "project-0-desc": "Kortspillet Boms og president.",
 
   "contact-form-title": "Ta kontakt",
   "contact-form-submit-btn": "Send",

@@ -50,6 +50,9 @@
   "project-1": "EZBuild",
   "project-1-desc": "A modification for the game Valheim that allows players to select tools and build structures in a more efficient way using a pipette tool.",
 
+  "project-0": "Tycoon",
+  "project-0-desc": "The Tycoon cardgame.",
+
   "contact-form-title": "Contact me",
   "contact-form-submit-btn": "Send",
   "placeholder-email": "Your email address",
