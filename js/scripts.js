@@ -138,15 +138,22 @@
     // -----------------------------------------------------------------------------------
     const carouselText = [
         {text: "UI/UX"},
-        {text: "Java"},
+        {text: "Java" },
+        {text: "PL/SQL"},
+        {text: "C#"},
         {text: "Responsive Design"},
-        {text: "Artificial intelligence"},
+        {text: "Large language models"},
         {text: "Web development"},
         {text: "Database management systems"},
         {text: "Spring MVC"}
     ]
 
-    jQuery(function($) {
+    jQuery(function ($) {
+        // Randomly shuffle CarouselText
+      for (let i = carouselText.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [carouselText[i], carouselText[j]] = [carouselText[j], carouselText[i]];
+        }
       carousel(carouselText, "#feature-text")
     });
 
@@ -166,7 +173,7 @@
       const letters = sentence.split("");
       let i = 0;
       while(letters.length > 0) {
-        await waitForMs(100);
+        await waitForMs(40);
         letters.pop();
         $(eleRef).html(letters.join(""));
       }
@@ -178,7 +185,7 @@
           await typeSentence(carouselList[i].text, eleRef);
           await waitForMs(1500);
           await deleteSentence(eleRef);
-          await waitForMs(500);
+          await waitForMs(1000);
           i++
           if(i >= carouselList.length) {i = 0;}
         }
