@@ -1,338 +1,324 @@
 <!DOCTYPE html>
 <html class="no-js" lang="no">
 
-	<head>
-		<meta charset="utf-8"/>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<!-- <meta i18-key="meta-description" name=”description” content="Personal portfolio for Joachim Leiros, I showcase my skills and personal projects"/> -->
-		<meta name=”description” content="My personal portfolio containing my projects, which technologies I utilize and my contact information"/>
-		<meta i18-key="meta-keywords" name=”keywords” content="Joachim Leiros, portolio, cv, technologies, contact, hire, deep learning, java, skills, projects, developer"/>
-		<meta name=”robots” content=”index,follow”/>
+<head>
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- <meta i18-key="meta-description" name=”description” content="Personal portfolio for Joachim Leiros, I showcase my skills and personal projects" /> -->
+    <meta name=”description” content="My personal portfolio containing my projects, which technologies I utilize and my contact information" />
+    <meta i18-key="meta-keywords" name=”keywords” content="Joachim Leiros, portolio, cv, technologies, contact, hire, deep learning, java, skills, projects, developer" />
+    <meta name=”robots” content=”index,follow” />
 
-		<title i18n-key="title">Joachim Leiros | Portfolio</title>
+    <title i18n-key="title">Joachim Leiros | Portfolio</title>
 
-		<link rel="apple-touch-icon" sizes="180x180" href="/media/images/icons/apple-touch-icon.png"/>
-		<link rel="icon" type="image/png" sizes="32x32" href="/media/images/icons/favicon-32x32.png"/>
-		<link rel="icon" type="image/png" sizes="16x16" href="/media/images/icons/favicon-16x16.png"/>
-		<link rel="manifest" href="/media/images/icons/site.web-manifest"/>
-		<link rel="shortcut icon" href="/media/images/icons/favicon.ico"/>
-		<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900&display=swap" rel="stylesheet"/>
-		<link rel="canonical" href="http://www.jleiros.com"/>
-		<link rel="alternate" href="http://www.jleiros.com" hreflang="en-us"/>
-		<link rel="alternate" href="http://www.jleiros.com" hreflang="en-gb"/>
-		<link rel="alternate" href="http://www.jleiros.com" hreflang="nb-no"/>
-		<link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css"/>
-		<link href="css/bootstrap.min.css" rel="stylesheet"/>
-		<link href="css/styles.css" rel="stylesheet"/>
-	</head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/media/images/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/media/images/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/media/images/icons/favicon-16x16.png" />
+    <link rel="manifest" href="/media/images/icons/site.web-manifest" />
+    <link rel="shortcut icon" href="/media/images/icons/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900&display=swap" rel="stylesheet" />
+    <link rel="canonical" href="http://www.jleiros.com" />
+    <link rel="alternate" href="http://www.jleiros.com" hreflang="en-us" />
+    <link rel="alternate" href="http://www.jleiros.com" hreflang="en-gb" />
+    <link rel="alternate" href="http://www.jleiros.com" hreflang="nb-no" />
+    <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
 
-	<body>
-	    <div id="mobile-menu-open" class="toggle shadow-large">
-			<i class="fa fa-bars" aria-hidden="true"></i>
-	    </div>
-	    <!-- End #mobile-menu-toggle -->
-	    <header id="navbar" class="shadow slider slide-in">
-			<div id="mobile-menu-close" class="toggle">
-				<span i18n-key="menu-close"></span>
-			</div>
-			<!-- End #mobile-menu-close -->
+<body>
+    <div id="mobile-menu-open" class="toggle shadow-large">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+    </div>
+    <!-- End #mobile-menu-toggle -->
+    <header id="navbar" class="shadow slider slide-in">
+        <div id="mobile-menu-close" class="toggle">
+            <span i18n-key="menu-close"></span>
+        </div>
+        <!-- End #mobile-menu-close -->
 
-				<ul id="menu" >
-					<li><a i18n-key="about-me" 	href="#about-section"></a></li>
-					<li><a i18n-key="skills" 	href="#skills-section"></a></li>
-					<li><a i18n-key="experience" 	href="#experience-section"></a></li>
-					<li><a i18n-key="education" 	href="#education-section"></a></li>
-					<li><a i18n-key="projects" 	href="#project-section"></a></li>
-					<li><a i18n-key="contact" 	href="#contact-section"></a></li>
-				</ul>
+        <ul id="menu">
+            <li><a i18n-key="about-me" href="#about-section"></a></li>
+            <li><a i18n-key="skills" href="#skills-section"></a></li>
+            <li><a i18n-key="experience" href="#experience-section"></a></li>
+            <li><a i18n-key="education" href="#education-section"></a></li>
+            <li><a i18n-key="projects" href="#project-section"></a></li>
+            <li><a i18n-key="contact" href="#contact-section"></a></li>
+        </ul>
 
-				<ul id="menu-lang">
-					<li class="menu-lang">
-						<img src="media/images/icons/no_flag.ico" alt="NORWEGIAN"
-							 i18n-lang-switcher onclick="setLocale('no');"
-							 width="20px" height="20px">
-					</li>
+        <ul id="menu-lang">
+            <li class="menu-lang">
+                <img src="media/images/icons/no_flag.ico" alt="NORWEGIAN"
+                     i18n-lang-switcher onclick="setLocale('no');"
+                     width="20px" height="20px">
+            </li>
 
-					<li class="menu-lang">
-						<img src="media/images/icons/en_flag.ico" alt="ENGLISH"
-							 i18n-lang-switcher onclick="setLocale('en');"
-							 width="20px" height="20px">
-					</li>
-				</ul>
+            <li class="menu-lang">
+                <img src="media/images/icons/en_flag.ico" alt="ENGLISH"
+                     i18n-lang-switcher onclick="setLocale('en');"
+                     width="20px" height="20px">
+            </li>
+        </ul>
+    </header>
+    <!-- End header -->
+    <!-- Start #lead -->
+    <section id="lead-section">
+        <div id="lead">
+            <div id="lead-content">
+                <h1 i18n-key="name"></h1>
+                <h2 i18n-key="job-title"></h2>
+                <div class="typing-container">
+                    <span id="sentence" class="sentence"></span>
+                    <span id="feature-text"></span>
+                    <span class="input-cursor"></span>
+                </div>
+                <a i18n-key="dl-portfolio" id="cv-dl" href="#" class="btn-rounded"></a>
+            </div>
+            <!-- End #lead-content -->
+            <!-- Start #lead-down -->
+            <div id="lead-down">
+                <span>
+                    <i class="fa fa-chevron-down" aria-hidden="true"></i>
+                </span>
+            </div>
+            <!-- End #lead-down -->
+        </div>
+    </section>
+    <!-- End #lead -->
+    <!-- Start #about -->
+    <section id="about-section">
+        <div id="about" class="shadow-x-large">
+            <div class="row">
+                <div class="col-md-4">
+                    <h2 i18n-key="about-me" class="heading"></h2>
+                </div>
+                <div class="col-md-8">
+                    <p i18n-key="about-me-content"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End #about -->
+    <!-- Start #skills -->
+    <section id="skills-section">
+        <div id="skills" class="shadow-x-large">
+            <h2 i18n-key="skills" class="heading">Skills</h2>
+            <div class="row">
+                <div class="skills-heading">
+                    <h3 i18n-key="languages" class="heading"></h3>
+                </div>
+                <div class="skills-ul">
+                    <ul class="sorted-list">
+                        <li>Java</li>
+                        <li>JavaScript</li>
+                        <li>Python</li>
+                        <li>HTML5</li>
+                        <li>CSS3</li>
+                        <li>PL/SQL</li>
+                        <li>C#</li>
+                        <li>MatLab</li>
+                        <li>Shell script</li>
+                    </ul>
+                </div>
+            </div>
 
-	    </header>
-	    <!-- End header -->
+            <div class="row">
+                <div class="skills-heading">
+                    <h3 i18n-key="frameworks" class="heading"></h3>
+                </div>
+                <div class="skills-ul">
+                    <ul>
+                        <li>Spring</li>
+                        <li>JUnit</li>
+                        <li>AJAX</li>
+                        <li></li>
+                    </ul>
+                </div>
+            </div>
 
-	    <!-- Start #lead -->
-	    <section id="lead-section">
-			<div id="lead">
-				<div id="lead-content">
-				<h1 i18n-key="name"></h1>
-				<h2 i18n-key="job-title"></h2>
-					<div class="typing-container">
-						<span id="sentence" class="sentence"></span>
-						<span id="feature-text"></span>
-						<span class="input-cursor"></span>
-					</div>
-				<a i18n-key="dl-portfolio" id="cv-dl" href="#" class="btn-rounded"></a>
-				</div>
-				<!-- End #lead-content -->
+            <div class="row">
+                <div class="skills-heading">
+                    <h3 i18n-key="libraries" class="heading"></h3>
+                </div>
+                <div class="skills-ul">
+                    <ul>
+                        <li>Bootstrap</li>
+                        <li>jQuery</li>
+                        <li>React</li>
+                        <li>PyTorch</li>
+                        <li>TensorFlow</li>
+                    </ul>
+                </div>
+            </div>
 
-				<!-- Start #lead-down -->
-				<div id="lead-down">
-					<span>
-						<i class="fa fa-chevron-down" aria-hidden="true"></i>
-					</span>
-				</div>
-				<!-- End #lead-down -->
-			</div>
-	    </section>
-	    <!-- End #lead -->
+            <div class="row">
+                <div class="skills-heading">
+                    <h3 i18n-key="other" class="heading"></h3>
+                </div>
+                <div class="skills-ul">
+                    <ul>
+                        <li>Git/GitHub</li>
+                        <li>WCAG 2.1</li>
+                        <li>Responsive design</li>
+                        <li>Android</li>
+                        <li>Postgres</li>
+                        <li>MySQL</li>
+                        <li>OpenCV</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End #skills -->
+    <!-- Start #experience -->
+    <section id="experience-section">
+        <div id="experience" class="shadow-x-large">
+            <h2 i18n-key="experience" class="heading"></h2>
+            <div id="experience-timeline">
+                <div id="timeline4" data-date="March 2023 - t.d. ">
+                    <h3 i18n-key="employer-4"></h3>
+                    <h4 i18n-key="employer-4-job"></h4>
+                    <p i18n-key="employer-4-desc"></p>
+                </div>
 
-	    <!-- Start #about -->
-	    <section id="about-section">
-			<div id="about" class="shadow-x-large">
-				<div class="row">
-					<div class="col-md-4">
-						<h2 i18n-key="about-me" class="heading"></h2>
-					</div>
-					<div class="col-md-8">
-						<p i18n-key="about-me-content"></p>
-					</div>
-				</div>
-			</div>
-	    </section>
-	    <!-- End #about -->
+                <div id="timeline3" data-date="September 2022 - February 2023">
+                    <h3 i18n-key="employer-3"></h3>
+                    <h4 i18n-key="employer-3-job"></h4>
+                    <p i18n-key="employer-3-desc"></p>
+                </div>
 
-		<!-- Start #skills -->
-		<section id="skills-section">
-			<div id="skills" class="shadow-x-large">
-				<h2 i18n-key="skills" class="heading">Skills</h2>
-				<div class="row">
-					<div class="skills-heading">
-						<h3 i18n-key="languages" class="heading"></h3>
-					</div>
-					<div class="skills-ul">
-						<ul class="sorted-list">
-							<li>Java</li>
-							<li>JavaScript</li>
-							<li>Python</li>
-							<li>HTML5</li>
-							<li>CSS3</li>
-							<li>PL/SQL</li>
-							<li>C#</li>
-							<li>MatLab</li>
-							<li>Shell script</li>
-						</ul>
-					</div>
-				</div>
+                <div id="timeline1" data-date="... - August 2021">
+                    <h3 i18n-key="employer-1"></h3>
+                    <h4 i18n-key="employer-1-job"></h4>
+                    <p i18n-key="employer-1-desc"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End #experience -->
+    <!-- Start #education -->
+    <section id="education-section">
+        <div id="education" class="shadow-x-large">
+            <h2 i18n-key="education" class="heading"></h2>
 
-				<div class="row">
-					<div class="skills-heading">
-						<h3 i18n-key="frameworks" class="heading"></h3>
-					</div>
-					<div class="skills-ul">
-						<ul>
-							<li>Spring</li>
-							<li>JUnit</li>
-							<li>AJAX</li>
-							<li></li>
-						</ul>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="skills-heading">
-						<h3 i18n-key="libraries" class="heading"></h3>
-					</div>
-					<div class="skills-ul">
-						<ul>
-							<li>Bootstrap</li>
-							<li>jQuery</li>
-							<li>React</li>
-							<li>PyTorch</li>
-							<li>TensorFlow</li>
-						</ul>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="skills-heading">
-						<h3 i18n-key="other" class="heading"></h3>
-					</div>
-					<div class="skills-ul">
-						<ul>
-							<li>Git/GitHub</li>
-							<li>WCAG 2.1</li>
-							<li>Responsive design</li>
-							<li>Android</li>
-							<li>Postgres</li>
-							<li>MySQL</li>
-							<li>OpenCV</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</section>
-		<!-- End #skills -->
-
-	    <!-- Start #experience -->
-	    <section id="experience-section">
-		<div id="experience" class="shadow-x-large">
-		    <h2 i18n-key="experience" class="heading"></h2>
-		    <div id="experience-timeline">
-			    	<div id="timeline4" data-date="March 2023 - t.d. ">
-					<h3 i18n-key="employer-4"></h3>
-					<h4 i18n-key="employer-4-job"></h4>
-					<p i18n-key="employer-4-desc"></p>
-				</div>
-			    
-				<div id="timeline3" data-date="September 2022 - February 2023">
-					<h3 i18n-key="employer-3"></h3>
-					<h4 i18n-key="employer-3-job"></h4>
-					<p i18n-key="employer-3-desc"></p>
-				</div>
-
-				<div id="timeline1" data-date="... - August 2021">
-					<h3 i18n-key="employer-1"></h3>
-					<h4 i18n-key="employer-1-job"></h4>
-					<p i18n-key="employer-1-desc"></p>
-				</div>
-		    </div>
-		</div>
-	    </section>
-	    <!-- End #experience -->
-
-	    <!-- Start #education -->
-	    <section id="education-section">
-		<div id="education" class="shadow-x-large">
-		    <h2 i18n-key="education" class="heading"></h2>
-
-		    <!-- Start .education-block -->
-		    <div class="education-block">
-				<h3 i18n-key="education-2"></h3>
-				<span i18n-key="education-2-date" class="education-date"></span>
-				<h4 i18n-key="education-2-field"></h4>
-				<p i18n-key="education-2-desc"></p>
-		    </div>
-		    <!-- End .education-block -->
-
-		    <!-- Start .education-block -->
-		    <div class="education-block">
-				<h3 i18n-key="education-1"></h3>
-				<span i18n-key="education-1-date" class="education-date"></span>
-				<h4 i18n-key="education-1-field"></h4>
-				<p i18n-key="education-1-desc"></p>
-		    </div>
-		    <!-- End .education-block -->
-		</div>
-	    </section>
-	    <!-- End #education -->
-
-	    <!-- Start #projects -->
-	    <section id="project-section">
-		<div id="projects" class="shadow-x-large">
-		    <h2 i18n-key="projects" class="heading"></h2>
-			<div class="row">
-				<!-- Start .project -->
-				<div class="project shadow-large">
-					<!-- Start .project-image -->
-					<div class="project-video">
-						<video autoplay loop width="300" height="300">
-						<source src="/media/projects/video/dwls-demo.webm"
-							type="video/webm">
-						</video>
-					</div>
-				<!-- End .project-image -->
-
-				<!-- Start .project-info -->
-					<div class="project-info">
-						<h3 i18n-key="project-2"></h3>
-						<p i18n-key="project-2-desc">
-
-						</p>
-						<a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2"></a>
-					</div>
-				<!-- End .project-info -->
-				</div>
-				<!-- End .project -->
-			</div>
-			<div class="row">
-					<!-- Start .project -->
-					<div class="project shadow-large">
-						<!-- Start .project-image -->
-						<div class="project-image">
-							<img src="media/projects/valheim-logo.jpg" alt="Valheim logo"/>
-						</div>
-						<!-- End .project-image -->
-
-						<!-- Start .project-info -->
-						<div class="project-info">
-							<h3 i18n-key="project-1"></h3>
-							<p i18n-key="project-1-desc">
-
-							</p>
-							<a i18n-key="project-link" href="https://github.com/jwlei/EZBuild"></a>
-						</div>
-						<!-- End .project-info -->
-					</div>
-					<!-- End .project -->
-				</div>
-	    		</div>
-		</div>
-	    </section>
-	    <!-- End #projects -->
-
-
-
-	    <!-- Start #contact and footer-->
-	    <section id="contact-section">
-		<!-- Start #contact-->
-		<div id="contact" class="shadow-x-large">
-		    <h2 i18n-key="contact-form-title" class="heading"></h2>
-		    <div id="contact-form">
-				<form method="POST" action="https://formspree.io/f/mjvzrygo">
-					<input type="hidden" name="_subject" value="Contact request from personal website" />
-					<label i18n-key="placeholder-email" for="contact-form"></label>
-						<input id="p-email" type="email" name="_replyto" required></input>
-					<label i18n-key="placeholder-message" for="contact-form"></label>
-						<textarea id="p-msg" name="message" required></textarea>
-					<button i18n-key="contact-form-submit-btn" type="submit"></button>
-				</form>
-		    </div>
-		</div>
-		<!-- #contact-form -->
-	    </section>
-	    <!-- End #contact and footer--> 
-
-		<!-- Start footer -->
-		<footer>
-		    <div class="container">
-				<div class="row">
-					<div class="col-sm-5 copyright">
-						<p>Copyright &copy; <span id="current-year">2023</span> Joachim Leiros</p>
-					</div>
-					<div class="col-sm-2 top">
-						<span id="to-top">
-							<i class="fa fa-chevron-up" aria-hidden="true"></i>
-						</span>
-					</div>
-					<div class="col-sm-5 social">
-						<ul>
-							<li>
-							<a href="https://github.com/jwlei" target="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
-							</li>
-							<li>
-							<a href="https://www.linkedin.com/in/jleiros" target="LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
-							</li>
-						</ul>
-					</div>
-				</div>
-		    </div>
-		</footer>
-		<!-- End footer --> 
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-		<script src="js/scripts.js"></script>
-    </body>
+            <!-- Start .education-block -->
+            <div class="education-block">
+                <h3 i18n-key="education-2"></h3>
+                <span i18n-key="education-2-date" class="education-date"></span>
+                <h4 i18n-key="education-2-field"></h4>
+                <p i18n-key="education-2-desc"></p>
+            </div>
+            <!-- End .education-block -->
+            <!-- Start .education-block -->
+            <div class="education-block">
+                <h3 i18n-key="education-1"></h3>
+                <span i18n-key="education-1-date" class="education-date"></span>
+                <h4 i18n-key="education-1-field"></h4>
+                <p i18n-key="education-1-desc"></p>
+            </div>
+            <!-- End .education-block -->
+        </div>
+    </section>
+    <!-- End #education -->
+    <!-- Start #projects -->
+    <section id="project-section">
+        <div id="projects" class="shadow-x-large">
+            <h2 i18n-key="projects" class="heading"></h2>
+            <div class="row">
+                <!-- Start .project -->
+                <div class="project shadow-large">
+                    <!-- Start .project-image -->
+                    <div class="project-video">
+                        <video autoplay loop width="300" height="300">
+                            <source src="/media/projects/video/dwls-demo.webm"
+                                    type="video/webm">
+                        </video>
+                    </div>
+                    <!-- End .project-image -->
+                    <!-- Start .project-info -->
+                    <div class="project-info">
+                        <h3 i18n-key="project-2"></h3>
+                        <p i18n-key="project-2-desc">
+                        </p>
+                        <a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2"></a>
+                    </div>
+                    <!-- End .project-info -->
+                </div>
+                <!-- End .project -->
+            </div>
+            <div class="row">
+                <!-- Start .project -->
+                <div class="project shadow-large">
+                    <!-- Start .project-image -->
+                    <div class="project-image">
+                        <img src="media/projects/valheim-logo.jpg" alt="Valheim logo" />
+                    </div>
+                    <!-- End .project-image -->
+                    <!-- Start .project-info -->
+                    <div class="project-info">
+                        <h3 i18n-key="project-1"></h3>
+                        <p i18n-key="project-1-desc">
+                        </p>
+                        <a i18n-key="project-link" href="https://github.com/jwlei/EZBuild"></a>
+                    </div>
+                    <!-- End .project-info -->
+                </div>
+                <!-- End .project -->
+            </div>
+        </div>
+        </div>
+    </section>
+    <!-- End #projects -->
+    <!-- Start #contact and footer-->
+    <section id="contact-section">
+        <!-- Start #contact-->
+        <div id="contact" class="shadow-x-large">
+            <h2 i18n-key="contact-form-title" class="heading"></h2>
+            <div id="contact-form">
+                <form method="POST" action="https://formspree.io/f/mjvzrygo">
+                    <input type="hidden" name="_subject" value="Contact request from personal website" />
+                    <label i18n-key="placeholder-email" for="contact-form"></label>
+                    <input id="p-email" type="email" name="_replyto" required></input>
+                    <label i18n-key="placeholder-message" for="contact-form"></label>
+                    <textarea id="p-msg" name="message" required></textarea>
+                    <button i18n-key="contact-form-submit-btn" type="submit"></button>
+                </form>
+            </div>
+        </div>
+        <!-- #contact-form -->
+    </section>
+    <!-- End #contact and footer-->
+    <!-- Start footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-5 copyright">
+                    <p>Copyright &copy; <span id="current-year">2023</span> Joachim Leiros</p>
+                </div>
+                <div class="col-sm-2 top">
+                    <span id="to-top">
+                        <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="col-sm-5 social">
+                    <ul>
+                        <li>
+                            <a href="https://github.com/jwlei" target="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+                        </li>
+                        <li>
+                            <a href="https://www.linkedin.com/in/jleiros" target="LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- End footer -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
 </html>
