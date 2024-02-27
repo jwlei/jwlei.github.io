@@ -1,6 +1,12 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\css",
+    "\\files",
+    "\\js",
+    "\\language",
+    "\\libs",
+    "\\media"
   ],
   "PreviewInSolutionExplorer": false
 }
