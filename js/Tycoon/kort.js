@@ -58,13 +58,13 @@ class Kort {
     }
     Kode() { return `${Kort.FargeNavn(this.farge).kode}${Kort.VerdiNavn(this.verdi).kode}`; }
     Navn() { return `${Kort.FargeNavn(this.farge).navn} ${Kort.VerdiNavn(this.verdi).navn}`; }
-    Img() { return `kort/${Kort.VerdiNavn(this.verdi).kode}${Kort.FargeNavn(this.farge).kode}.png`; }
+    Img() { return `../media/images/card_back/${Kort.VerdiNavn(this.verdi).kode}${Kort.FargeNavn(this.farge).kode}.png`; }
     static sortFunc(a, b) {
         return (a.farge - b.farge) * 100 + (a.verdi - b.verdi);
     }
     static BakgrunnKort(variant = 0) {
         return {
-            Img() { return `kort/${(variant == 0) ? "blue" : "yellow"}_back.png`; },
+            Img() { return `../media/images/card_back/${(variant == 0) ? "blue" : "yellow"}_back.png`; },
             Navn() { return ""; }
         }
     }
