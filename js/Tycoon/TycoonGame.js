@@ -1,51 +1,12 @@
-﻿class Spiller {
-    constructor(nick, spillerKey) {
-        this.nick = nick;
-        this.spillerKey = spillerKey;
-        this.plassering = 0;
-        this.kort = [];
-        this.sinTur = 0;
-        this.melding = [];
-        this.laPaaSist = null;
-    }
-    getVerdier() {
-        var ret = {
-            nick: this.nick,
-            spillerKey: this.spillerKey,
-            plassering: this.plassering,
-            kort: this.kort,
-            sinTur: this.sinTur,
-            melding: this.melding,
-            laPaaSist: ((this.laPaaSist == null) ? [] : this.laPaaSist)
-        }
-        return ret;
-    }
-    settVerdier(obj) {
-        this.nick = obj.nick;
-        this.spillerKey = obj.spillerKey;
-        this.plassering = obj.plassering;
-        this.kort = obj.kort;
-        this.sinTur = obj.sinTur;
-        this.melding = ((obj.melding == null) ? [] : obj.melding);
-        this.laPaaSist = obj.laPaaSist;
-        return this;
-    }
-    nullstillRunde(varSinTur) {
-        if (this != varSinTur) {
-            this.melding = [];
-        }
-    }
-}
-
-class Spill {
+class TycoonGame {
     constructor(id = null) {
         // Get a reference to the database service
         var database = firebase.database();
     }
     Lagre() {
-        throw ("MÃ¥ implementeres");
+        throw ("Må implementeres");
     }
-    getSpiller(nick) {
+    getPlayer(nick) {
         var ret = null;
         this.spillere.filter(spiller => (spiller.nick == nick)).forEach(spiller => {
             ret = spiller;
@@ -53,13 +14,13 @@ class Spill {
         return ret;
     }
     StartSpillFix() {
-        throw ("MÃ¥ implementeres");
+        throw ("Må implementeres");
     }
-    StartSpill() {
+    startGame() {
         switch (this.status) {
             case "O":
             case "F":
-                //Bland spillerrekkefÃ¸lge
+                //Bland spillerrekkefølge
                 for (var i = this.spillere.length - 1; i > 0; i--) {
                     var n = Math.floor(Math.random() * (i + 1));
                     var husk = this.spillere[i];
@@ -92,7 +53,7 @@ class Spill {
         } else if (typeof spiller == "number") {
             this.sinTur = spiller;
         } else if (typeof spiller == "string") {
-            this.sinTur = this.getSpiller(spiller);
+            this.sinTur = this.getPlayer(spiller);
         }
         if (this.sinTur >= 0) {
             this.spillere[this.sinTur].sinTur = 1;
@@ -114,7 +75,7 @@ class Spill {
         var finnPlass = ((vunnet) ? 0 : this.spillere.length + 1);
         do {
             finnPlass += ((vunnet) ? 1 : -1);
-            //GÃ¥r i lÃ¸kke helt til denne plasseringen er ledig.
+            //Går i løkke helt til denne plasseringen er ledig.
         } while (this.spillere.filter(s => {
             return s.plassering == finnPlass;
         }).length >= 1);
@@ -123,17 +84,17 @@ class Spill {
         return true;
     }
     NesteSinTur_Neste(varSinTur) {
-        throw ("MÃ¥ kodes!");
+        throw ("Må kodes!");
         //Eksempel:
         //return varSinTur+1;
     }
     NesteSinTur_HoppOver(sinTur) {
         return false;
         //Kan overskrives hvis noen spillere skal hoppes over.
-        //(Spillere som har fÃ¥tt en plassering hoppes automatisk over.)
+        //(Spillere som har fått en plassering hoppes automatisk over.)
     }
     NesteSinTur_ForsteSpillerIgjen() {
-        //Kan overskrives nÃ¥r det har gÃ¥tt en runde rundt bordet, i tilfelle noe mÃ¥ gjÃ¸res da.
+        //Kan overskrives når det har gått en runde rundt bordet, i tilfelle noe må gjøres da.
     }
     NesteSinTur() {
         if (this.sinTur == -1 || this.status != "S" || this.sinTur == null) { throw ('Spillet er ikke i gang.') }
@@ -162,7 +123,7 @@ class Spill {
                     });
                     if (fikset) { spill.Lagre(); };
                 }
-            }, 14000 + 2000 * Math.random()); //Litt tilfeldig tid, sÃ¥ ikke alle spillere gjÃ¸r det pÃ¥ likt.
+            }, 14000 + 2000 * Math.random()); //Litt tilfeldig tid, så ikke alle spillere gjør det på likt.
         } else {
             var nesteForsok = 0;
             var nesteSinTur = this.sinTur;
@@ -203,7 +164,7 @@ class Spill {
                 return { spiller: spiller_inn };
                 break;
             default:
-                return { tekst: 'Ingen nye spillere nÃ¥r spillet pÃ¥gÃ¥r.' };
+                return { tekst: 'Ingen nye spillere når spillet pågår.' };
                 break;
         }
     }
@@ -226,13 +187,13 @@ class Spill {
                 return spiller;
                 break;
             default:
-                throw ('Kan ikke gi opp nÃ¥.');
+                throw ('Kan ikke gi opp nå.');
                 break;
         }
     }
     GaaTilOppsett() {
-        //OmgjÃ¸r et ferdig spill til et spill som skal settes opp for Ã¥ spille litt til.
-        if (this.status == "S") { throw ("Kan ikke gÃ¥ til oppsett fÃ¸r spillet er ferdig.") }
+        //Omgjør et ferdig spill til et spill som skal settes opp for å spille litt til.
+        if (this.status == "S") { throw ("Kan ikke gå til oppsett før spillet er ferdig.") }
         this.spillere.forEach(spiller => {
             spiller.plassering = 0;
             spiller.kort = [];

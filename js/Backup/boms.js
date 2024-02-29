@@ -1,4 +1,4 @@
-﻿class Layout {
+class Layout {
     static el(tittel) {
         return document.getElementById(tittel);
     }
@@ -92,7 +92,7 @@
             elemNick.innerHTML = spiller.nick;
             elemSpiller.appendChild(elemNick);
             if (spill.status != "S" && spill.status != "G") {
-                // Knapp for Ã¥ fjerne spiller (vises ikke nÃ¥r man spiller)
+                // Knapp for å fjerne spiller (vises ikke når man spiller)
                 var elemFjern = document.createElement("button");
                 elemFjern.innerHTML = "Fjern";
                 elemFjern.onclick = function () {
@@ -154,7 +154,7 @@
         });
     }
     static TegneHoppover(tekster, funcer) {
-        tekster.push("Avbryt (ikke gjÃ¸r noe)");
+        tekster.push("Avbryt (ikke gjør noe)");
         funcer.push(function () { });
         var elem = document.getElementById("SpanHoppover");
         if (elem == null) { return; };
@@ -164,7 +164,7 @@
         b.alt = 'Hjelp spiller som har sovnet';
         b.onclick = function () {
             dialogAskStart(
-                "Spilleren har ikke gjort noe pÃ¥ en stund. Vil du overstyre spilleren?",
+                "Spilleren har ikke gjort noe på en stund. Vil du overstyre spilleren?",
                 tekster,
                 funcer
             )
@@ -176,7 +176,7 @@
         switch (spill.status) {
             case "O":
                 if (spill.spillere.length == 0) {
-                    // Vis tips nÃ¥r det er oppstart og ingen spillere.
+                    // Vis tips når det er oppstart og ingen spillere.
                     bord.className = "BordForklaring";
                     bord.innerHTML = document.getElementById("DivBord_Bordforklaring").innerHTML;
                 } else {
@@ -210,9 +210,9 @@
                     //    `&gt;` +
                     //    `<img src="ikoner/${spill.spillerTittel(bytte.til+1).img}" alt="${spill.spillerTittel(bytte.til+1).img}" />` +
                     //    ((bytte.modus == "Velg") ? `${spill.spillere[bytte.fra].nick} skal gi ${bytte.antall} kort:` :
-                    //        ((bytte.modus == "Best") ? `${spill.spillere[bytte.fra].nick} mÃ¥ gi ${bytte.antall} beste-kort:` :
+                    //        ((bytte.modus == "Best") ? `${spill.spillere[bytte.fra].nick} må gi ${bytte.antall} beste-kort:` :
                     //            ((bytte.modus == "Gitt") ? `${spill.spillere[bytte.fra].nick} har bestemt seg:` :
-                    //                ((bytte.modus == "Kan se") ? `${spill.spillere[bytte.til].nick} fÃ¥r kort:` :
+                    //                ((bytte.modus == "Kan se") ? `${spill.spillere[bytte.til].nick} får kort:` :
                     //                    `Hmmm... ${bytte.modus}`))));
                     elem.innerHTML = `<div class="bytteFigur"><img src="ikoner/${spill.spillerTittel(bytte.fra + 1).img}" alt="${spill.spillerTittel(bytte.fra + 1).tittel}" /></div>`;
                     elem.innerHTML += `<div class="bytteTittel">${bytte.tekst}</div>`;
@@ -321,9 +321,9 @@
                     case "S":
                         var o = spill.OversteKortBunke();
                         if (o == null) {
-                            this.el("SpanSpillerInfo").innerHTML = `Du skal starte Ã¥ legge ut.`;
+                            this.el("SpanSpillerInfo").innerHTML = `Du skal starte å legge ut.`;
                         } else {
-                            this.el("SpanSpillerInfo").innerHTML = `Spilleren fÃ¸r deg la ${o.Tekst()}.`;
+                            this.el("SpanSpillerInfo").innerHTML = `Spilleren før deg la ${o.Tekst()}.`;
                         }
                         break;
                     default:
@@ -447,9 +447,9 @@
             fixClass(elem, "KortForklaring", false);
             var s = `<img src='ikoner/${spill.spillerTittel(spiller.plassering).img}' alt='Ferdig' height='90%' />`;
             if (spill.status == "S") {
-                s += `<span>Du ble <b>${spill.spillerTittel(spiller.plassering).tittel}</b>. Venter pÃ¥ at de andre skal spille ferdig.</span>`;
+                s += `<span>Du ble <b>${spill.spillerTittel(spiller.plassering).tittel}</b>. Venter på at de andre skal spille ferdig.</span>`;
             } else {
-                s += `<span>Spillet er ferdig. Du ble <b>${spill.spillerTittel(spiller.plassering).tittel}</b> (av ${spill.spillere.length} spillere). For Ã¥ spille en runde til, trykk pÃ¥ <img src="ikoner/00Start.png" style="height: 1em; vertical-align: text-bottom;" alt="startknappen" />.</span>`;
+                s += `<span>Spillet er ferdig. Du ble <b>${spill.spillerTittel(spiller.plassering).tittel}</b> (av ${spill.spillere.length} spillere). For å spille en runde til, trykk på <img src="ikoner/00Start.png" style="height: 1em; vertical-align: text-bottom;" alt="startknappen" />.</span>`;
             }
             elem.innerHTML = s;
         }
@@ -459,7 +459,7 @@
 class KortBoms extends Kort {
     static Klover3verdi() { return 16; }
     static NavnBoms(verdiBoms) {
-        return ["", "", "", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2", "KlÃ¸ver 3"][verdiBoms];
+        return ["", "", "", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2", "Kløver 3"][verdiBoms];
     }
     constructor(farge, verdi) {
         super(farge, verdi);
@@ -470,7 +470,7 @@ class KortBoms extends Kort {
         } else {
             // Her er det en 3'er
             if (this.farge == 3) {
-                this.verdiBoms = 16; //KlÃ¸ver 3
+                this.verdiBoms = 16; //Kløver 3
             } else {
                 this.verdiBoms = 3;
             }
@@ -533,7 +533,7 @@ class KortBunke extends Array {
         if (this.length > 0) {
             this.verdiBoms = this[0].verdiBoms;
             this.forEach(k => {
-                if (k.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge pÃ¥ forskjellige kort.") }
+                if (k.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge på forskjellige kort.") }
             });
         } else {
             this.verdiBoms = null;
@@ -542,7 +542,7 @@ class KortBunke extends Array {
     }
     push(item) {
         if (this.verdiBoms != null) {
-            if (item.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge pÃ¥ forskjellige kort.") }
+            if (item.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge på forskjellige kort.") }
         } else {
             this.verdiBoms = item.verdiBoms;
         }
@@ -561,14 +561,14 @@ class KortBunke extends Array {
     }
     Tekst() {
         if (this.length == 0) { return "ingen kort" };
-        if (this[0].Klover3()) { return "klÃ¸ver 3" };
+        if (this[0].Klover3()) { return "kløver 3" };
         return ["", "en", "to", "tre", "fire", "fem", "seks", "syv"][this.length] + " " + ((this.length > 1) ? Kort.VerdiNavn(this[0].verdi).navnflertall : Kort.VerdiNavn(this[0].verdi).navnentall);
     }
     KanLeggesPa(overst) {
         return (
-            (overst == null) || // FÃ¸rste som legges pÃ¥
+            (overst == null) || // Første som legges på
             (this.length == overst.length && this.verdiBoms >= overst.verdiBoms) || // Normale regler
-            (this.length == 1 && this[0].Klover3()) // KlÃ¸ver tre
+            (this.length == 1 && this[0].Klover3()) // Kløver tre
         )
     }
 }
@@ -600,8 +600,8 @@ class SpillerBoms extends Spiller {
     nullstillRunde(varSinTur) {
         super.nullstillRunde(varSinTur);
         if (varSinTur === null || (this.laPaaSist != "Pass" && this.plassering == 0)) {
-            //Nullstiller bare hvis spilleren fortsatt er med pÃ¥ runden.
-            //Nullstiller ogsÃ¥ hvis det ikke var noen sin tur (nytt spill)
+            //Nullstiller bare hvis spilleren fortsatt er med på runden.
+            //Nullstiller også hvis det ikke var noen sin tur (nytt spill)
             this.laPaaSist = null;
         }
     }
@@ -690,7 +690,7 @@ class SpillBoms extends Spill {
         for (let i = this.BeregnAntKortstokker(); i > 0; i--) {
             kortstokk.LeggTil52Kort(function (farge, verdi) { return new KortBoms(farge, verdi) });
         }
-        // Tar ut kort som ikke skal vÃ¦re med
+        // Tar ut kort som ikke skal være med
         kortstokk.Sorter();
         kortstokk.splice(0, kortstokk.length % this.spillere.length);
         // Stokker og deler ut
@@ -703,9 +703,9 @@ class SpillBoms extends Spill {
                 spiller.kort.push(kortstokk.pop());
             })
         }
-        // Fiks rekkefÃ¸lge og gi kort hvis det har vÃ¦rt et tidligere spill
+        // Fiks rekkefølge og gi kort hvis det har vært et tidligere spill
         if (this.spillere.filter(s => (s.plassering != 0)).length > 0) {
-            //Spill i rekkefÃ¸lge, og bytt kort.
+            //Spill i rekkefølge, og bytt kort.
             this.spillere.filter(s => (s.plassering == 0)).forEach(s => (s.plassering = 99)); //Evt nye spillere skal starte sist.
             this.spillere.sort((a, b) => a.plassering - b.plassering);
             this.spillere.forEach(spiller => {
@@ -718,8 +718,8 @@ class SpillBoms extends Spill {
             if (this.spillere.length >= 5) {
                 this.spillere[0].melding.push("Skal gi to kort til bomsen.");
                 this.spillere[1].melding.push("Skal gi ett kort til visebomsen.");
-                this.spillere[this.spillere.length - 2].melding.push("Gir sitt dÃ¥rligste kort til visepresidenten.");
-                this.spillere[this.spillere.length - 1].melding.push("Gir sine to dÃ¥rligste kort til presidenten.");
+                this.spillere[this.spillere.length - 2].melding.push("Gir sitt dårligste kort til visepresidenten.");
+                this.spillere[this.spillere.length - 1].melding.push("Gir sine to dårligste kort til presidenten.");
                 this.spillBunke = [{
                     tekst: "Presidenten skal gi bomsen to kort:",
                     fra: 0,
@@ -762,7 +762,7 @@ class SpillBoms extends Spill {
             }
             this.spillBunke.filter(bytte => (bytte.modus == "Best")).forEach(bytte => {
                 bytte.kort = [];
-                var kort = this.spillere[bytte.fra].kort.filter(k => (!k.Klover3())); //KlÃ¸ver 3 skal ikke gis.
+                var kort = this.spillere[bytte.fra].kort.filter(k => (!k.Klover3())); //Kløver 3 skal ikke gis.
                 for (var i = 1; i <= bytte.antall; i++) {
                     bytte.kort.push(kort[kort.length - i]);
                 }
@@ -780,7 +780,7 @@ class SpillBoms extends Spill {
     }
     BytteKort_GiKort(bytte) {
         if (this.status != "G") { throw ("Spillet er ikke i bytte-modus."); };
-        if (bytte.modus != 'Velg' && bytte.modus != 'Best') { throw (`Kan ikke gi kort nÃ¥r modus er ${bytte.modus} (mÃ¥ vÃ¦re Velg eller Best).`); };
+        if (bytte.modus != 'Velg' && bytte.modus != 'Best') { throw (`Kan ikke gi kort når modus er ${bytte.modus} (må være Velg eller Best).`); };
         if (bytte.kort.length != bytte.antall) { throw ("Feil antall kort som byttes."); };
         bytte.kort.forEach(k => {
             this.spillere[bytte.fra].kort.splice(
@@ -800,7 +800,7 @@ class SpillBoms extends Spill {
     }
     BytteKort_FaaKort(bytte) {
         if (this.status != "G") { throw ("Spillet er ikke i bytte-modus."); };
-        if (bytte.modus != 'Kan se') { throw (`Kan ikke gi kort nÃ¥r modus er ${bytte.modus} (mÃ¥ vÃ¦re Kan se).`); };
+        if (bytte.modus != 'Kan se') { throw (`Kan ikke gi kort når modus er ${bytte.modus} (må være Kan se).`); };
         if (bytte.kort.length != bytte.antall) { throw ("Feil antall kort som byttes."); };
         bytte.kort.forEach(k => {
             this.spillere[bytte.til].kort.push(new KortBoms(k.farge, k.verdi));
@@ -808,7 +808,7 @@ class SpillBoms extends Spill {
         this.spillere[bytte.til].kort.Sorter();
         this.spillBunke.splice(this.spillBunke.findIndex(b => (b == bytte)), 1);
         if (this.spillBunke.length == 0) {
-            //Alle bytter gjennomfÃ¸rt
+            //Alle bytter gjennomført
             this.status = "S";
             this.setSinTur(0);
         }
@@ -820,8 +820,8 @@ class SpillBoms extends Spill {
     }
     KanLeggeKort(spiller, verdiBoms, returInfo = {}) {
         // Sjekker om en gitt verdi kan legges.
-        // Sjekker bÃ¥de at spilleren har kort som passer og at det kan legges.
-        // Kortene merkes og returInfo inneholder kortbunke som kan legges pÃ¥. (FÃ¸rste runda elle mulige som kan legges pÃ¥ med den verdiBoms.)
+        // Sjekker både at spilleren har kort som passer og at det kan legges.
+        // Kortene merkes og returInfo inneholder kortbunke som kan legges på. (Første runda elle mulige som kan legges på med den verdiBoms.)
         if (this.status != "S") {
             returInfo.svar = false;
             returInfo.tekst = "Spillet har ikke startet.";
@@ -850,7 +850,7 @@ class SpillBoms extends Spill {
         var oversteKB = this.OversteKortBunke();
         if (verdiBoms < oversteKB.verdiBoms) {
             returInfo.svar = false;
-            returInfo.tekst = `MÃ¥ legge pÃ¥ ${oversteKB.verdiBoms} eller hÃ¸yere.`;
+            returInfo.tekst = `Må legge på ${oversteKB.verdiBoms} eller høyere.`;
             return false;
         };
         var antallKort = ((verdiBoms == KortBoms.Klover3verdi()) ? 1 : antallKort = oversteKB.length);
@@ -868,7 +868,7 @@ class SpillBoms extends Spill {
         if (kb.length < antallKort) {
             spiller.kort.forEach(k => { k._Merket = false; });
             returInfo.svar = false;
-            returInfo.tekst = `Du mÃ¥ ha ${antallKort} like kort.`;
+            returInfo.tekst = `Du må ha ${antallKort} like kort.`;
             return false;
         };
         returInfo.svar = true
@@ -887,9 +887,9 @@ class SpillBoms extends Spill {
     }
     SpillBunkeGarUt(info = {}) {
         var overst = this.OversteKortBunke();
-        if (overst == null) { return false; } //Ingen kort, da gÃ¥r det ikke ut.
+        if (overst == null) { return false; } //Ingen kort, da går det ikke ut.
         if (overst[0].Klover3()) {
-            info.tekst = "KlÃ¸ver 3";
+            info.tekst = "Kløver 3";
             return true;
         }
         var verdi = overst.verdiBoms;
@@ -912,7 +912,7 @@ class SpillBoms extends Spill {
         return false;
     }
     LeggKort(spiller, kb) {
-        if (!this.KanLeggeKortBunke(spiller, kb)) { throw ("Kan ikke legge dette nÃ¥!"); };
+        if (!this.KanLeggeKortBunke(spiller, kb)) { throw ("Kan ikke legge dette nå!"); };
         if (this.spillBunke.length == 0) {
             this.spillere.filter(s => (s.plassering > 0 && s.melding.length > 0)).forEach(s => {
                 s.melding = [];
@@ -926,10 +926,10 @@ class SpillBoms extends Spill {
         this.spillBunke.push(kb);
         if (spiller.kort.length == 0) {
             if (kb.verdiBoms == KortBoms.Klover3verdi()) {
-                // Hvis man legger KlÃ¸ver 3 som siste kort, sÃ¥ taper man:
+                // Hvis man legger Kløver 3 som siste kort, så taper man:
                 this.SpillerFerdig(spiller, false);
             } else {
-                // Ferdig pÃ¥ riktig mÃ¥te:
+                // Ferdig på riktig måte:
                 this.SpillerFerdig(spiller);
             }
         }
@@ -950,7 +950,7 @@ class SpillBoms extends Spill {
             var spillerSist = this.spillere[varSinTur];
             //if (typeof spillerSist.laPaaSist == "KortBunke") {
             if (spillerSist.laPaaSist) {
-                spillerSist.melding.push(`${((spillerSist.laPaaSist.Tekst) ? "La pÃ¥ " + spillerSist.laPaaSist.Tekst() : spillerSist.laPaaSist)}, bunken gÃ¥r ut. (${info.tekst})`);
+                spillerSist.melding.push(`${((spillerSist.laPaaSist.Tekst) ? "La på " + spillerSist.laPaaSist.Tekst() : spillerSist.laPaaSist)}, bunken går ut. (${info.tekst})`);
             } else {
                 spillerSist.melding.push(`Bunken gikk ut og ferdig. (${info.tekst})`);
             }
@@ -958,7 +958,7 @@ class SpillBoms extends Spill {
             this.spillere.forEach(spiller => {
                 spiller.laPaaSist = null;
             });
-            //Finn den som la pÃ¥ sist, og som har kort igjen pÃ¥ hÃ¥nden.
+            //Finn den som la på sist, og som har kort igjen på hånden.
             var nesteNick = null;
             this.spillBunke.forEach(kb => {
                 if (this.getSpiller(kb.nick).kort.length > 0) {
@@ -966,7 +966,7 @@ class SpillBoms extends Spill {
                 }
             });
             if (nesteNick == null) {
-                //Hvis ingen av de som la pÃ¥ i runden har kort igjen, sÃ¥ gÃ¥r vi baklengs for Ã¥ finne neste som legger pÃ¥.
+                //Hvis ingen av de som la på i runden har kort igjen, så går vi baklengs for å finne neste som legger på.
                 nesteNick = this.OversteKortBunke().nick;
                 var huskIndex = this.spillere.findIndex(spiller => (spiller.nick == nesteNick));
                 do {
@@ -1052,7 +1052,7 @@ class SpillBoms extends Spill {
         }
 
         document.getElementById('BnFInviterSpill').addEventListener('click', function () {
-            if (HuskSpill == null) { throw ('MÃ¥ lage spill fÃ¸r du inviterer.') }
+            if (HuskSpill == null) { throw ('Må lage spill før du inviterer.') }
             s = `${document.baseURI}?spillid=${HuskSpill.spillId}`;
             dialogVisLinkStart(HuskSpill.spillId, s);
         });
@@ -1084,7 +1084,7 @@ class SpillBoms extends Spill {
                 } else {
                     dialogAskStart(
                         "Vil du avslutte spillet?", [
-                        "Ja, gÃ¥ til hovedmenyen",
+                        "Ja, gå til hovedmenyen",
                         "Nei, fortsett spillet"
                     ], [
                         function () {
@@ -1105,7 +1105,7 @@ class SpillBoms extends Spill {
         });
 
         document.getElementById('BnPNySpiller').addEventListener('click', function () {
-            if (HuskNick != null) { throw ('Skal ikke lage ny spiller nÃ¥r man allerede har en spiller.') }
+            if (HuskNick != null) { throw ('Skal ikke lage ny spiller når man allerede har en spiller.') }
             showDialog("SporOmNick", true);
         });
 
@@ -1127,7 +1127,7 @@ class SpillBoms extends Spill {
         document.getElementById('BnPGiOpp').addEventListener('click', function () {
             if (HuskSpill.status == "S") {
                 dialogAskStart(
-                    "Er du sikker pÃ¥ at du vil gi opp?", [
+                    "Er du sikker på at du vil gi opp?", [
                     "Ja, jeg vil avslutte spillet",
                     "Nei, jeg fortsetter spillet"
                 ], [
@@ -1199,7 +1199,7 @@ function AutoSpiller2(spill, spiller, heleRunden = false) {
             spill.BytteKort_FaaKort(bytte);
         });
         spill.spillBunke.filter(b => (b.modus == "Velg" && spill.spillere[b.fra] == spiller)).forEach(bytte => {
-            //Finner de dÃ¥rligste kortene
+            //Finner de dårligste kortene
             for (var i = 1; i <= bytte.antall; i++) {
                 bytte.kort.push(spiller.kort[i - 1]);
             }
@@ -1245,9 +1245,9 @@ function setTimerHoppover(spill) {
         clearTimeout(huskTimerHoppover);
     }
     huskTimerHoppover = setTimeout(function () {
-        var HoppOverSpiller = spill.spillere[spill.sinTur]; //Husker pÃ¥ nummeret slik at det er statisk (i tilfelle flere trykker samtidig).
+        var HoppOverSpiller = spill.spillere[spill.sinTur]; //Husker på nummeret slik at det er statisk (i tilfelle flere trykker samtidig).
         Layout.TegneHoppover([
-            "GjÃ¸r det beste",
+            "Gjør det beste",
             "Hopp over",
             "Si pass",
             "Avslutt spiller"
@@ -1260,5 +1260,5 @@ function setTimerHoppover(spill) {
         }, function () {
             spill.AvsluttSpiller(HoppOverSpiller);
         }]);
-    }, 20000); //Kommer opp hvis spiller ikke har gjort noe pÃ¥ 20 sekunder.
+    }, 20000); //Kommer opp hvis spiller ikke har gjort noe på 20 sekunder.
 }
