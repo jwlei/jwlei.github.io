@@ -145,7 +145,7 @@ class Layout {
             }
             spiller.melding.forEach(m => {
                 var elemMelding = document.createElement("span");
-                elemMelding.className = "melding";
+                elemMelding.className = "message";
                 elemMelding.innerHTML = m;
                 elemSpiller.appendChild(elemMelding);
                 elemSpiller.appendChild(document.createElement("br"));
@@ -176,11 +176,11 @@ class Layout {
         switch (spill.status) {
             case "O":
                 if (spill.spillere.length == 0) {
-                    // Vis tips når det er oppstart og ingen spillere.
+                    // Vis tips når det er oppstart og ingen players.
                     bord.className = "BordForklaring";
                     bord.innerHTML = document.getElementById("DivBord_Bordforklaring").innerHTML;
                 } else {
-                    // Hvis det er oppstart og spillere, vises kortstokken.
+                    // Hvis det er oppstart og players, vises kortstokken.
                     bord.className = "BordKortstokker";
                     var s = "";
                     for (let i = 0; i < spill.BeregnAntKortstokker(); i++) {
@@ -209,17 +209,17 @@ class Layout {
                     //    `<img src="ikoner/${spill.spillerTittel(bytte.fra+1).img}" alt="${spill.spillerTittel(bytte.fra+1).img}" />` +
                     //    `&gt;` +
                     //    `<img src="ikoner/${spill.spillerTittel(bytte.til+1).img}" alt="${spill.spillerTittel(bytte.til+1).img}" />` +
-                    //    ((bytte.modus == "Velg") ? `${spill.spillere[bytte.fra].nick} skal gi ${bytte.antall} kort:` :
-                    //        ((bytte.modus == "Best") ? `${spill.spillere[bytte.fra].nick} må gi ${bytte.antall} beste-kort:` :
-                    //            ((bytte.modus == "Gitt") ? `${spill.spillere[bytte.fra].nick} har bestemt seg:` :
-                    //                ((bytte.modus == "Kan se") ? `${spill.spillere[bytte.til].nick} får kort:` :
+                    //    ((bytte.modus == "Velg") ? `${spill.players[bytte.fra].nickname} skal gi ${bytte.antall} cards:` :
+                    //        ((bytte.modus == "Best") ? `${spill.players[bytte.fra].nickname} må gi ${bytte.antall} beste-cards:` :
+                    //            ((bytte.modus == "Gitt") ? `${spill.players[bytte.fra].nickname} har bestemt seg:` :
+                    //                ((bytte.modus == "Kan se") ? `${spill.players[bytte.til].nickname} får cards:` :
                     //                    `Hmmm... ${bytte.modus}`))));
                     elem.innerHTML = `<div class="bytteFigur"><img src="ikoner/${spill.spillerTittel(bytte.fra + 1).img}" alt="${spill.spillerTittel(bytte.fra + 1).tittel}" /></div>`;
                     elem.innerHTML += `<div class="bytteTittel">${bytte.tekst}</div>`;
                     var elemDiv = document.createElement("div");
                     elemDiv.className = "bytteKort";
-                    //if (bytte.kort.length == 0 && seKort) {
-                    //    elemDiv.innerHTML = `Du skal gi ${bytte.antall} kort. Velg fra kortstokken din.`;
+                    //if (bytte.cards.length == 0 && seKort) {
+                    //    elemDiv.innerHTML = `Du skal gi ${bytte.antall} cards. Velg fra kortstokken din.`;
                     //}
                     var spanKort = document.createElement("span");
                     bytte.kort.forEach(kort => {
@@ -229,7 +229,7 @@ class Layout {
                     var spanKnapp = document.createElement("span");
                     if (spill.spillere[bytte.fra] == spiller && bytte.antall == bytte.kort.length && (bytte.modus == "Velg" || bytte.modus == "Best")) {
                         var elemKnapp = document.createElement("button");
-                        //elemKnapp.innerHTML = "<img src='ikoner/00Done.png' alt='Gi kort' />";
+                        //elemKnapp.innerHTML = "<img src='ikoner/00Done.png' alt='Gi cards' />";
                         elemKnapp.innerHTML = `Gi til ${spill.spillere[bytte.til].nick}`;
                         elemKnapp.onclick = function () {
                             spill.BytteKort_GiKort(bytte);
@@ -238,7 +238,7 @@ class Layout {
                     }
                     if (spill.spillere[bytte.til] == spiller && bytte.modus == "Kan se") {
                         var elemKnapp = document.createElement("button");
-                        //elemKnapp.innerHTML = "<img src='ikoner/00Done.png' alt='Motta kort' /></img>";
+                        //elemKnapp.innerHTML = "<img src='ikoner/00Done.png' alt='Motta cards' /></img>";
                         elemKnapp.innerHTML = `Motta fra ${spill.spillere[bytte.fra].nick}`;
                         elemKnapp.onclick = function () {
                             spill.BytteKort_FaaKort(bytte);
@@ -271,7 +271,7 @@ class Layout {
             case "S":
                 bord.className = "BordKortstokk";
                 bord.innerHTML = "";
-                const sv = "H" + Spill.spillId + Spill.ts + Spill.runde;
+                const sv = "H" + GameUtility.spillId + GameUtility.ts + GameUtility.runde;
                 var seedRandom = new Math.seedrandom(sv);
                 var elem = null;
                 spill.spillBunke.forEach(kb => {
@@ -291,7 +291,7 @@ class Layout {
                 bord.appendChild(elem);
                 break;
             default:
-                throw ("Ukent status.");
+                throw ("Ukent gameStatus.");
                 break;
         }
     }
@@ -316,7 +316,7 @@ class Layout {
             if (spiller.sinTur == 1) {
                 switch (spill.status) {
                     case "G":
-                        this.el("SpanSpillerInfo").innerHTML = `Du skal gi kort.`;
+                        this.el("SpanSpillerInfo").innerHTML = `Du skal gi cards.`;
                         break;
                     case "S":
                         var o = spill.OversteKortBunke();
@@ -407,7 +407,7 @@ class Layout {
                                                 });
                                             }
                                         }
-                                        dialogTekster.push("Velg annet kort");
+                                        dialogTekster.push("Velg annet cards");
                                         dialogFuncer.push(function () { });
                                         dialogAskStart("Vil du legge:", dialogTekster, dialogFuncer);
                                     } else {
@@ -421,7 +421,7 @@ class Layout {
                                             var dialogTekster = [
                                                 //`Legg ${info.kb.Tekst()}`,
                                                 htmlTekst,
-                                                "Velg annet kort"
+                                                "Velg annet cards"
                                             ];
                                             var dialogFuncer = [function () {
                                                 spill.LeggKort(spiller, info.kb);
@@ -449,7 +449,7 @@ class Layout {
             if (spill.status == "S") {
                 s += `<span>Du ble <b>${spill.spillerTittel(spiller.plassering).tittel}</b>. Venter på at de andre skal spille ferdig.</span>`;
             } else {
-                s += `<span>Spillet er ferdig. Du ble <b>${spill.spillerTittel(spiller.plassering).tittel}</b> (av ${spill.spillere.length} spillere). For å spille en runde til, trykk på <img src="ikoner/00Start.png" style="height: 1em; vertical-align: text-bottom;" alt="startknappen" />.</span>`;
+                s += `<span>Spillet er ferdig. Du ble <b>${spill.spillerTittel(spiller.plassering).tittel}</b> (av ${spill.spillere.length} players). For å spille en runde til, trykk på <img src="ikoner/00Start.png" style="height: 1em; vertical-align: text-bottom;" alt="startknappen" />.</span>`;
             }
             elem.innerHTML = s;
         }
@@ -533,7 +533,7 @@ class KortBunke extends Array {
         if (this.length > 0) {
             this.verdiBoms = this[0].verdiBoms;
             this.forEach(k => {
-                if (k.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge på forskjellige kort.") }
+                if (k.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge på forskjellige cards.") }
             });
         } else {
             this.verdiBoms = null;
@@ -542,7 +542,7 @@ class KortBunke extends Array {
     }
     push(item) {
         if (this.verdiBoms != null) {
-            if (item.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge på forskjellige kort.") }
+            if (item.verdiBoms != this.verdiBoms) { throw ("Kan ikke legge på forskjellige cards.") }
         } else {
             this.verdiBoms = item.verdiBoms;
         }
@@ -560,7 +560,7 @@ class KortBunke extends Array {
         return this;
     }
     Tekst() {
-        if (this.length == 0) { return "ingen kort" };
+        if (this.length == 0) { return "ingen cards" };
         if (this[0].Klover3()) { return "kløver 3" };
         return ["", "en", "to", "tre", "fire", "fem", "seks", "syv"][this.length] + " " + ((this.length > 1) ? Kort.VerdiNavn(this[0].verdi).navnflertall : Kort.VerdiNavn(this[0].verdi).navnentall);
     }
@@ -573,15 +573,15 @@ class KortBunke extends Array {
     }
 }
 
-class SpillerBoms extends Spiller {
+class SpillerBoms extends Player {
     constructor(nick, spillerKey) {
         super(nick, spillerKey);
         this.tittel = "";
     }
-    getVerdier() {
-        var ret = super.getVerdier();
-        ret.kort = KortBoms.KortstokkKode_get(ret.kort);
-        //if (ret.laPaaSist.verdiBoms) { ret.laPaaSist = KortBoms.KortstokkBunkeKode_get(ret.laPaaSist) };
+    getValues() {
+        var ret = super.getValues();
+        ret.cards = KortBoms.KortstokkKode_get(ret.cards);
+        //if (ret.playedLatestCards.verdiBoms) { ret.playedLatestCards = KortBoms.KortstokkBunkeKode_get(ret.playedLatestCards) };
         ret.tittel = this.tittel;
         return ret;
     }
@@ -590,19 +590,19 @@ class SpillerBoms extends Spiller {
         obj.laPaaSist = ((obj.laPaaSist == null) ? null :
             ((obj.laPaaSist.verdiBoms) ? new KortBunke(obj.laPaaSist.nick).setVerdier(obj.laPaaSist) :
                 obj.laPaaSist));
-        super.settVerdier(obj);
+        super.setValues(obj);
         this.tittel = obj.tittel;
         return this;
     }
     antallMedVerdiBoms(verdiBoms) {
-        return this.kort.filter(k => (k.verdiBoms == verdiBoms)).length;
+        return this.cards.filter(k => (k.verdiBoms == verdiBoms)).length;
     }
-    nullstillRunde(varSinTur) {
-        super.nullstillRunde(varSinTur);
-        if (varSinTur === null || (this.laPaaSist != "Pass" && this.plassering == 0)) {
+    resetTurn(varSinTur) {
+        super.resetTurn(varSinTur);
+        if (varSinTur === null || (this.playedLatestCards != "Pass" && this.placement == 0)) {
             //Nullstiller bare hvis spilleren fortsatt er med på runden.
             //Nullstiller også hvis det ikke var noen sin tur (nytt spill)
-            this.laPaaSist = null;
+            this.playedLatestCards = null;
         }
     }
     static Spillere_get(spillere) {
@@ -621,7 +621,7 @@ class SpillerBoms extends Spiller {
     }
 }
 
-class SpillBoms extends Spill {
+class SpillBoms extends GameUtility {
     constructor(id = null) {
         super(id);
         this.debug = true;
@@ -632,25 +632,25 @@ class SpillBoms extends Spill {
             this.regler = {
                 VisKunKort: false
             };
-            this.status = 'O'; //O=Oppstart, G=Gir kort S=Spiller, F=Ferdig
+            this.gameStatus = 'O'; //O=Oppstart, G=Gir cards S=Player, F=Ferdig
             this.runde = 0;
-            this.spillere = [];
+            this.players = [];
             this.spillBunke = [];
             this.sinTur = -1;
-            this.Lagre();
+            this.Save();
         } else {
             this.spillId = id;
             this.databaseRef = firebase.database().ref(`boms_1/${this.spillId}`);
             //PS: Skal ikke "lagre" her, da spillet skal hentes.
         }
     }
-    Lagre() {
+    Save() {
         //console.log(JSON.stringify(this));
         this.databaseRef.set({
-            status: this.status,
+            status: this.gameStatus,
             regler: this.regler,
             runde: this.runde,
-            spillere: SpillerBoms.Spillere_get(this.spillere),
+            spillere: SpillerBoms.Spillere_get(this.players),
             spillBunke: this.spillBunke,
             sinTur: this.sinTur,
             ts: new Date()
@@ -660,27 +660,27 @@ class SpillBoms extends Spill {
         return 1;
     }
     spillerTittel(plassering) {
-        if (this.spillere.length >= 5) {
+        if (this.players.length >= 5) {
             switch (plassering) {
                 case 1:
                     return ({ tittel: "President", img: "00President.png" });
                 case 2:
                     return ({ tittel: "Visepresident", img: "00VisePres.png" });
-                case this.spillere.length - 1:
+                case this.players.length - 1:
                     return ({ tittel: "Viseboms", img: "00ViseBoms.png" });
-                case this.spillere.length:
+                case this.players.length:
                     return ({ tittel: "Boms", img: "00Boms.png" });
                 default:
-                    return ({ tittel: `Arbeider${((this.spillere.length > 5) ? " " + (plassering - 2) : "")}`, img: "00Arbeider.png" });
+                    return ({ tittel: `Arbeider${((this.players.length > 5) ? " " + (plassering - 2) : "")}`, img: "00Arbeider.png" });
             }
         } else {
             switch (plassering) {
                 case 1:
                     return ({ tittel: "President", img: "00President.png" });
-                case this.spillere.length:
+                case this.players.length:
                     return ({ tittel: "Boms", img: "00Boms.png" });
                 default:
-                    return ({ tittel: `Arbeider${((this.spillere.length > 3) ? " " + (plassering - 1) : "")}`, img: "00Arbeider.png" });
+                    return ({ tittel: `Arbeider${((this.players.length > 3) ? " " + (plassering - 1) : "")}`, img: "00Arbeider.png" });
             }
         }
     }
@@ -690,71 +690,71 @@ class SpillBoms extends Spill {
         for (let i = this.BeregnAntKortstokker(); i > 0; i--) {
             kortstokk.LeggTil52Kort(function (farge, verdi) { return new KortBoms(farge, verdi) });
         }
-        // Tar ut kort som ikke skal være med
+        // Tar ut cards som ikke skal være med
         kortstokk.Sorter();
-        kortstokk.splice(0, kortstokk.length % this.spillere.length);
+        kortstokk.splice(0, kortstokk.length % this.players.length);
         // Stokker og deler ut
         kortstokk.Bland();
-        this.spillere.forEach(spiller => {
+        this.players.forEach(spiller => {
             spiller.kort = new Kortstokk();
         });
         while (kortstokk.length > 0) {
-            this.spillere.forEach(spiller => {
+            this.players.forEach(spiller => {
                 spiller.kort.push(kortstokk.pop());
             })
         }
-        // Fiks rekkefølge og gi kort hvis det har vært et tidligere spill
-        if (this.spillere.filter(s => (s.plassering != 0)).length > 0) {
-            //Spill i rekkefølge, og bytt kort.
-            this.spillere.filter(s => (s.plassering == 0)).forEach(s => (s.plassering = 99)); //Evt nye spillere skal starte sist.
-            this.spillere.sort((a, b) => a.plassering - b.plassering);
-            this.spillere.forEach(spiller => {
+        // Fiks rekkefølge og gi cards hvis det har vært et tidligere spill
+        if (this.players.filter(s => (s.plassering != 0)).length > 0) {
+            //GameUtility i rekkefølge, og bytt cards.
+            this.players.filter(s => (s.plassering == 0)).forEach(s => (s.plassering = 99)); //Evt nye players skal starte sist.
+            this.players.sort((a, b) => a.plassering - b.plassering);
+            this.players.forEach(spiller => {
                 spiller.kort.Sorter();
                 spiller.plassering = 0;
             });
             this.spillBunke = [];
-            this.status = "G"; //Gi kort til hverandre
+            this.gameStatus = "G"; //Gi cards til hverandre
             this.setSinTur(null);
-            if (this.spillere.length >= 5) {
-                this.spillere[0].melding.push("Skal gi to kort til bomsen.");
-                this.spillere[1].melding.push("Skal gi ett kort til visebomsen.");
-                this.spillere[this.spillere.length - 2].melding.push("Gir sitt dårligste kort til visepresidenten.");
-                this.spillere[this.spillere.length - 1].melding.push("Gir sine to dårligste kort til presidenten.");
+            if (this.players.length >= 5) {
+                this.players[0].melding.push("Skal gi to cards til bomsen.");
+                this.players[1].melding.push("Skal gi ett cards til visebomsen.");
+                this.players[this.players.length - 2].melding.push("Gir sitt dårligste cards til visepresidenten.");
+                this.players[this.players.length - 1].melding.push("Gir sine to dårligste cards til presidenten.");
                 this.spillBunke = [{
-                    tekst: "Presidenten skal gi bomsen to kort:",
+                    tekst: "Presidenten skal gi bomsen to cards:",
                     fra: 0,
-                    til: this.spillere.length - 1,
+                    til: this.players.length - 1,
                     antall: 2,
                     modus: "Velg"
                 }, {
-                    tekst: "Visepresidenten skal gi visebomsen ett kort:",
+                    tekst: "Visepresidenten skal gi visebomsen ett cards:",
                     fra: 1,
-                    til: this.spillere.length - 2,
+                    til: this.players.length - 2,
                     antall: 1,
                     modus: "Velg"
                 }, {
-                    tekst: "Visebomsen skal gi visepresidenten sitt beste kort:",
-                    fra: this.spillere.length - 2,
+                    tekst: "Visebomsen skal gi visepresidenten sitt beste cards:",
+                    fra: this.players.length - 2,
                     til: 1,
                     antall: 1,
                     modus: "Best"
                 }, {
-                    tekst: "Bomsen skal gi presidenten sine to beste kort:",
-                    fra: this.spillere.length - 1,
+                    tekst: "Bomsen skal gi presidenten sine to beste cards:",
+                    fra: this.players.length - 1,
                     til: 0,
                     antall: 2,
                     modus: "Best"
                 }];
             } else {
                 this.spillBunke = [{
-                    tekst: "Presidenten skal gi bomsen ett kort:",
+                    tekst: "Presidenten skal gi bomsen ett cards:",
                     fra: 0,
-                    til: this.spillere.length - 1,
+                    til: this.players.length - 1,
                     antall: 1,
                     modus: "Velg"
                 }, {
-                    tekst: "Bomsen skal gi presidenten sitt beste kort:",
-                    fra: this.spillere.length - 1,
+                    tekst: "Bomsen skal gi presidenten sitt beste cards:",
+                    fra: this.players.length - 1,
                     til: 0,
                     antall: 1,
                     modus: "Best"
@@ -762,29 +762,29 @@ class SpillBoms extends Spill {
             }
             this.spillBunke.filter(bytte => (bytte.modus == "Best")).forEach(bytte => {
                 bytte.kort = [];
-                var kort = this.spillere[bytte.fra].kort.filter(k => (!k.Klover3())); //Kløver 3 skal ikke gis.
+                var kort = this.players[bytte.fra].kort.filter(k => (!k.Klover3())); //Kløver 3 skal ikke gis.
                 for (var i = 1; i <= bytte.antall; i++) {
                     bytte.kort.push(kort[kort.length - i]);
                 }
             });
             this.setSinTur(null);
             this.spillBunke.filter(bytte => (bytte.modus == "Velg")).forEach(bytte => {
-                this.spillere[bytte.fra].sinTur = 1;
+                this.players[bytte.fra].sinTur = 1;
             })
         } else {
             this.spillBunke = [];
-            this.spillere.forEach(spiller => {
+            this.players.forEach(spiller => {
                 spiller.kort.Sorter();
             });
         }
     }
     BytteKort_GiKort(bytte) {
-        if (this.status != "G") { throw ("Spillet er ikke i bytte-modus."); };
-        if (bytte.modus != 'Velg' && bytte.modus != 'Best') { throw (`Kan ikke gi kort når modus er ${bytte.modus} (må være Velg eller Best).`); };
-        if (bytte.kort.length != bytte.antall) { throw ("Feil antall kort som byttes."); };
+        if (this.gameStatus != "G") { throw ("Spillet er ikke i bytte-modus."); };
+        if (bytte.modus != 'Velg' && bytte.modus != 'Best') { throw (`Kan ikke gi cards når modus er ${bytte.modus} (må være Velg eller Best).`); };
+        if (bytte.kort.length != bytte.antall) { throw ("Feil antall cards som byttes."); };
         bytte.kort.forEach(k => {
-            this.spillere[bytte.fra].kort.splice(
-                this.spillere[bytte.fra].kort.findIndex(k_ut => (k_ut.farge == k.farge && k_ut.verdi == k.verdi)),
+            this.players[bytte.fra].kort.splice(
+                this.players[bytte.fra].kort.findIndex(k_ut => (k_ut.farge == k.farge && k_ut.verdi == k.verdi)),
                 1
             );
         });
@@ -796,23 +796,23 @@ class SpillBoms extends Spill {
             });
             this.setSinTur(-1);
         }
-        this.Lagre();
+        this.Save();
     }
     BytteKort_FaaKort(bytte) {
-        if (this.status != "G") { throw ("Spillet er ikke i bytte-modus."); };
-        if (bytte.modus != 'Kan se') { throw (`Kan ikke gi kort når modus er ${bytte.modus} (må være Kan se).`); };
-        if (bytte.kort.length != bytte.antall) { throw ("Feil antall kort som byttes."); };
+        if (this.gameStatus != "G") { throw ("Spillet er ikke i bytte-modus."); };
+        if (bytte.modus != 'Kan se') { throw (`Kan ikke gi cards når modus er ${bytte.modus} (må være Kan se).`); };
+        if (bytte.kort.length != bytte.antall) { throw ("Feil antall cards som byttes."); };
         bytte.kort.forEach(k => {
-            this.spillere[bytte.til].kort.push(new KortBoms(k.farge, k.verdi));
+            this.players[bytte.til].kort.push(new KortBoms(k.farge, k.verdi));
         });
-        this.spillere[bytte.til].kort.Sorter();
+        this.players[bytte.til].kort.Sorter();
         this.spillBunke.splice(this.spillBunke.findIndex(b => (b == bytte)), 1);
         if (this.spillBunke.length == 0) {
             //Alle bytter gjennomført
-            this.status = "S";
+            this.gameStatus = "S";
             this.setSinTur(0);
         }
-        this.Lagre();
+        this.Save();
     }
     OversteKortBunke() {
         if (this.spillBunke.length == 0) { return null; }
@@ -820,9 +820,9 @@ class SpillBoms extends Spill {
     }
     KanLeggeKort(spiller, verdiBoms, returInfo = {}) {
         // Sjekker om en gitt verdi kan legges.
-        // Sjekker både at spilleren har kort som passer og at det kan legges.
+        // Sjekker både at spilleren har cards som passer og at det kan legges.
         // Kortene merkes og returInfo inneholder kortbunke som kan legges på. (Første runda elle mulige som kan legges på med den verdiBoms.)
-        if (this.status != "S") {
+        if (this.gameStatus != "S") {
             returInfo.svar = false;
             returInfo.tekst = "Spillet har ikke startet.";
             return false;
@@ -868,7 +868,7 @@ class SpillBoms extends Spill {
         if (kb.length < antallKort) {
             spiller.kort.forEach(k => { k._Merket = false; });
             returInfo.svar = false;
-            returInfo.tekst = `Du må ha ${antallKort} like kort.`;
+            returInfo.tekst = `Du må ha ${antallKort} like cards.`;
             return false;
         };
         returInfo.svar = true
@@ -879,7 +879,7 @@ class SpillBoms extends Spill {
     KanLeggeKortBunke(spiller, kb) {
         return spiller != null &&
             kb != null &&
-            this.status == "S" &&
+            this.gameStatus == "S" &&
             spiller.sinTur == 1 &&
             spiller.nick == kb.nick &&
             kb.KanLeggesPa(this.OversteKortBunke()) &&
@@ -887,7 +887,7 @@ class SpillBoms extends Spill {
     }
     SpillBunkeGarUt(info = {}) {
         var overst = this.OversteKortBunke();
-        if (overst == null) { return false; } //Ingen kort, da går det ikke ut.
+        if (overst == null) { return false; } //Ingen cards, da går det ikke ut.
         if (overst[0].Klover3()) {
             info.tekst = "Kløver 3";
             return true;
@@ -905,8 +905,8 @@ class SpillBoms extends Spill {
             info.tekst = `Fire ${Kort.VerdiNavn(kb[0].verdi).navnflertall}`;
             return true;
         }
-        if (this.spillere.filter(spiller => (spiller.laPaaSist != "Pass" && spiller.plassering == 0)).length <= 1) {
-            info.tekst = "Alle spillere sa pass";
+        if (this.players.filter(spiller => (spiller.laPaaSist != "Pass" && spiller.plassering == 0)).length <= 1) {
+            info.tekst = "Alle players sa pass";
             return true;
         }
         return false;
@@ -914,7 +914,7 @@ class SpillBoms extends Spill {
     LeggKort(spiller, kb) {
         if (!this.KanLeggeKortBunke(spiller, kb)) { throw ("Kan ikke legge dette nå!"); };
         if (this.spillBunke.length == 0) {
-            this.spillere.filter(s => (s.plassering > 0 && s.melding.length > 0)).forEach(s => {
+            this.players.filter(s => (s.plassering > 0 && s.melding.length > 0)).forEach(s => {
                 s.melding = [];
             })
         }
@@ -926,7 +926,7 @@ class SpillBoms extends Spill {
         this.spillBunke.push(kb);
         if (spiller.kort.length == 0) {
             if (kb.verdiBoms == KortBoms.Klover3verdi()) {
-                // Hvis man legger Kløver 3 som siste kort, så taper man:
+                // Hvis man legger Kløver 3 som siste cards, så taper man:
                 this.SpillerFerdig(spiller, false);
             } else {
                 // Ferdig på riktig måte:
@@ -937,7 +937,7 @@ class SpillBoms extends Spill {
     }
     SpillerKanPasse(spiller) {
         return spiller != null &&
-            this.status == "S" &&
+            this.gameStatus == "S" &&
             spiller.sinTur == 1;
     }
     SpillerPass(spiller) {
@@ -947,43 +947,43 @@ class SpillBoms extends Spill {
     NesteSinTur_Neste(varSinTur) {
         var info = {};
         if (this.SpillBunkeGarUt(info)) {
-            var spillerSist = this.spillere[varSinTur];
-            //if (typeof spillerSist.laPaaSist == "KortBunke") {
+            var spillerSist = this.players[varSinTur];
+            //if (typeof spillerSist.playedLatestCards == "KortBunke") {
             if (spillerSist.laPaaSist) {
                 spillerSist.melding.push(`${((spillerSist.laPaaSist.Tekst) ? "La på " + spillerSist.laPaaSist.Tekst() : spillerSist.laPaaSist)}, bunken går ut. (${info.tekst})`);
             } else {
                 spillerSist.melding.push(`Bunken gikk ut og ferdig. (${info.tekst})`);
             }
             this.runde++;
-            this.spillere.forEach(spiller => {
+            this.players.forEach(spiller => {
                 spiller.laPaaSist = null;
             });
-            //Finn den som la på sist, og som har kort igjen på hånden.
+            //Finn den som la på sist, og som har cards igjen på hånden.
             var nesteNick = null;
             this.spillBunke.forEach(kb => {
-                if (this.getSpiller(kb.nick).kort.length > 0) {
+                if (this.getPlayer(kb.nick).kort.length > 0) {
                     nesteNick = kb.nick;
                 }
             });
             if (nesteNick == null) {
-                //Hvis ingen av de som la på i runden har kort igjen, så går vi baklengs for å finne neste som legger på.
+                //Hvis ingen av de som la på i runden har cards igjen, så går vi baklengs for å finne neste som legger på.
                 nesteNick = this.OversteKortBunke().nick;
-                var huskIndex = this.spillere.findIndex(spiller => (spiller.nick == nesteNick));
+                var huskIndex = this.players.findIndex(spiller => (spiller.nick == nesteNick));
                 do {
                     huskIndex--;
-                    if (huskIndex < 0) { huskIndex += this.spillere.length };
-                } while (this.spillere[huskIndex].plassering > 0);
+                    if (huskIndex < 0) { huskIndex += this.players.length };
+                } while (this.players[huskIndex].plassering > 0);
                 this.spillBunke = [];
                 return huskIndex;
             }
             this.spillBunke = [];
-            return this.spillere.findIndex(spiller => (spiller.nick == nesteNick));
+            return this.players.findIndex(spiller => (spiller.nick == nesteNick));
         } else {
             return varSinTur + 1;
         }
     }
     NesteSinTur_HoppOver(sinTur) {
-        return (this.spillere[sinTur].laPaaSist == "Pass");
+        return (this.players[sinTur].laPaaSist == "Pass");
     }
 }
 
@@ -1161,8 +1161,8 @@ class SpillBoms extends Spill {
             HuskSpill.SpillerPass(HuskSpill.getSpiller(HuskNick));
         });
 
-        //Layout.FixFelles(HuskSpill, HuskSpill.getSpiller(HuskNick));
-        //Layout.FixPrivat(HuskSpill, HuskSpill.getSpiller(HuskNick));
+        //Layout.FixFelles(HuskSpill, HuskSpill.getPlayer(HuskNick));
+        //Layout.FixPrivat(HuskSpill, HuskSpill.getPlayer(HuskNick));
 
         document.getElementById('BnFResultater').addEventListener('click', function () {
             if (!HuskSpill.resultater) { HuskSpill.resultater = []; };
