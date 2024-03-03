@@ -6,8 +6,8 @@ function setTimerSkipTurn(game, clearTimer = true) {
     }
 
     rememberTimerSkipTurn = setTimeout(() => {
-        let skipPlayer = game.spillere[game.sinTur]; // Remembers the player who's turn it is.
-        Layout.TegneHoppover(
+        let skipPlayer = game.players[game.hasTurn]; // Remembers the player who's turn it is.
+        Layout.drawSkip(
             [
                 "Force best move for player",
                 "Skip the players turn",
@@ -16,9 +16,9 @@ function setTimerSkipTurn(game, clearTimer = true) {
             ],
             [
                 () => player_com(game, skipPlayer, true),
-                () => game.NesteSinTur(),
-                () => game.SpillerPass(skipPlayer),
-                () => game.AvsluttSpiller(skipPlayer)
+                () => game.nextPlayersTurn(),
+                () => game.playerPass(skipPlayer),
+                () => game.terminatePlayer(skipPlayer)
             ]
         );
     }, 20000); // Comes up if the player hasn't done anything in 20 seconds.

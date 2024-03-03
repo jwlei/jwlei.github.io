@@ -35,14 +35,14 @@ function player_com(game, player, heleRunden = false) {
                 kort._Antall = player.kort.filter(k => (k.verdiBoms == kort.verdiBoms)).length;
             });
             const valgtVerdiBoms = player.kort.sort((a, b) => (b._Antall - a._Antall))[0].verdiBoms;
-            kb = new KortBunke(player.nick);
+            kb = new CardsOnTable(player.nick);
             player.kort.filter(k => (k.verdiBoms == valgtVerdiBoms)).forEach(kort => {
                 kb.push(kort);
             })
         } else {
             player.kort.filter(kort => (game.KanLeggeKort(player, kort.verdiBoms))).forEach(kort => {
                 if (kb == null || kort.verdiBoms < kb.verdiBoms) {
-                    kb = new KortBunke(player.nick, kort);
+                    kb = new CardsOnTable(player.nick, kort);
                 } else if (kort.verdiBoms == kb.verdiBoms && (kb.length < game.OversteKortBunke().length)) {
                     kb.push(kort);
                 }
