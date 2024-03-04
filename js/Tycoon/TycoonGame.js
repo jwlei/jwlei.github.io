@@ -1,19 +1,11 @@
 class TycoonGame {
     constructor(id = null) {
         // Get a reference to the database service
-        var database = firebase.database();
-    }
-
-    save() {
-        throw ("Må implementeres");
-    }
-
-    StartSpillFix() {
-        throw ("Må implementeres");
+        let database = firebase.database();
     }
 
     getPlayer(nickname) {
-        return this.players.find(player => player.nick === nickname) || null;
+        return this.players.find(player => player.nickname === nickname) || null;
         //let ret = null;
         //this.players.filter(player => (player.nick == nickname)).forEach(player => {
         //    ret = player;
@@ -25,8 +17,8 @@ class TycoonGame {
         switch (this.status) {
             case "O":
             case "F":
-                //Bland spillerrekkefølge
-                for (let i = this.players.length - 1; i > 0; i--) {
+
+                for (let i = this.players.length - 1; i > 0; i--) { // Fisher-Yates shuffle algorithm
                     let n = Math.floor(Math.random() * (i + 1));
                     let remember = this.players[i];
                     this.players[i] = this.players[n];
@@ -37,14 +29,10 @@ class TycoonGame {
                     player.hasTurn = 0;
                 });
                 this.round = 1;
-                this.setSinTur(0);
+                this.setHasTurn(0);
                 this.startTime = Date.now();
                 this.endTime = null;
                 this.status = "S";
-                //Fiks individuelle ting pr spill
-                this.StartSpillFix();
-                //Start spillet
-                this.save();
                 break;
             default:
                 throw ('Spillet har allerede startet.');
@@ -52,21 +40,21 @@ class TycoonGame {
         }
     }
 
-    setSinTur(spiller) {
-        this.players.forEach(spiller => { spiller.sinTur = 0; })
-        if (spiller == null) {
+    setHasTurn(player) {
+        this.players.forEach(player => { player.hasTurn = 0; })
+        if (player == null) {
             this.hasTurn = -1;
-        } else if (typeof spiller == "number") {
-            this.hasTurn = spiller;
-        } else if (typeof spiller == "string") {
-            this.hasTurn = this.getPlayer(spiller);
+        } else if (typeof player == "number") {
+            this.hasTurn = player;
+        } else if (typeof player == "string") {
+            this.hasTurn = this.getPlayer(player);
         }
         if (this.hasTurn >= 0) {
-            this.players[this.hasTurn].sinTur = 1;
+            this.players[this.hasTurn].hasTurn = 1;
         }
     }
 
-    SpillTid() {
+    gameId() {
         if (this.startTime != null) {
             if (this.endTime == null) {
                 return Math.floor((Date.now() - this.startTime) / 60000);
@@ -78,67 +66,69 @@ class TycoonGame {
         }
     }
 
-    SpillerFerdig(spiller, vunnet = true) {
-        if (spiller.plassering != 0) { return false; }
-        var finnPlass = ((vunnet) ? 0 : this.players.length + 1);
+    playerHasFinished(player, hasWon = true) {
+        if (player.placement != 0) {
+            return false;
+        }
+
+        let finalPlacement = ((hasWon) ? 0 : this.players.length + 1);
         do {
-            finnPlass += ((vunnet) ? 1 : -1);
+            finalPlacement += ((hasWon) ? 1 : -1);
             //Går i løkke helt til denne plasseringen er ledig.
         } while (this.players.filter(s => {
-            return s.plassering == finnPlass;
+            return s.placement == finalPlacement;
         }).length >= 1);
-        spiller.plassering = finnPlass;
-        spiller.nullstillRunde();
+
+        player.placement = finalPlacement;
+        player.resetRound();
         return true;
     }
 
-    NesteSinTur_Neste(varSinTur) {
-        throw ("Må kodes!");
-        //Eksempel:
-        //return varSinTur+1;
-    }
-
-    NesteSinTur_HoppOver(sinTur) {
+    nextPlayerSkip(hasTurn) {
         return false;
-        //Kan overskrives hvis noen players skal hoppes over.
-        //(Spillere som har fått en placement hoppes automatisk over.)
     }
 
-    NesteSinTur_ForsteSpillerIgjen() {
-        //Kan overskrives når det har gått en round rundt bordet, i tilfelle noe må gjøres da.
-    }
+    nextPlayerTurn() {
+        if (this.hasTurn == -1 || this.status != "S" || this.hasTurn == null) {
+            throw ('Game not running.')
+        }
 
-    NesteSinTur() {
-        if (this.hasTurn == -1 || this.status != "S" || this.hasTurn == null) { throw ('Spillet er ikke i gang.') }
-        var varSinTur = this.players[this.hasTurn];
-        varSinTur.sinTur = 0;
-        var igjen = this.players.filter(spiller => { return spiller.plassering == 0; });
-        if (igjen.length <= 1) {
-            this.SpillerFerdig(igjen[0], false);
+        let playedLastCards = this.players[this.hasTurn];
+        playedLastCards.hasTurn = 0;
+
+        let again = this.players.filter(player => {
+            return player.placement == 0;
+        });
+        if (again.length <= 1) {
+            this.playerHasFinished(again[0], false);
             this.endTime = Date.now();
-            this.setSinTur(-1);
-            this.players = this.players.sort((a, b) => { return a.plassering - b.plassering; })
-            if (!this.resultater) { this.resultater = []; };
-            var resultat = [];
-            this.players.forEach(spiller => {
-                resultat.push(spiller.nick)
+            this.setHasTurn(-1);
+
+            this.players = this.players.sort((a, b) => { return a.placement - b.placement; })
+            if (!this.resultater) {
+                this.resultater = [];
+            };
+            let resultat = [];
+            this.players.forEach(player => {
+                resultat.push(player.nickname)
             });
             this.resultater.push(resultat);
             this.status = "F";
-            var spill = this;
+            let game = this;
+
             setTimeout(function () {
-                if (spill.status == "F" || spill.status == "O") {
-                    var fikset = false;
-                    spill.players.filter(s => (s.melding.length > 0)).forEach(spiller => {
+                if (game.status == "F" || game.status == "O") {
+                    let fikset = false;
+                    game.players.filter(s => (s.melding.length > 0)).forEach(spiller => {
                         spiller.melding = [];
                         fikset = true;
                     });
-                    if (fikset) { spill.save(); };
+                    if (fikset) { game.save(); };
                 }
             }, 14000 + 2000 * Math.random()); //Litt tilfeldig tid, så ikke alle players gjør det på likt.
         } else {
-            var nesteForsok = 0;
-            var nesteSinTur = this.hasTurn;
+            let nesteForsok = 0;
+            let nesteSinTur = this.hasTurn;
             do {
                 nesteSinTur = this.NesteSinTur_Neste(nesteSinTur, nesteForsok);
                 nesteForsok++;
@@ -149,18 +139,18 @@ class TycoonGame {
                 while (nesteSinTur < 0) {
                     nesteSinTur += this.players.length;
                 }
-            } while (this.NesteSinTur_HoppOver(nesteSinTur) || this.players[nesteSinTur].plassering != 0);
-            this.setSinTur(nesteSinTur);
-            this.players[nesteSinTur].nullstillRunde(varSinTur);
+            } while (this.nextPlayerSkip(nesteSinTur) || this.players[nesteSinTur].plassering != 0);
+            this.setHasTurn(nesteSinTur);
+            this.players[nesteSinTur].nullstillRunde(playedLastCards);
         }
         this.save();
     }
 
-    NySpiller(spiller_inn) {
-        var nySpiller = null;
+    addNewPlayer(player) {
+        let nySpiller = null;
         this.players.forEach(erSpiller => {
-            if (erSpiller.nick == spiller_inn.nick) {
-                if (erSpiller.spillerKey == spiller_inn.spillerKey) {
+            if (erSpiller.nick == player.nick) {
+                if (erSpiller.spillerKey == player.spillerKey) {
                     nySpiller = { spiller: erSpiller };
                 } else {
                     nyspiller = { tekst: 'Nick er allerede i bruk av annen spiller.' };
@@ -172,9 +162,9 @@ class TycoonGame {
             case "F":
                 this.GaaTilOppsett();
             case 'O':
-                this.players.push(spiller_inn);
+                this.players.push(player);
                 this.save();
-                return { spiller: spiller_inn };
+                return { spiller: player };
                 break;
             default:
                 return { tekst: 'Ingen nye players når spillet pågår.' };
@@ -182,23 +172,23 @@ class TycoonGame {
         }
     }
 
-    AvsluttSpiller(spiller) {
+    terminatePlayer(player) {
         switch (this.status) {
             case 'O':
             case "F":
-                this.players = this.players.filter(s => { return s !== spiller; });
+                this.players = this.players.filter(s => { return s !== player; });
                 this.save();
                 return null;
                 break;
             case 'S':
-                this.SpillerFerdig(spiller, false);
-                if (spiller.sinTur == 1) {
-                    this.NesteSinTur();
+                this.playerHasFinished(player, false);
+                if (player.sinTur == 1) {
+                    this.nextPlayerTurn();
                 } else {
                     this.save();
                 }
-                spiller.melding.push("Gir opp!");
-                return spiller;
+                player.melding.push("Gir opp!");
+                return player;
                 break;
             default:
                 throw ('Kan ikke gi opp nå.');

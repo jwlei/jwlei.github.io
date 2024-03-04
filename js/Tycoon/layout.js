@@ -1,12 +1,13 @@
 ﻿class Layout {
-    static el(tittel) {
-        return document.getElementById(tittel);
+    static el(title) {
+        return document.getElementById(title);
     }
-    static elVisible(elem, synlig = true) {
+
+    static elVisible(elem, visible = true) {
         if (typeof (elem) == "string") {
             elem = this.el(elem);
         }
-        switch (synlig) {
+        switch (visible) {
             case true:
                 elem.style.display = "inline";
                 break;
@@ -17,53 +18,63 @@
                 elem.style.display = ((elem.style.display == "none") ? "inline" : "none");
                 break;
             default:
-                throw ("Ukjent argument.");
+                throw ("Invalid argument.");
                 break;
         }
         try {
-            var elem_off;
-            elem_off = this.el(elem.id + "_Off");
-            elem_off.style.display = ((elem.style.display == "none") ? "inline" : "none");
+            var elementOff;
+            elementOff = this.el(elem.id + "_Off");
+            elementOff.style.display = ((elem.style.display == "none") ? "inline" : "none");
         } catch (error) { }
     }
-    static imgKortTag(K, width = null, rotering = null) {
-        return `<img src='${K.Img()}' ${((width != null) ? "width='" + width + "'" : "")} alt='${K.Navn()}' ${((rotering != null) ? "transform: translateX(" + rotering + "px) rotate(" + rotering + "deg);" : "")} />`;
+
+    static imageCardTag(card, width = null, rotation = null) {
+        return `<img
+                    src='${card.Img()}' ${((width != null) ? "width='" + width + "'" : "")}
+                    alt='${card.Navn()}' ${((rotation != null) ? "transform: translateX(" + rotation + "px) rotate(" + rotation + "deg);" : "")} />`;
     }
-    static imgKortElem(K, width) {
-        var e = document.createElement("img");
-        e.src = K.Img();
+
+    static imageCardElement(card, width) {
+        let e = document.createElement("img");
+        e.src = card.Img();
         if (width != null) { e.width = width; };
-        e.alt = K.Navn();
+        e.alt = card.Navn();
         return e;
     }
-    static FixFelles(spill, spiller) {
-        var divHovedmeny = document.getElementById("DivHovedmeny");
-        if (spill == null) {
-            fixClass(divHovedmeny, "Skjul", false);
-            this.FixHovedmeny();
+
+    static mainMenuController(game, player) {
+        let divMainMenu = document.getElementById("DivHovedmeny");
+
+        if (game == null) {
+            fixClass(divMainMenu, "Skjul", false);
+            this.drawCreateConnect();
             document.getElementById("DivBord").innerHTML = "";
         } else {
-            fixClass(divHovedmeny, "Skjul", true);
-            this.FixFKnapper(spill);
-            this.FixSpillere(spill, spiller);
-            this.FixBord(spill, spiller);
+            fixClass(divMainMenu, "Skjul", true);
+            this.buttonController(game);
+            this.playerActionsController(game, player);
+            this.FixBord(game, player);
         }
     }
-    static FixHovedmeny() {
+
+    static drawCreateConnect() {
         this.elVisible("BnHNySpill", true);
         this.elVisible("BnHKobleSpill", true);
     }
-    static FixFKnapper(spill) {
-        this.el("SpanSpillId").innerHTML = spill.spillId;
-        switch (spill.status) {
+
+    static buttonController(game) {
+        this.el("SpanSpillId").innerHTML = game.gameId;
+        switch (game.status) {
             case "O":
                 this.elVisible("BnFInviterSpill", true);
                 this.elVisible("BnFNyAutoSpiller", true);
-                this.elVisible("BnFStartSpill", spill.spillere.length >= 2);
+                this.elVisible("BnFStartSpill", game.players.length >= 2);
                 this.elVisible("BnFRegler", true);
                 this.elVisible("BnFHovedmeny", true);
                 break;
+
             case "S":
+
             case "G":
                 this.elVisible("BnFInviterSpill", true);
                 this.elVisible("BnFNyAutoSpiller", false);
@@ -71,6 +82,7 @@
                 this.elVisible("BnFRegler", true);
                 this.elVisible("BnFHovedmeny", false);
                 break;
+
             case "F":
                 this.elVisible("BnFInviterSpill", true);
                 this.elVisible("BnFNyAutoSpiller", true);
@@ -78,88 +90,93 @@
                 this.elVisible("BnFRegler", true);
                 this.elVisible("BnFHovedmeny", true);
                 break;
+
             default:
-                throw ('Ukjent spillstatus.');
+                throw ('Unknown gamestate.');
                 break;
         }
     }
-    static FixSpillere(spill, spillerErJeg) {
-        var elemHele = document.getElementById("DivSpillere");
-        elemHele.innerHTML = "";
-        spill.spillere.forEach(spiller => {
-            var elemSpiller = document.createElement("div");
-            var elemNick = document.createElement("span");
-            elemNick.innerHTML = spiller.nick;
-            elemSpiller.appendChild(elemNick);
-            if (spill.status != "S" && spill.status != "G") {
-                // Knapp for Ã¥ fjerne spiller (vises ikke nÃ¥r man spiller)
-                var elemFjern = document.createElement("button");
-                elemFjern.innerHTML = "Fjern";
-                elemFjern.onclick = function () {
-                    spill.AvsluttSpiller(spiller);
+
+    static playerActionsController(game, playerMe) {
+        let elementPlayers = document.getElementById("DivSpillere");
+        elementPlayers.innerHTML = "";
+
+        game.players.forEach(player => {
+            let elementPlayer = document.createElement("div");
+            let elementNickname = document.createElement("span");
+            elementNickname.innerHTML = player.nickname;
+            elementPlayer.appendChild(elementNickname);
+
+            if (game.status != "S" && game.status != "G") {
+                let elementRemovePlayer = document.createElement("button");  // Remove player button
+                elementRemovePlayer.innerHTML = "Fjern";
+                elementRemovePlayer.onclick = function () {
+                    game.terminatePlayer(player);
                 };
-                elemSpiller.appendChild(elemFjern);
+                elementPlayer.appendChild(elementRemovePlayer);
             }
-            if (spiller.plassering == 0) {
-                // Oppsett og spill
-                if (spiller.laPaaSist) {
-                    if (spiller.laPaaSist == "Pass") {
-                        var imgPass = document.createElement("img");
-                        imgPass.src = "ikoner/00Pass.png";
-                        elemSpiller.appendChild(imgPass);
+
+            if (player.placement == 0) {
+                // Oppsett og game
+                if (player.playedLastCards) {
+                    if (player.playedLastCards == "Pass") {
+                        let imgPass = document.createElement("img");
+                        imgPass.src = "ikoner/00Pass.png"; // TODO: Remove image
+                        elementPlayer.appendChild(imgPass);
                     } else {
-                        var i = 0;
-                        while (spiller.laPaaSist[i]) {
-                            elemSpiller.appendChild(Layout.imgKortElem(spiller.laPaaSist[i], null));
+                        let i = 0;
+                        while (player.playedLastCards[i]) {
+                            elementPlayer.appendChild(Layout.imageCardElement(player.playedLastCards[i], null));
                             i++;
                         }
                     }
-                } else if (spiller.sinTur == 1) {
-                    var placeholder = document.createElement("span");
+                } else if (player.hasTurn == 1) {
+                    let placeholder = document.createElement("span");
                     placeholder.id = "SpanHoppover";
-                    elemSpiller.appendChild(placeholder);
-                    setTimerHoppover(spill);
+                    elementPlayer.appendChild(placeholder);
+                    setTimerHoppover(game);
                 }
-                elemSpiller.className =
-                    ((spiller.sinTur == 1) ? " MinTur" : "") +
-                    ((spiller.kort.length == 1) ? " EttKort" : "");
-                var elemKortbakgrunner = document.createElement("div");
-                elemKortbakgrunner.className = "SpillerKortBakgrunner";
-                for (let kortNr = spiller.kort.length; kortNr > 0; kortNr--) {
-                    if (kortNr <= spiller.antTrukket) {
-                        elemKortbakgrunner.appendChild(Layout.imgKortElem(KortBoms.BakgrunnKort(1), null));
+                elementPlayer.className =
+                    ((player.hasTurn == 1) ? " MinTur" : "") +
+                    ((player.card.length == 1) ? " EttKort" : "");
+                let elementCardBackground = document.createElement("div");
+                elementCardBackground.className = "SpillerKortBakgrunner";
+                for (let cardNum = player.card.length; cardNum > 0; cardNum--) {
+                    if (cardNum <= player.antTrukket) {
+                        elementCardBackground.appendChild(Layout.imageCardElement(KortBoms.BakgrunnKort(1), null));
                     } else {
-                        elemKortbakgrunner.appendChild(Layout.imgKortElem(KortBoms.BakgrunnKort(), null));
+                        elementCardBackground.appendChild(Layout.imageCardElement(KortBoms.BakgrunnKort(), null));
                     }
                 }
-                spiller.kort.forEach(k => { });
-                elemSpiller.appendChild(elemKortbakgrunner);
+                player.card.forEach(card => { });
+                elementPlayer.appendChild(elementCardBackground);
             } else {
                 // Ferdig
-                elemSpiller.className = "Ferdig";
-                var elemPlass = document.createElement("div");
+                elementPlayer.className = "Ferdig";
+                let elemPlass = document.createElement("div");
                 elemPlass.className = "SpillerKortPlassering";
-                var tittel = spill.spillerTittel(spiller.plassering);
-                elemPlass.innerHTML = `<img src='ikoner/${tittel.img}' alt='${tittel.tittel}' />` + `&nbsp;${tittel.tittel}`;
-                elemSpiller.appendChild(elemPlass);
+                let title = game.spillerTittel(player.plassering);
+                elemPlass.innerHTML = `<img src='ikoner/${title.img}' alt='${title.title}' />` + `&nbsp;${title.title}`;
+                elementPlayer.appendChild(elemPlass);
             }
-            spiller.melding.forEach(m => {
-                var elemMelding = document.createElement("span");
-                elemMelding.className = "melding";
-                elemMelding.innerHTML = m;
-                elemSpiller.appendChild(elemMelding);
-                elemSpiller.appendChild(document.createElement("br"));
+            player.message.forEach(m => {
+                let elementMessage = document.createElement("span");
+                elementMessage.className = "melding";
+                elementMessage.innerHTML = m;
+                elementPlayer.appendChild(elementMessage);
+                elementPlayer.appendChild(document.createElement("br"));
             });
-            elemHele.appendChild(elemSpiller);
+            elementPlayers.appendChild(elementPlayer);
         });
     }
+
     static TegneHoppover(tekster, funcer) {
         tekster.push("Avbryt (ikke gjÃ¸r noe)");
         funcer.push(function () { });
-        var elem = document.getElementById("SpanHoppover");
+        let elem = document.getElementById("SpanHoppover");
         if (elem == null) { return; };
         fixClass(elem, "DropdownButton", true);
-        var b = document.createElement("img");
+        let b = document.createElement("img");
         b.src = 'ikoner/00Sleep.png';
         b.alt = 'Hjelp spiller som har sovnet';
         b.onclick = function () {
@@ -171,8 +188,9 @@
         };
         elem.appendChild(b);
     }
+
     static FixBord(spill, spiller) {
-        var bord = document.getElementById("DivBord");
+        let bord = document.getElementById("DivBord");
         switch (spill.status) {
             case "O":
                 if (spill.spillere.length == 0) {
@@ -184,7 +202,7 @@
                     bord.className = "BordKortstokker";
                     var s = "";
                     for (let i = 0; i < spill.BeregnAntKortstokker(); i++) {
-                        s += Layout.imgKortTag(Kort.BakgrunnKort(), null);
+                        s += Layout.imageCardTag(Kort.BakgrunnKort(), null);
                     }
                     bord.innerHTML = s;
                 }
@@ -223,7 +241,7 @@
                     //}
                     var spanKort = document.createElement("span");
                     bytte.kort.forEach(kort => {
-                        var elemK = Layout.imgKortElem(((seKort) ? new Kort(kort.farge, kort.verdi) : Kort.BakgrunnKort()), null);
+                        var elemK = Layout.imageCardElement(((seKort) ? new Kort(kort.farge, kort.verdi) : Kort.BakgrunnKort()), null);
                         spanKort.appendChild(elemK);
                     });
                     var spanKnapp = document.createElement("span");
@@ -276,7 +294,7 @@
                 var elem = null;
                 spill.spillBunke.forEach(kb => {
                     kb.forEach(k => {
-                        elem = Layout.imgKortElem(k, null);
+                        elem = Layout.imageCardElement(k, null);
                         elem.style = `transform: translateX(${Math.round(seedRandom() * 50 - 25)}px) translateY(${Math.round(seedRandom() * 80 - 40)}px) rotate(${Math.round(seedRandom() * 30 - 15)}deg);`;
                         bord.appendChild(elem);
                     });
@@ -295,12 +313,14 @@
                 break;
         }
     }
+
     static FixPrivat(spill, spiller) {
         fixClass(document.getElementById("DivHele"), "SePaaModus", (spiller == null));
         fixClass(document.getElementById("DivHele"), "KunKortModus", (spill != null && spill.regler.VisKunKort && spiller != null));
         this.FixPKnapper(spill, spiller);
         this.FixKort(spill, spiller);
     }
+
     static FixPKnapper(spill, spiller) {
         if (spill == null) {
             this.elVisible("BnPNySpiller", false);
@@ -349,6 +369,7 @@
         this.elVisible("BnPPass", (spiller != null && spill.SpillerKanPasse(spiller)));
         this.elVisible("BnPGiOpp", (spiller != null && !(spill.status == "S" && spiller.plassering != 0)));
     }
+
     static FixKort(spill, spiller) {
         var elem = document.getElementById("DivKort");
         elem.innerHTML = "";
@@ -368,7 +389,7 @@
                     kortNummer++;
                     var elemKort = document.createElement('span');
                     elemKort.style.transform = `translateX(${-2 * Math.round(100 * ((kortNummer / (spiller.kort.length - 1)) - 0.5)) / 10}px) rotate(${Math.round(100 * ((kortNummer / (spiller.kort.length - 1)) - 0.5)) / 10}deg)`;
-                    elemKort.innerHTML = Layout.imgKortTag(k, null);
+                    elemKort.innerHTML = Layout.imageCardTag(k, null);
                     switch (spill.status) {
                         case "G":
                             spill.spillBunke.filter(gave => (gave.modus == "Velg" && spill.spillere[gave.fra] == spiller)).forEach(gave => {
@@ -398,7 +419,7 @@
                                                 for (let n = 0; n < i; n++) { kb.push(info.kb[n]); };
                                                 var htmlTekst = "<div class='AskKort'>";
                                                 kb.forEach(kort => {
-                                                    htmlTekst += Layout.imgKortTag(kort, null);
+                                                    htmlTekst += Layout.imageCardTag(kort, null);
                                                 });
                                                 htmlTekst += '</div>';
                                                 dialogTekster.push(htmlTekst);
@@ -415,7 +436,7 @@
                                         if (spill.KanLeggeKort(spiller, k.verdiBoms, info)) {
                                             var htmlTekst = "<div class='AskKort'>";
                                             info.kb.forEach(kort => {
-                                                htmlTekst += Layout.imgKortTag(kort, null);
+                                                htmlTekst += Layout.imageCardTag(kort, null);
                                             });
                                             htmlTekst += '</div>';
                                             var dialogTekster = [

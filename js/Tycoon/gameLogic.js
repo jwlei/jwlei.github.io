@@ -1,4 +1,4 @@
-﻿class GameUtility extends TycoonGame {
+﻿class GameLogic extends TycoonGame {
     constructor(id = null) {
         super(id);
         this.debug = true;
@@ -41,6 +41,7 @@
 
     playerTitle(placement) {
         if (this.players.length >= 5) {
+            // TODO: remove images from the game logic
             switch (placement) {
                 case 1:
                     return ({ tittel: "President", img: "00President.png" });
@@ -95,7 +96,7 @@
             });
             this.cardsOnTable = [];
             this.status = "G"; //Gi card til hverandre
-            this.setSinTur(null);
+            this.setHasTurn(null);
             if (this.players.length >= 5) {
                 this.players[0].melding.push("Skal gi to card til bomsen.");
                 this.players[1].melding.push("Skal gi ett card til visebomsen.");
@@ -148,7 +149,7 @@
                     bytte.kort.push(kort[kort.length - i]);
                 }
             });
-            this.setSinTur(null);
+            this.setHasTurn(null);
             this.cardsOnTable.filter(bytte => (bytte.modus == "Velg")).forEach(bytte => {
                 this.players[bytte.fra].sinTur = 1;
             });
@@ -176,7 +177,7 @@
             this.cardsOnTable.forEach(bytte => {
                 bytte.modus = "Kan se";
             });
-            this.setSinTur(-1);
+            this.setHasTurn(-1);
         }
         this.save();
     }
@@ -193,7 +194,7 @@
         if (this.cardsOnTable.length == 0) {
             //Alle bytter gjennomfÃ¸rt
             this.status = "S";
-            this.setSinTur(0);
+            this.setHasTurn(0);
         }
         this.save();
     }
@@ -314,13 +315,13 @@
         if (spiller.kort.length == 0) {
             if (kb.verdiBoms == KortBoms.Klover3verdi()) {
                 // Hvis man legger KlÃ¸ver 3 som siste card, sÃ¥ taper man:
-                this.SpillerFerdig(spiller, false);
+                this.playerHasFinished(spiller, false);
             } else {
                 // Ferdig pÃ¥ riktig mÃ¥te:
-                this.SpillerFerdig(spiller);
+                this.playerHasFinished(spiller);
             }
         }
-        this.NesteSinTur();
+        this.nextPlayerTurn();
     }
 
     SpillerKanPasse(spiller) {
@@ -331,7 +332,7 @@
 
     SpillerPass(spiller) {
         spiller.laPaaSist = "Pass";
-        this.NesteSinTur();
+        this.nextPlayerTurn();
     }
 
     NesteSinTur_Neste(varSinTur) {
@@ -373,7 +374,7 @@
         }
     }
 
-    NesteSinTur_HoppOver(sinTur) {
+    nextPlayerSkip(sinTur) {
         return (this.players[sinTur].laPaaSist == "Pass");
     }
 }
