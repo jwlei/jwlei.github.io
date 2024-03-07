@@ -42,6 +42,7 @@ class TycoonGame {
 
     setHasTurn(player) {
         this.players.forEach(player => { player.hasTurn = 0; })
+
         if (player == null) {
             this.hasTurn = -1;
         } else if (typeof player == "number") {
@@ -105,66 +106,69 @@ class TycoonGame {
             this.setHasTurn(-1);
 
             this.players = this.players.sort((a, b) => { return a.placement - b.placement; })
-            if (!this.resultater) {
-                this.resultater = [];
+            if (!this.results) {
+                this.results = [];
             };
-            let resultat = [];
+            let result = [];
             this.players.forEach(player => {
-                resultat.push(player.nickname)
+                result.push(player.nickname)
             });
-            this.resultater.push(resultat);
+            this.results.push(result);
             this.status = "F";
             let game = this;
 
             setTimeout(function () {
                 if (game.status == "F" || game.status == "O") {
-                    let fikset = false;
-                    game.players.filter(s => (s.melding.length > 0)).forEach(spiller => {
-                        spiller.melding = [];
-                        fikset = true;
+                    let fixated = false;
+                    game.players.filter(s => (s.message.length > 0)).forEach(player => {
+                        player.message = [];
+                        fixated = true;
                     });
-                    if (fikset) { game.save(); };
+                    if (fixated) { game.save(); };
                 }
             }, 14000 + 2000 * Math.random()); //Litt tilfeldig tid, så ikke alle players gjør det på likt.
         } else {
-            let nesteForsok = 0;
-            let nesteSinTur = this.hasTurn;
+            let nextTry = 0;
+            let nextPlayer = this.hasTurn;
             do {
-                nesteSinTur = this.NesteSinTur_Neste(nesteSinTur, nesteForsok);
-                nesteForsok++;
-                while (nesteSinTur >= this.players.length) {
-                    nesteSinTur -= this.players.length;
+                nextPlayer = this.nextPlayerTurn(nextPlayer, nextTry);
+                nextTry++;
+                while (nextPlayer >= this.players.length) {
+                    nextPlayer -= this.players.length;
                     this.NesteSinTur_ForsteSpillerIgjen();
                 }
-                while (nesteSinTur < 0) {
-                    nesteSinTur += this.players.length;
+                while (nextPlayer < 0) {
+                    nextPlayer += this.players.length;
                 }
-            } while (this.nextPlayerSkip(nesteSinTur) || this.players[nesteSinTur].plassering != 0);
-            this.setHasTurn(nesteSinTur);
-            this.players[nesteSinTur].nullstillRunde(playedLastCards);
+            } while (this.nextPlayerSkip(nextPlayer) || this.players[nextPlayer].placement != 0);
+            this.setHasTurn(nextPlayer);
+            this.players[nextPlayer].nullstillRunde(playedLastCards);
         }
         this.save();
     }
 
     addNewPlayer(player) {
-        let nySpiller = null;
-        this.players.forEach(erSpiller => {
-            if (erSpiller.nick == player.nick) {
-                if (erSpiller.spillerKey == player.spillerKey) {
-                    nySpiller = { spiller: erSpiller };
+        let playerNew = null;
+        this.players.forEach(isPlayer => {
+            if (isPlayer.nickname == player.nickname) {
+                if (isPlayer.playerId == player.playerId) {
+                    playerNew = { player: isPlayer };
                 } else {
-                    nyspiller = { tekst: 'Nick er allerede i bruk av annen spiller.' };
+                    playerNew = { tekst: 'Nick er allerede i bruk av annen player.' };
                 }
             }
         });
-        if (nySpiller != null) { return nySpiller };
+        if (playerNew != null) {
+            return playerNew
+        };
+
         switch (this.status) {
             case "F":
                 this.GaaTilOppsett();
             case 'O':
                 this.players.push(player);
                 this.save();
-                return { spiller: player };
+                return { player: player };
                 break;
             default:
                 return { tekst: 'Ingen nye players når spillet pågår.' };

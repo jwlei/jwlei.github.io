@@ -335,7 +335,7 @@
         this.nextPlayerTurn();
     }
 
-    NesteSinTur_Neste(varSinTur) {
+    nextPlayerTurn(varSinTur) {
         var info = {};
         if (this.SpillBunkeGarUt(info)) {
             var spillerSist = this.players[varSinTur];
