@@ -18,7 +18,7 @@
             font-size: 24px;
             margin: 10px;
             text-decoration: none;
-            color: #000;
+            color: white;
         }
         .clock {
             margin-top: 20px;
@@ -27,20 +27,11 @@
     </style>
 </head>
 <body>
-    <h1>Shortcuts</h1>
     <a href="https://www.youtube.com" target="_blank">YouTube</a>
     <a href="https://www.reddit.com" target="_blank">Reddit</a>
     <a href="https://www.messenger.com" target="_blank">Messenger</a>
     <a href="https://github.com/jwlei/" target="_blank">GitHub</a>
     <div class="clock" id="clock"></div>
-    <script>
-        function updateClock() {
-            const now = new Date();
-            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'UTC' };
-            document.getElementById('clock').textContent = now.toLocaleString('sv-SE', options);
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-    </script>
+
 </body>
 </html>
