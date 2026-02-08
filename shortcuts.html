@@ -1,1 +1,46 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Shortcuts</title>\n    <style>\n        body { font-family: Arial, sans-serif; }\n        .shortcuts { margin: 20px; }\n        .shortcut-item { margin: 10px 0; }\n    </style>\n</head>\n<body>\n    <h1>Shortcuts</h1>\n    <div class="shortcuts">\n        <div class="shortcut-item"><a href="https://www.youtube.com">YouTube</a></div>\n        <div class="shortcut-item"><a href="https://www.reddit.com">Reddit</a></div>\n        <div class="shortcut-item"><a href="https://www.messenger.com">Messenger</a></div>\n        <div class="shortcut-item"><a href="https://github.com">GitHub</a></div>\n    </div>\n    <footer>\n        <p>Current Date and Time (UTC): 2026-02-08 21:30:20</p>\n    </footer>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css"> <!-- Make sure this points to your CSS file -->
+    <title>Shortcuts</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        a {
+            font-size: 24px;
+            margin: 10px;
+            text-decoration: none;
+            color: #000;
+        }
+        .clock {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shortcuts</h1>
+    <a href="https://www.youtube.com" target="_blank">YouTube</a>
+    <a href="https://www.reddit.com" target="_blank">Reddit</a>
+    <a href="https://www.messenger.com" target="_blank">Messenger</a>
+    <a href="https://github.com/jwlei/jwlei.github.io" target="_blank">GitHub Repository</a>
+    <div class="clock" id="clock"></div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'UTC' };
+            document.getElementById('clock').textContent = now.toLocaleString('sv-SE', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
