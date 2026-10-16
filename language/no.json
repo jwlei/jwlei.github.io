@@ -14,6 +14,9 @@
 
   "name": "Joachim Leiros",
   "job-title": "Dataingeniør",
+  "hero-kicker": "PROGRAMVAREUTVIKLER · NORGE",
+  "hero-summary": "Jeg utvikler gjennomtenkte løsninger og liker å gjøre komplekse utfordringer enkle og pålitelige.",
+  "typing-prefix": "Jeg jobber med",
   "dl-portfolio": "Last ned CV",
 
   "about-me-content": "Ambisiøs utvikler og familiemann. \n\nLiker å lære nye teknologier og utvikle ferdighetene mine. ",
@@ -24,9 +27,13 @@
   "other": "Annet",
   
   "employer-4": "Hansen Technologies",
-  "employer-4-date": "Mars 2023 - Nå",
+  "employer-4-date": "Mars 2023 - August 2026",
   "employer-4-job": "Prosjektkonsulent",
   "employer-4-desc": "Service delivery for Hansen CIS-E/EnoroCX, fokus på Ledger/Billing",
+  "employer-5": "Hansen Technologies",
+  "employer-5-date": "September 2026 - nå",
+  "employer-5-job": "Senior prosjektkonsulent",
+  "employer-5-desc": "Senior prosjektkonsulent for Hansen CIS-E/EnoroCX, fortsatt med fokus på Ledger/Billing.",
 
   "employer-3": "NAV",
   "employer-3-date": "September 2022 - Februar 2023",
@@ -44,6 +51,9 @@
   "education-1-desc": "Evidensbasert behandling med fokus på ICF- modellen \n\n Avbrutt.",
 
   "project-link": "Se prosjekt",
+  "project-nexus-link": "Nexus Mods",
+  "project-radial-queue-desc": "En mod for Monster Hunter Wilds som legger handlinger valgt fra radialmenyen i kø, slik at flere handlinger kan utføres etter hverandre.",
+  "project-immersivehud-desc": "En Valheim-mod som skjuler HUD-elementer automatisk basert på konfigurerbare betingelser, for en mer oppslukende spillopplevelse.",
   "project-2": "Detektering og varsling av hjortevilt ved veibane ved bruk av dyplæring",
   "project-2-desc": "Utvikling av en dyplæringsmodell og python program for nøyaktig sanntids deteksjon og varsling av hjortevilt nær offentlig veier.",
 

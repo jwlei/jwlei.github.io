@@ -273,6 +273,7 @@ async function setLocale(newLocale) {
     const newTranslations = await fetchTranslationsFor(newLocale);
     locale = newLocale;
     translations = newTranslations;
+    document.documentElement.lang = newLocale === "no" ? "nb" : "en";
 
     translatePage();
 }
@@ -291,6 +292,13 @@ function translatePage() {
     // data-i18n-key attribute with the translation corresponding
     // to its data-i18n-key
     document.querySelectorAll("[i18n-key]").forEach(translateElement);
+    document.querySelectorAll("[i18n-date-key]").forEach(element => {
+        const key = element.getAttribute("i18n-date-key");
+        const date = translations[key];
+        element.setAttribute("data-date", date);
+        const renderedDate = element.parentElement.querySelector(".vtimeline-date");
+        if (renderedDate) renderedDate.innerText = date;
+    });
     changePortfolioDlLink()
 }
 
@@ -368,5 +376,3 @@ for (var i = 0, el; el = els[i]; i++) {
         console.log(el);
     }
 }
-
-

@@ -14,6 +14,9 @@
 
   "name": "Joachim Leiros",
   "job-title": "Software Engineer",
+  "hero-kicker": "SOFTWARE ENGINEER · NORWAY",
+  "hero-summary": "I build thoughtful software and enjoy turning complex problems into clear, reliable solutions.",
+  "typing-prefix": "I work with",
   "dl-portfolio": "Download portfolio",
 
   "about-me-content": "Ambitious developer and family man situated in Norway. \n\n I love learning new technologies and further improving myself.",
@@ -24,9 +27,13 @@
   "other": "Other",
   
   "employer-4": "Hansen Technologies",
-  "employer-4-date": "March 2023 - Present",
+  "employer-4-date": "March 2023 - August 2026",
   "employer-4-job": "Project consultant",
   "employer-4-desc": "Service delivery for Hansen CIS-E/EnoroCX, focusing on Ledger/Billing",
+  "employer-5": "Hansen Technologies",
+  "employer-5-date": "September 2026 - Present",
+  "employer-5-job": "Senior project consultant",
+  "employer-5-desc": "Senior project consultant for Hansen CIS-E/EnoroCX, continuing to focus on Ledger/Billing.",
 
   "employer-3": "NAV",
   "employer-3-date": "September 2022 - February 2023",
@@ -44,6 +51,9 @@
   "education-1-desc": "Evidence based treatment with focus on the ICF-model. \n\n Aborted.",
 
   "project-link": "View Project",
+  "project-nexus-link": "Nexus Mods",
+  "project-radial-queue-desc": "A Monster Hunter Wilds mod that queues actions selected from the radial menu, making it easier to perform several actions in sequence.",
+  "project-immersivehud-desc": "A Valheim mod that hides HUD elements dynamically based on configurable in-game conditions for a more immersive experience.",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
   "project-2-desc": "Development of a deep learning model and Python application for accurate real-time detection and warning of game close to public roads.",
 

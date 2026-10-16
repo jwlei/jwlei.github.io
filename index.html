@@ -9,9 +9,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- <meta i18-key="meta-description" name=”description” content="Personal portfolio for Joachim Leiros, I showcase my skills and personal projects" /> -->
-    <meta name=”description” content="My personal portfolio containing my projects, which technologies I utilize and my contact information" />
-    <meta i18-key="meta-keywords" name=”keywords” content="Joachim Leiros, portolio, cv, technologies, contact, hire, deep learning, java, skills, projects, developer" />
-    <meta name=”robots” content=”index,follow” />
+    <meta name="description" content="My personal portfolio containing my projects, the technologies I use, and my contact information" />
+    <meta name="keywords" content="Joachim Leiros, portfolio, CV, technologies, contact, deep learning, Java, projects, developer" />
+    <meta name="robots" content="index,follow" />
 
     <title i18n-key="title">Joachim Leiros | Portfolio</title>
 
@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css" />
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
+    <link href="css/portfolio.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -36,6 +37,10 @@
     </div>
     <!-- End #mobile-menu-toggle -->
     <header id="navbar" class="shadow slider slide-in">
+        <a class="site-brand" href="#lead-section" aria-label="Joachim Leiros, home">
+            <span class="brand-mark">JL</span>
+            <span class="brand-name">J<span>L</span></span>
+        </a>
         <div id="mobile-menu-close" class="toggle">
             <span i18n-key="menu-close"></span>
         </div>
@@ -54,13 +59,13 @@
             <li class="menu-lang">
                 <img src="media/images/icons/no_flag.ico" alt="NORWEGIAN"
                      i18n-lang-switcher onclick="setLocale('no');"
-                     width="20px" height="20px">
+                     width="20" height="20">
             </li>
 
             <li class="menu-lang">
                 <img src="media/images/icons/en_flag.ico" alt="ENGLISH"
-                     i18n-lang-switcher onclick="setLocale('en');"
-                     width="20px" height="20px">
+                     onclick="setLocale('en');"
+                     width="20" height="20">
             </li>
         </ul>
     </header>
@@ -69,14 +74,38 @@
     <section id="lead-section">
         <div id="lead">
             <div id="lead-content">
+                <p class="hero-kicker"><span class="status-dot"></span><span i18n-key="hero-kicker"></span></p>
                 <h1 i18n-key="name"></h1>
                 <h2 i18n-key="job-title"></h2>
+                <p class="hero-summary" i18n-key="hero-summary"></p>
                 <div class="typing-container">
-                    <span id="sentence" class="sentence"></span>
+                    <span class="typing-prefix" i18n-key="typing-prefix"></span>
                     <span id="feature-text"></span>
                     <span class="input-cursor"></span>
                 </div>
-                <a i18n-key="dl-portfolio" id="cv-dl" href="#" class="btn-rounded"></a>
+                <div class="hero-actions">
+                    <a i18n-key="dl-portfolio" id="cv-dl" href="#" class="btn-rounded"></a>
+                    <a class="text-link" href="#project-section"><span i18n-key="projects"></span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
+            </div>
+            <div class="hero-editor" aria-hidden="true">
+                <div class="editor-titlebar">
+                    <div class="editor-dots"><span></span><span></span><span></span></div>
+                    <span class="editor-filename">about-me.js</span>
+                    <span class="editor-language">JavaScript</span>
+                </div>
+                <div class="editor-body">
+                    <div class="editor-line"><span class="line-number">1</span><code><span class="code-purple">const</span> developer = {</code></div>
+                    <div class="editor-line"><span class="line-number">2</span><code>&nbsp; name: <span class="code-green">"Joachim Leiros"</span>,</code></div>
+                    <div class="editor-line"><span class="line-number">3</span><code>&nbsp; role: <span class="code-green">"Software Engineer"</span>,</code></div>
+                    <div class="editor-line"><span class="line-number">4</span><code>&nbsp; basedIn: <span class="code-green">"Norway"</span>,</code></div>
+                    <div class="editor-line"><span class="line-number">5</span><code>&nbsp; interests: [</code></div>
+                    <div class="editor-line"><span class="line-number">6</span><code>&nbsp;&nbsp; <span class="code-green">"web"</span>, <span class="code-green">"AI"</span>, <span class="code-green">"good coffee"</span></code></div>
+                    <div class="editor-line"><span class="line-number">7</span><code>&nbsp; ]</code></div>
+                    <div class="editor-line"><span class="line-number">8</span><code>};</code></div>
+                    <div class="editor-line editor-comment"><span class="line-number">9</span><code><span class="code-muted">// Always learning, always building.</span></code></div>
+                </div>
+                <div class="editor-status"><span><i class="fa fa-code" aria-hidden="true"></i> UTF-8</span><span><i class="fa fa-check-circle" aria-hidden="true"></i> Ready to build</span></div>
             </div>
             <!-- End #lead-content -->
             <!-- Start #lead-down -->
@@ -179,13 +208,19 @@
         <div id="experience" class="shadow-x-large">
             <h2 i18n-key="experience" class="heading"></h2>
             <div id="experience-timeline">
-                <div id="timeline4" data-date="March 2023 - t.d. ">
+                <div id="timeline5" data-date="September 2026 - Present" i18n-date-key="employer-5-date">
+                    <h3 i18n-key="employer-5"></h3>
+                    <h4 i18n-key="employer-5-job"></h4>
+                    <p i18n-key="employer-5-desc"></p>
+                </div>
+
+                <div id="timeline4" data-date="March 2023 - August 2026" i18n-date-key="employer-4-date">
                     <h3 i18n-key="employer-4"></h3>
                     <h4 i18n-key="employer-4-job"></h4>
                     <p i18n-key="employer-4-desc"></p>
                 </div>
 
-                <div id="timeline3" data-date="September 2022 - February 2023">
+                <div id="timeline3" data-date="September 2022 - February 2023" i18n-date-key="employer-3-date">
                     <h3 i18n-key="employer-3"></h3>
                     <h4 i18n-key="employer-3-job"></h4>
                     <p i18n-key="employer-3-desc"></p>
@@ -227,7 +262,7 @@
                 <div class="project shadow-large">
                     <!-- Start .project-image -->
                     <div class="project-video">
-                        <video autoplay loop width="300" height="300">
+                        <video autoplay muted loop playsinline width="300" height="300" title="Real-time wildlife detection demo">
                             <source src="/media/projects/video/dwls-demo.webm"
                                     type="video/webm">
                         </video>
@@ -238,7 +273,7 @@
                         <h3 i18n-key="project-2"></h3>
                         <p i18n-key="project-2-desc">
                         </p>
-                        <a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2"></a>
+                        <a i18n-key="project-link" href="https://github.com/jwlei/real-time-object-detection-YOLOv5-cv2" target="_blank" rel="noopener noreferrer"></a>
                     </div>
                     <!-- End .project-info -->
                 </div>
@@ -257,11 +292,37 @@
                         <h3 i18n-key="project-1"></h3>
                         <p i18n-key="project-1-desc">
                         </p>
-                        <a i18n-key="project-link" href="https://github.com/jwlei/EZBuild"></a>
+                        <a i18n-key="project-link" href="https://github.com/jwlei/EZBuild" target="_blank" rel="noopener noreferrer"></a>
                     </div>
                     <!-- End .project-info -->
                 </div>
                 <!-- End .project -->
+            </div>
+            <div class="row">
+                <div class="project shadow-large">
+                    <div class="project-info">
+                        <p class="project-platform">Monster Hunter Wilds · Lua · REFramework</p>
+                        <h3>Radial Queue</h3>
+                        <p i18n-key="project-radial-queue-desc"></p>
+                        <div class="project-links">
+                            <a i18n-key="project-link" href="https://github.com/jwlei/radial_queue" target="_blank" rel="noopener noreferrer"></a>
+                            <a class="project-nexus-link" i18n-key="project-nexus-link" href="https://next.nexusmods.com/profile/taakefyrsten" target="_blank" rel="noopener noreferrer"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="project shadow-large">
+                    <div class="project-info">
+                        <p class="project-platform">Valheim · C# · BepInEx</p>
+                        <h3>ImmersiveHud</h3>
+                        <p i18n-key="project-immersivehud-desc"></p>
+                        <div class="project-links">
+                            <a i18n-key="project-link" href="https://github.com/jwlei/ImmersiveHud" target="_blank" rel="noopener noreferrer"></a>
+                            <a class="project-nexus-link" i18n-key="project-nexus-link" href="https://www.nexusmods.com/valheim/mods/2732" target="_blank" rel="noopener noreferrer"></a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         </div>
@@ -275,9 +336,9 @@
             <div id="contact-form">
                 <form method="POST" action="https://formspree.io/f/mjvzrygo">
                     <input type="hidden" name="_subject" value="Contact request from personal website" />
-                    <label i18n-key="placeholder-email" for="contact-form"></label>
-                    <input id="p-email" type="email" name="_replyto" required></input>
-                    <label i18n-key="placeholder-message" for="contact-form"></label>
+                    <label i18n-key="placeholder-email" for="p-email"></label>
+                    <input id="p-email" type="email" name="_replyto" required>
+                    <label i18n-key="placeholder-message" for="p-msg"></label>
                     <textarea id="p-msg" name="message" required></textarea>
                     <button i18n-key="contact-form-submit-btn" type="submit"></button>
                 </form>
@@ -301,10 +362,10 @@
                 <div class="col-sm-5 social">
                     <ul>
                         <li>
-                            <a href="https://github.com/jwlei" target="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+                            <a href="https://github.com/jwlei" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
                         </li>
                         <li>
-                            <a href="https://www.linkedin.com/in/jleiros" target="LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                            <a href="https://www.linkedin.com/in/jleiros" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
                         </li>
                     </ul>
                 </div>
