@@ -58,7 +58,13 @@
   "education-1-desc": "Evidensbasert behandling med fokus på ICF- modellen \n\n Avbrutt.",
 
   "project-link": "Se prosjekt",
+  "project-play-link": "Spill i nettleseren",
   "project-nexus-link": "Nexus Mods",
+  "project-norwegian-tycoon": "Norwegian Tycoon — Boms og president",
+  "project-norwegian-tycoon-platform": "Nettleserspill · Firebase · Mobil",
+  "project-norwegian-tycoon-desc": "Et norsk kortspill du kan spille i nettleseren. Opprett et spill, inviter venner på nett eller legg til robotspillere.",
+  "project-tycoon-play-label": "Spill Norwegian Tycoon i nettleseren",
+  "project-tycoon-github-label": "Se kildekoden til Norwegian Tycoon på GitHub",
   "project-2-github-label": "Åpne prosjektet for dyregjenkjenning på GitHub",
   "project-ezbuild-github-label": "Åpne EZBuild på GitHub",
   "project-ezbuild-nexus-label": "Åpne EZBuild på Nexus Mods",

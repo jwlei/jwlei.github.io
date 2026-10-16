@@ -58,7 +58,13 @@
   "education-1-desc": "Evidence based treatment with focus on the ICF-model. \n\n Aborted.",
 
   "project-link": "View Project",
+  "project-play-link": "Play in browser",
   "project-nexus-link": "Nexus Mods",
+  "project-norwegian-tycoon": "Norwegian Tycoon — Boms og President",
+  "project-norwegian-tycoon-platform": "Browser game · Firebase · Mobile",
+  "project-norwegian-tycoon-desc": "A Norwegian card game playable in your browser. Create a room, invite friends to play online, or add bot players.",
+  "project-tycoon-play-label": "Play Norwegian Tycoon in this browser",
+  "project-tycoon-github-label": "View the Norwegian Tycoon source code on GitHub",
   "project-2-github-label": "Open the wildlife detection project on GitHub",
   "project-ezbuild-github-label": "Open EZBuild on GitHub",
   "project-ezbuild-nexus-label": "Open EZBuild on Nexus Mods",
