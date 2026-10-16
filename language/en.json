@@ -4,6 +4,7 @@
   
   
   "title": "Joachim Leiros | Personal page",
+  "home": "Home",
   "skip-to-content": "Skip to content",
   "menu-open": "Open menu",
   "menu-close": "Close",
@@ -20,7 +21,6 @@
 
   "name": "Joachim Leiros",
   "job-title": "Software Engineer",
-  "hero-kicker": "SOFTWARE ENGINEER · NORWAY",
   "hero-summary": "I build thoughtful software and enjoy turning complex problems into clear, reliable solutions.",
   "hero-skills": "I work with Java, Python, web development, and machine learning.",
   "typing-prefix": "I work with",
@@ -66,11 +66,14 @@
   "project-radial-queue-nexus-label": "Open Radial Queue on Nexus Mods",
   "project-immersivehud-github-label": "Open ImmersiveHud on GitHub",
   "project-immersivehud-nexus-label": "Open ImmersiveHud on Nexus Mods",
-  "project-radial-queue-desc": "A Monster Hunter Wilds mod that queues actions selected from the radial menu, making it easier to perform several actions in sequence.",
+  "project-radial-queue-desc": "Queues radial and shortcut inputs until an action can run, preventing missed inputs and repeat clicking during animations.",
+  "project-radial-queue-reception": "Nexus Mods reception: 207 endorsements · 11.2k downloads",
   "project-immersivehud-desc": "A Valheim mod that hides HUD elements dynamically based on configurable in-game conditions for a more immersive experience.",
+  "project-immersivehud-reception": "Nexus Mods reception: 15 endorsements · 598 downloads",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
   "project-2-desc": "Development of a deep learning model and Python application for accurate real-time detection and warning of game close to public roads.",
 
   "project-1": "EZBuild",
-  "project-1-desc": "A modification for the game Valheim that allows players to select tools and build structures in a more efficient way using a pipette tool."
+  "project-1-desc": "A Valheim building quality-of-life mod with a pipette for building and resource gathering, automatic tool selection, interaction while building, and quick hammer/repair hotkeys.",
+  "project-ezbuild-reception": "Nexus Mods reception: 57 endorsements · 1.7k downloads"
 }

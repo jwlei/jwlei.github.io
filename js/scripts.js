@@ -5,6 +5,35 @@
 
     // Remove no-js class
     $('html').removeClass('no-js');
+
+    function setupScrollReveal() {
+        var reducedMotion = window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion || !('IntersectionObserver' in window)) return;
+
+        var targets = document.querySelectorAll(
+            '#about, #skills .row, #experience .vtimeline-point, .education-block, .project'
+        );
+        var staggerTargets = document.querySelectorAll(
+            '#skills .row, #experience .vtimeline-point, .education-block, .project'
+        );
+        staggerTargets.forEach(function(target, index) {
+            target.style.setProperty('--reveal-delay', `${Math.min(index * 45, 180)}ms`);
+        });
+
+        var observer = new IntersectionObserver(function(entries, currentObserver) {
+            entries.forEach(function(entry) {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('is-visible');
+                currentObserver.unobserve(entry.target);
+            });
+        }, {threshold: 0.08, rootMargin: '0px 0px -32px 0px'});
+
+        targets.forEach(function(target) {
+            target.classList.add('reveal');
+            observer.observe(target);
+        });
+    }
     
     $('header a').click(function(e) {
 
@@ -78,6 +107,8 @@
         });
 
     });
+
+    setupScrollReveal();
 
     // Open mobile menu
     $('#mobile-menu-open').click(function() {
