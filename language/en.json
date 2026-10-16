@@ -67,13 +67,13 @@
   "project-immersivehud-github-label": "Open ImmersiveHud on GitHub",
   "project-immersivehud-nexus-label": "Open ImmersiveHud on Nexus Mods",
   "project-radial-queue-desc": "Queues radial and shortcut inputs until an action can run, preventing missed inputs and repeat clicking during animations.",
-  "project-radial-queue-reception": "Nexus Mods reception: 207 endorsements · 11.2k downloads",
+  "project-radial-queue-reception": "Nexus Mods: 207 endorsements · 11.2k downloads. Players praise the queued inputs for cutting down on repeated button presses.",
   "project-immersivehud-desc": "A Valheim mod that hides HUD elements dynamically based on configurable in-game conditions for a more immersive experience.",
-  "project-immersivehud-reception": "Nexus Mods reception: 15 endorsements · 598 downloads",
+  "project-immersivehud-reception": "Nexus Mods: 15 endorsements · 598 downloads. Players praise the dynamic HUD and thank the author for continuing to maintain it.",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
   "project-2-desc": "Development of a deep learning model and Python application for accurate real-time detection and warning of game close to public roads.",
 
   "project-1": "EZBuild",
   "project-1-desc": "A Valheim building quality-of-life mod with a pipette for building and resource gathering, automatic tool selection, interaction while building, and quick hammer/repair hotkeys.",
-  "project-ezbuild-reception": "Nexus Mods reception: 57 endorsements · 1.7k downloads"
+  "project-ezbuild-reception": "Nexus Mods: 57 endorsements · 1.7k downloads. Players praise its useful building shortcuts and quality-of-life improvements."
 }

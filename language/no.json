@@ -67,13 +67,13 @@
   "project-immersivehud-github-label": "Åpne ImmersiveHud på GitHub",
   "project-immersivehud-nexus-label": "Åpne ImmersiveHud på Nexus Mods",
   "project-radial-queue-desc": "Setter handlinger fra radialmenyen og snarveier i kø til de kan utføres, slik at du unngår tapte inndata og gjentatte klikk under animasjoner.",
-  "project-radial-queue-reception": "Mottakelse på Nexus Mods: 207 anbefalinger · 11,2k nedlastinger",
+  "project-radial-queue-reception": "Nexus Mods: 207 anbefalinger · 11,2k nedlastinger. Spillere setter pris på at handlinger legges i kø og reduserer gjentatte knappetrykk.",
   "project-immersivehud-desc": "En Valheim-mod som skjuler HUD-elementer automatisk basert på konfigurerbare betingelser, for en mer oppslukende spillopplevelse.",
-  "project-immersivehud-reception": "Mottakelse på Nexus Mods: 15 anbefalinger · 598 nedlastinger",
+  "project-immersivehud-reception": "Nexus Mods: 15 anbefalinger · 598 nedlastinger. Spillere setter pris på dynamisk HUD og takker for at modifikasjonen fortsatt vedlikeholdes.",
   "project-2": "Detektering og varsling av hjortevilt ved veibane ved bruk av dyplæring",
   "project-2-desc": "Utvikling av en dyplæringsmodell og python program for nøyaktig sanntids deteksjon og varsling av hjortevilt nær offentlig veier.",
 
   "project-1": "EZBuild",
   "project-1-desc": "En Valheim-mod for enklere bygging med pipette for bygging og ressursinnsamling, automatisk valg av verktøy, interaksjon mens du bygger og hurtigtaster for hammer/reparasjon.",
-  "project-ezbuild-reception": "Mottakelse på Nexus Mods: 57 anbefalinger · 1,7k nedlastinger"
+  "project-ezbuild-reception": "Nexus Mods: 57 anbefalinger · 1,7k nedlastinger. Spillere setter pris på nyttige byggeverktøy og forbedringer av spillopplevelsen."
 }
