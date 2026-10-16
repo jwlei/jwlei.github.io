@@ -11,35 +11,48 @@
         // Treat as normal link if no-scroll class
         if ($(this).hasClass('no-scroll')) return;
 
-        e.preventDefault();
         var heading = $(this).attr('href');
-        var scrollDistance = $(heading).offset().top;
+        if (!heading || !heading.startsWith('#')) return;
+        var target = document.querySelector(heading);
+        if (!target) {
+            console.error(`Navigation target not found: ${heading}`);
+            return;
+        }
 
-        $('html, body').animate({
-            scrollTop: scrollDistance + 'px'
-        }, Math.abs(window.pageYOffset - $(heading).offset().top) / 1);
+        e.preventDefault();
+        var scrollDistance = $(target).offset().top;
+
+        animateScroll(scrollDistance, 350);
 
         // Hide the menu once clicked if mobile
         if ($('header').hasClass('active')) {
-            $('header, body').removeClass('active');
+            setMobileMenuOpen(false, false);
         }
+        target.focus({preventScroll: true});
     });
     
     // Scroll to top
     $('#to-top').click(function() {
-        $('html, body').animate({
-            scrollTop: 0
-        }, 200);
+        animateScroll(0, 200);
+        document.getElementById('hero-heading').focus({preventScroll: true});
     });
     
 
     // Scroll to first element
-    $('#lead-down span').click(function() {
-        var scrollDistance = $('#lead-section').next().offset().top;
-        $('html, body').animate({
-            scrollTop: scrollDistance + 'px'
-        }, 200);
+    $('#lead-down button').click(function() {
+        var target = $('#lead-section').next()[0];
+        var scrollDistance = $(target).offset().top;
+        animateScroll(scrollDistance, 200);
+        target.focus({preventScroll: true});
     });
+
+    function animateScroll(position, duration) {
+        var reducedMotion = window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        $('html, body').stop().animate({
+            scrollTop: position
+        }, reducedMotion ? 0 : duration);
+    }
 
     // Create timeline
     $('#experience-timeline').each(function() {
@@ -68,19 +81,41 @@
 
     // Open mobile menu
     $('#mobile-menu-open').click(function() {
-        $('header, body').addClass('active');
+        setMobileMenuOpen(true);
     });
 
     // Close mobile menu
     $('#mobile-menu-close').click(function() {
-        $('header, body').removeClass('active');
+        setMobileMenuOpen(false);
     });
     
     $('section').click(function() {
         if ($('header').hasClass('active')) {
-            $('header, body').removeClass('active');
+            setMobileMenuOpen(false, false);
         }
     });
+
+    $(document).keydown(function(e) {
+        if (e.key === 'Escape' && $('header').hasClass('active')) {
+            setMobileMenuOpen(false);
+        }
+    });
+
+    function setMobileMenuOpen(isOpen, returnFocus = true) {
+        var header = document.getElementById('navbar');
+        var openButton = document.getElementById('mobile-menu-open');
+        var closeButton = document.getElementById('mobile-menu-close');
+
+        header.classList.toggle('active', isOpen);
+        document.body.classList.toggle('active', isOpen);
+        openButton.setAttribute('aria-expanded', String(isOpen));
+
+        if (isOpen) {
+            closeButton.focus();
+        } else if (returnFocus && document.activeElement === closeButton) {
+            openButton.focus();
+        }
+    }
 
     // Load additional projects
     $('#view-more-projects').click(function(e){
@@ -90,50 +125,6 @@
         });
     });
 
-
-    $('body').keydown(function(e){
-        if(e.keyCode === 33 ){
-            e.preventDefault();
-            // user has pressed backspace or page up
-            var links = document.getElementsByTagName('section');
-            link = findPrevious(links);
-            animate(link);
-        }
-        if(e.keyCode === 32 || e.keyCode === 34){
-            e.preventDefault();
-            // user has pressed space or page down
-            var section = document.getElementsByTagName('section');
-            link = findNext(section);
-            animate(link);
-        }
-    });
-
-    // Disable previous when on contact-form
-    jQuery('#contact-form').bind('keydown', function(e) {
-        e.stopPropagation();
-    });
-
-    function findNext(section) {
-        for(var i = 0 ; i < section.length ; i++) {
-            var t = section[i].getClientRects()[0].top;
-            if(t >= 40) return section[i];
-        }
-    }
-
-    function findPrevious(section) {
-        for(var i = section.length-1 ; i >= 0 ; i--) {
-            var t = section[i].getClientRects()[0].top;
-            if(t < -20) return section[i];
-        }
-    }
-
-    function animate(section) {
-        if( section ) {
-            $('html,body').animate({
-                scrollTop: section.offsetTop
-            });
-        }
-    }
 
     // -----------------------------------------------------------------------------------
     const carouselText = [
@@ -149,6 +140,11 @@
     ]
 
     jQuery(function ($) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            $('#feature-text').text('Java');
+            return;
+        }
+
         // Randomly shuffle CarouselText
       for (let i = carouselText.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -222,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const initialLocale =
         supportedOrDefault(browserLocales(true));
     setLocale(initialLocale);
-    bindLocaleSwitcher(initialLocale);
 });
 
 
@@ -244,36 +239,23 @@ function browserLocales(languageCodeOnly = false) {
 }
 
 
-function bindLocaleSwitcher(initialValue) {
-    // Whenever the user selects a new locale, we
-    // load the locale's translations and update
-    // the page
-    const switcher = document.querySelector("[i18n-lang-switcher]");
-    switcher.value = initialValue;
-    switcher.onchange = (e) => {
-        // Set the locale to the selected option[value]
-        setLocale(e.target.value);
-    };
-}
-
-async function getLocale(){
-    if(navigator.language === ('no' || 'nb' || 'nn')){
-        return 'no';
-    } else {
-        return 'en';
-    }
-}
-
-
 async function setLocale(newLocale) {
     // Load translations for the given locale and translate
     // the page to this locale
     if (newLocale === locale) return;
+    if (!isSupported(newLocale)) {
+        throw new RangeError(`Unsupported locale: ${newLocale}`);
+    }
 
     const newTranslations = await fetchTranslationsFor(newLocale);
     locale = newLocale;
     translations = newTranslations;
     document.documentElement.lang = newLocale === "no" ? "nb" : "en";
+    document.querySelectorAll(".language-switcher").forEach(button => {
+        button.setAttribute("aria-pressed", String(
+            button.getAttribute("i18n-aria-label") === `language-${newLocale === "no" ? "norwegian" : "english"}`
+        ));
+    });
 
     translatePage();
 }
@@ -283,6 +265,9 @@ async function fetchTranslationsFor(newLocale) {
     // Retrieve translations JSON object for the given
     // locale over the network
     const response = await fetch(`/language/${newLocale}.json`);
+    if (!response.ok) {
+        throw new Error(`Unable to load ${newLocale} translations: ${response.status}`);
+    }
     return await response.json();
 }
 
@@ -292,9 +277,22 @@ function translatePage() {
     // data-i18n-key attribute with the translation corresponding
     // to its data-i18n-key
     document.querySelectorAll("[i18n-key]").forEach(translateElement);
+    document.querySelectorAll("[i18n-aria-label]").forEach(element => {
+        const key = element.getAttribute("i18n-aria-label");
+        const label = translations[key];
+        if (typeof label !== "string") {
+            console.error(`Missing translation for aria-label: ${key}`);
+            return;
+        }
+        element.setAttribute("aria-label", label);
+    });
     document.querySelectorAll("[i18n-date-key]").forEach(element => {
         const key = element.getAttribute("i18n-date-key");
         const date = translations[key];
+        if (typeof date !== "string") {
+            console.error(`Missing translation for date: ${key}`);
+            return;
+        }
         element.setAttribute("data-date", date);
         const renderedDate = element.parentElement.querySelector(".vtimeline-date");
         if (renderedDate) renderedDate.innerText = date;
@@ -308,14 +306,18 @@ function translateElement(element) {
     // with the translation in the active locale,
     // corresponding to the element's data-i18n-key
     const key = element.getAttribute("i18n-key");
-    element.innerText = translations[key];
+    const translatedText = translations[key];
+    if (typeof translatedText !== "string") {
+        console.error(`Missing translation: ${key}`);
+        return;
+    }
+    element.textContent = translatedText;
 }
 
 
 function changePortfolioDlLink() {
     // Change link depending on language
     const link = document.getElementById("cv-dl");
-    link.getAttribute("href");
 
     if (locale === "no") {
         link.setAttribute("href",
@@ -328,51 +330,3 @@ function changePortfolioDlLink() {
 // -----------------------------------------------------------------------------------
 // END LANGUAGE
 // -----------------------------------------------------------------------------------
-
-
-// -----------------------------------------------------------------------------------
-// ANIMATION
-// -----------------------------------------------------------------------------------
-
-
-
-window.onscroll = function() {navbarShrinkOnScroll()};
-
-function navbarShrinkOnScroll() {
-    // When the user scrolls down 80px from the top of the document, resize the navbar padding and the logo's font size
-    if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
-        document.getElementById("navbar").style.padding = "3px 10px";
-        document.getElementById("navbar").style.fontSize = "0.9em";
-    } else {
-        document.getElementById("navbar").style.padding = "16px 10px";
-        document.getElementById("navbar").style.fontSize = "1em";
-    }
-}
-
-function isScroller(el) {
-    var isScrollableWidth, isScollableHeight, elStyle;
-    elStyle = window.getComputedStyle(el, null); // Note: IE9+
-    if (elStyle.overflow === 'scroll' ||
-        elStyle.overflowX === 'scroll' ||
-        elStyle.overflowY === 'scroll') {
-        return true;
-    }
-    if (elStyle.overflow === 'auto' ||
-        elStyle.overflowX === 'auto' ||
-        elStyle.overflowY === 'auto') {
-        if (el.scrollHeight > el.clientHeight) {
-            return true;
-        }
-        if (el.scrollWidth > el.clientWidth) {
-            return true;
-        }
-    }
-    return false;
-}
-
-var els = document.querySelectorAll('body *');
-for (var i = 0, el; el = els[i]; i++) {
-    if (isScroller(el)) {
-        console.log(el);
-    }
-}

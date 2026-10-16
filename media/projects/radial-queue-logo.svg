@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#282038"/>
+      <stop offset="1" stop-color="#242526"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="220" rx="18" fill="url(#bg)"/>
+  <circle cx="130" cy="94" r="47" fill="none" stroke="#c586c0" stroke-opacity=".45" stroke-width="2"/>
+  <circle cx="130" cy="94" r="31" fill="none" stroke="#c586c0" stroke-opacity=".7" stroke-width="2"/>
+  <path d="M130 94 130 47a47 47 0 0 1 41 24z" fill="#c586c0" fill-opacity=".72"/>
+  <circle cx="130" cy="94" r="8" fill="#4fc1ff"/>
+  <path d="M185 74h28m-28 20h38m-38 20h28" stroke="#e5e5e5" stroke-linecap="round" stroke-width="6"/>
+  <text x="160" y="179" fill="#e5e5e5" font-family="Segoe UI, sans-serif" font-size="18" font-weight="700" letter-spacing="2" text-anchor="middle">RADIAL QUEUE</text>
+</svg>

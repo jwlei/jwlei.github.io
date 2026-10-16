@@ -4,18 +4,25 @@
   
   
   "title": "Joachim Leiros | Personal page",
+  "skip-to-content": "Skip to content",
+  "menu-open": "Open menu",
   "menu-close": "Close",
+  "primary-navigation": "Primary navigation",
+  "language-norwegian": "Switch to Norwegian",
+  "language-english": "Switch to English",
+  "scroll-to-content": "Scroll to content",
+  "back-to-top": "Back to top",
   "about-me": "About me",
   "experience": "Experience",
   "education": "Education",
   "projects": "Projects",
   "skills": "Technologies and tools",
-  "contact": "Contact",
 
   "name": "Joachim Leiros",
   "job-title": "Software Engineer",
   "hero-kicker": "SOFTWARE ENGINEER · NORWAY",
   "hero-summary": "I build thoughtful software and enjoy turning complex problems into clear, reliable solutions.",
+  "hero-skills": "I work with Java, Python, web development, and machine learning.",
   "typing-prefix": "I work with",
   "dl-portfolio": "Download portfolio",
 
@@ -52,16 +59,18 @@
 
   "project-link": "View Project",
   "project-nexus-link": "Nexus Mods",
+  "project-2-github-label": "Open the wildlife detection project on GitHub",
+  "project-ezbuild-github-label": "Open EZBuild on GitHub",
+  "project-ezbuild-nexus-label": "Open EZBuild on Nexus Mods",
+  "project-radial-queue-github-label": "Open Radial Queue on GitHub",
+  "project-radial-queue-nexus-label": "Open Radial Queue on Nexus Mods",
+  "project-immersivehud-github-label": "Open ImmersiveHud on GitHub",
+  "project-immersivehud-nexus-label": "Open ImmersiveHud on Nexus Mods",
   "project-radial-queue-desc": "A Monster Hunter Wilds mod that queues actions selected from the radial menu, making it easier to perform several actions in sequence.",
   "project-immersivehud-desc": "A Valheim mod that hides HUD elements dynamically based on configurable in-game conditions for a more immersive experience.",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
   "project-2-desc": "Development of a deep learning model and Python application for accurate real-time detection and warning of game close to public roads.",
 
   "project-1": "EZBuild",
-  "project-1-desc": "A modification for the game Valheim that allows players to select tools and build structures in a more efficient way using a pipette tool.",
-
-  "contact-form-title": "Contact me",
-  "contact-form-submit-btn": "Send",
-  "placeholder-email": "Your email address",
-  "placeholder-message": "Your message"
+  "project-1-desc": "A modification for the game Valheim that allows players to select tools and build structures in a more efficient way using a pipette tool."
 }

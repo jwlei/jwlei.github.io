@@ -14,6 +14,7 @@
 }
 
 html {
+    font-size: 112.5%;
     scroll-padding-top: 88px;
 }
 
@@ -33,7 +34,12 @@ body {
     background-attachment: scroll;
     color: var(--text);
     font-family: "Lato", "Segoe UI", sans-serif;
+    font-size: 1rem;
     line-height: 1.7;
+}
+
+body.active {
+    z-index: auto;
 }
 
 section {
@@ -219,7 +225,7 @@ header#navbar #menu a:focus-visible {
     margin: 0 0 20px;
     color: var(--accent);
     font-family: Consolas, "Courier New", monospace;
-    font-size: 0.76rem;
+    font-size: 0.86rem;
     font-weight: 700;
     letter-spacing: 0.11em;
 }
@@ -362,7 +368,7 @@ header#navbar #menu a:focus-visible {
     background: #252526;
     color: #a7a7ad;
     font-family: Consolas, "Courier New", monospace;
-    font-size: 0.7rem;
+    font-size: 0.78rem;
 }
 
 .editor-dots {
@@ -397,7 +403,7 @@ header#navbar #menu a:focus-visible {
 .editor-body {
     padding: 22px 0 25px;
     font-family: Consolas, "Courier New", monospace;
-    font-size: clamp(0.69rem, 1.15vw, 0.84rem);
+    font-size: clamp(0.83rem, 1.15vw, 0.95rem);
     line-height: 2.15;
 }
 
@@ -439,7 +445,7 @@ header#navbar #menu a:focus-visible {
     border-bottom: 0;
     background: #007acc;
     color: #fff;
-    font-size: 0.64rem;
+    font-size: 0.74rem;
 }
 
 .editor-status i {
@@ -580,7 +586,7 @@ header#navbar #menu a:focus-visible {
 #skills h3 {
     margin: 6px 0 0;
     color: #d9d9de;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 700;
     text-align: left;
 }
@@ -608,7 +614,7 @@ header#navbar #menu a:focus-visible {
     background: #2b2b2e;
     box-shadow: none;
     color: #c9c9ce;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
 }
 
@@ -672,7 +678,7 @@ header#navbar #menu a:focus-visible {
     margin: 0 0 7px;
     color: var(--accent);
     font-family: Consolas, "Courier New", monospace;
-    font-size: 0.74rem;
+    font-size: 0.85rem;
     font-weight: 400;
     text-align: left;
 }
@@ -725,7 +731,7 @@ header#navbar #menu a:focus-visible {
 .education-block span {
     color: var(--accent);
     font-family: Consolas, "Courier New", monospace;
-    font-size: 0.74rem;
+    font-size: 0.85rem;
 }
 
 .education-block h4 {
@@ -810,7 +816,7 @@ header#navbar #menu a:focus-visible {
 .project-info p {
     margin: 0 0 17px;
     color: #b4b4bb;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     line-height: 1.75;
 }
 
@@ -818,7 +824,7 @@ header#navbar #menu a:focus-visible {
     margin: 0 0 7px;
     color: var(--accent);
     font-family: Consolas, "Courier New", monospace;
-    font-size: 0.71rem;
+    font-size: 0.83rem;
     letter-spacing: 0.015em;
 }
 
@@ -830,7 +836,7 @@ header#navbar #menu a:focus-visible {
 
 .project a {
     color: var(--accent);
-    font-size: 0.86rem;
+    font-size: 0.95rem;
     font-weight: 700;
     text-decoration: none;
 }
@@ -947,7 +953,7 @@ footer .row {
 
 .copyright {
     color: #85858d;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
 }
 
 .copyright p {
@@ -993,10 +999,169 @@ footer .row {
 
 a:focus-visible,
 button:focus-visible,
-#lead-down span:focus-visible,
+#lead-down button:focus-visible,
 #to-top:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 3px solid var(--accent);
     outline-offset: 3px;
+}
+
+.skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 1001;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #111;
+    font-weight: 700;
+    transform: translateY(-160%);
+}
+
+.skip-link:focus {
+    color: #111;
+    transform: translateY(0);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.language-switcher {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.language-switcher img {
+    width: 25px;
+    height: 25px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+}
+
+.language-switcher:hover {
+    background: var(--surface-raised);
+}
+
+#mobile-menu-open,
+#mobile-menu-close {
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
+#mobile-menu-open {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+#mobile-menu-close {
+    align-items: center;
+    min-height: 44px;
+    border-radius: 6px;
+    background: transparent;
+    text-align: left;
+}
+
+#lead-down button {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0 auto;
+    place-items: center;
+    border: 1px solid #55555c;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+}
+
+#lead-down button i {
+    padding: 0;
+    color: inherit;
+}
+
+.project-image img {
+    object-fit: contain;
+    padding: 18px;
+}
+
+.project-links a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+}
+
+#to-top {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid #4b4b52;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+}
+
+#to-top i {
+    padding: 0;
+    color: #c6c6cc;
+}
+
+.copyright {
+    color: #b8b8bd;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (max-width: 480px) {
+    footer .row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    footer .copyright,
+    footer .top,
+    footer .social {
+        width: 100%;
+        text-align: center;
+    }
+
+    footer .social ul {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+    }
 }
 
 @media (max-width: 900px) {
@@ -1069,7 +1234,8 @@ button:focus-visible,
 
     #mobile-menu-open {
         top: 14px;
-        left: 14px;
+        right: 14px;
+        left: auto;
         display: flex;
         align-items: center;
         justify-content: center;
