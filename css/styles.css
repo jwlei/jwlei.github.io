@@ -294,26 +294,6 @@ a:focus {
 .top {
     text-align: center;
 }
-.social {
-    text-align: right;
-}
-.social ul {
-    margin: 5px 0 0 0;
-    padding: 0;
-}
-.social li {
-    display: inline-block;
-    font-size: 1.25em;
-    list-style: none;
-}
-.social a {
-    display: block;
-    color: #ededee;
-    padding: 10px;
-}
-.social a:hover {
-    color: #728f8d;
-}
 
 .copyright {
     color: #B0BEC5;
@@ -468,10 +448,6 @@ a:focus {
 @media only screen and (max-width: 768px) {
     #lead-content a {
         padding: 10px 20px;
-    }
-
-    .social {
-        text-align: center;
     }
 }
 
