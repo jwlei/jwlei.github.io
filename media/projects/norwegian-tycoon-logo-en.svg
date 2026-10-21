@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+    <title id="title">Norwegian Tycoon</title>
+    <defs>
+        <radialGradient id="felt" cx=".5" cy=".36" r=".8">
+            <stop stop-color="#234c41"/>
+            <stop offset="1" stop-color="#0b1d1b"/>
+        </radialGradient>
+        <linearGradient id="gold" x2="0" y2="1">
+            <stop stop-color="#fff0bf"/>
+            <stop offset=".5" stop-color="#e4c56b"/>
+            <stop offset="1" stop-color="#b58b43"/>
+        </linearGradient>
+        <pattern id="diamonds" width="48" height="48" patternUnits="userSpaceOnUse">
+            <path d="m24 4 20 20-20 20L4 24Z" fill="none" stroke="#e4c56b" stroke-opacity=".045"/>
+        </pattern>
+        <filter id="shadow" x="-.5" y="-.5" width="2" height="2">
+            <feDropShadow dy="12" stdDeviation="12" flood-color="#020b08" flood-opacity=".45"/>
+        </filter>
+    </defs>
+    <path fill="url(#felt)" d="M0 0h800v600H0z"/>
+    <path fill="url(#diamonds)" d="M0 0h800v600H0z"/>
+    <rect x="28" y="28" width="744" height="544" rx="12" fill="none" stroke="#e4c56b" stroke-opacity=".25"/>
+    <path d="M60 96V60h36m608 0h36v36M60 504v36h36m608 0h36v-36" fill="none" stroke="#e4c56b" stroke-width="2"/>
+    <g filter="url(#shadow)">
+        <g transform="rotate(-19 365 230)">
+            <rect x="296" y="130" width="134" height="192" rx="12" fill="#eee8d9" stroke="#c6b882" stroke-width="2"/>
+            <text x="313" y="168" fill="#a2373c" font-family="Georgia,serif" font-size="28">A</text>
+            <path d="M363 263c-64-39-37-75-14-53l14 14 14-14c23-22 50 14-14 53Z" fill="#a2373c"/>
+        </g>
+        <g transform="rotate(15 443 230)">
+            <rect x="376" y="130" width="134" height="192" rx="12" fill="#fff9e9" stroke="#d4c38a" stroke-width="2"/>
+            <text x="393" y="168" fill="#153c32" font-family="Georgia,serif" font-size="28">K</text>
+            <path d="M443 199c-12 22-41 32-32 52 5 13 23 14 31 1l-9 25h20l-9-25c8 13 26 12 31-1 9-20-20-30-32-52Z" fill="#153c32"/>
+        </g>
+    </g>
+    <g fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m376 92 8 22h32l8-22-17 10-7-20-7 20Z"/>
+        <path d="M384 122h32M267 333c-35-25-52-62-44-102m310 102c35-25 52-62 44-102" opacity=".8"/>
+        <path d="m232 283-18-9m24 25-20-2m32 19-20 4m338-37 18-9m-24 25 20-2m-32 19 20 4" opacity=".6"/>
+    </g>
+    <g text-anchor="middle" fill="url(#gold)" font-family="Georgia,'Times New Roman',serif" font-weight="700">
+        <text x="400" y="414" font-size="44" letter-spacing="4">NORWEGIAN</text>
+        <text x="400" y="484" font-size="70" letter-spacing="6">TYCOON</text>
+    </g>
+    <path d="M272 512h100m56 0h100m-128-6 6 6-6 6-6-6Z" fill="none" stroke="#e4c56b" stroke-opacity=".65"/>
+</svg>

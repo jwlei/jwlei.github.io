@@ -68,7 +68,7 @@ footer ul:after{
 
 
 /* ------------------ CONTAINERS ------------------ */
-#about, #experience, #education, #projects, #skills, #contact {
+#projects, #contact {
     display: inline-flex;
     flex-direction: column;
     justify-content: center;
@@ -90,90 +90,10 @@ footer ul:after{
 
 
 
-    /* ------------------ NAVBAR ------------------ */
-header {
-    position: fixed;
-    display: flex;
-    justify-content: center;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    background: #242424;
-    border: 1px solid #292929;
-    transition: 0.4s; /* Adds a transition effect when the padding is decreased */
-    text-align: center;
-    animation-name: dropHeader;
-    animation-iteration-count: 1;
-    animation-timing-function: ease;
-    animation-duration: 0.75s;
-    padding: 16px 10px; /* Large padding which will shrink on scroll (using JS) */
-    z-index: 999;
-    vertical-align: middle;
-    font-size: 1em;
-}
-
-header ul {
-    position: relative;
-    text-align: center;
-    padding: 1px;
-    margin: 0;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-}
-header li {
-    display: inline-block;
-}
-
-header a, i {
-    display: block;
-    color: #B0BEC5;
-    padding-right: 10px;
-    padding-left: 10px;
-    transition: 0.2s ease all;
-
-}
-
-header a:hover {
-    text-decoration: none;
-    border-radius: 1px;
-    color: #FFFFFF;
-    transition: color 0.2s ease-in-out;
-}
-
-header img:hover, a:focus {
+a:focus {
     color: #FFFFFF;
     text-decoration: none;
 }
-
-header.active {
-    display: block;
-}
-
-#menu-lang {
-    position: absolute;
-    padding: 0;
-    top: 30%;
-    right: 2%;
-    margin: -5px 10px;
-    list-style: none;
-    cursor: pointer;
-}
-#menu-lang li {
-    padding-left: 10px;
-    padding-right: 10px;
-
-}
-
-
-header img:hover {
-    text-decoration: none;
-    border-radius: 1px;
-    color: #FFFFFF;
-    background: #2A2A2A;
-    box-shadow: 0 3px 10px rgba(72, 69, 69, 0.2);
-}
-
 
 
 /* ------------------ LEAD ------------------ */
@@ -215,16 +135,9 @@ header img:hover {
 }
 
 #lead-content h2 {
-    color: #4f7370;
+    color: #1f6feb;
     font-weight: 500;
     font-size: 2.25em;
-    margin-bottom: 15px;
-}
-
-#lead-content span {
-    color: #B0BEC5;
-    font-weight: 400;
-    font-size: 2em;
     margin-bottom: 15px;
 }
 
@@ -238,180 +151,6 @@ header img:hover {
     bottom: 50px;
     color: #d1d3d5;
 }
-
-#lead-down span {
-    cursor: pointer;
-    display: block;
-    margin: 0 auto;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    border: 3px solid #4f7370;
-    text-align: center;
-}
-
-#lead-down i {
-    animation: pulsate 1.5s ease;
-    animation-iteration-count: infinite;
-    padding-top: 5px;
-}
-
-
-
-/* ------------------ ABOUT ------------------ */
-#about h2 {
-    color: #FFFFFF;
-}
-#about p {
-    color: #B0BEC5;
-    margin: 0;
-}
-
-
-
-/* ------------------ TIMELINE ------------------ */
-#experience h2 {
-    color: #FFFFFF;
-    margin-bottom: 30px;
-}
-
-#experience-timeline {
-    margin: 10px auto 0 auto;
-    position: relative;
-}
-
-#experience-timeline:before {
-    position: absolute;
-    content: "";
-    top: 0;
-    bottom: 0;
-    left: 303px;
-    right: auto;
-    height: 82%;
-    width: 3px;
-    background: #4f7370;
-    z-index: 0;
-}
-
-#experience-timeline:after {
-    position: absolute;
-    content: "";
-    width: 3px;
-    height: 50px;
-    background: #4f7370;
-    background: linear-gradient(to bottom, #4f7370, rgba(79, 115, 112, 0));
-    top: 82%;
-    left: 303px;
-}
-
-.vtimeline-content {
-    margin-left: 350px;
-    margin-right: 5vw;
-    background: #292929;
-    border: 1px solid #292929;
-    padding: 10px;
-    border-radius: 1px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    text-align: left;
-}
-.vtimeline-content h3 {
-    font-size: 1.5em;
-    font-weight: 300;
-    color: #FFFFFF;
-    display: inline-block;
-    margin: 0;
-}
-.vtimeline-content h4 {
-    font-size: 1.2em;
-    font-weight: 300;
-    color: #B0BEC5;
-    margin: 0 0 15px 0;
-}
-.vtimeline-content p {
-    color: #B0BEC5;
-    font-size: 0.9em;
-    margin: 0;
-}
-.vtimeline-point {
-    position: relative;
-    display: block;
-    vertical-align: top;
-    margin-bottom: 30px;
-}
-.vtimeline-icon {
-    position: relative;
-    color: #B0BEC5;
-    width: 50px;
-    height: 50px;
-    background: #4f7370;
-    border-radius: 50%;
-    float: left;
-    z-index: 99;
-    margin-left: 280px;
-}
-.vtimeline-icon i {
-    display: block;
-    font-size: 2em;
-    margin-top: 10px;
-}
-.vtimeline-date {
-    width: 260px;
-    text-align: right;
-    position: absolute;
-    left: 0;
-    top: 10px;
-    font-weight: 300;
-    color: #c2c4c6;
-}
-
-
-
-/* ------------------ EDUCATION ------------------ */
-#education h2 {
-    color: #FFFFFF;
-    margin-bottom: 50px;
-}
-.education-block {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    width: 80%;
-    margin: 0 auto 30px auto;
-    padding: 15px;
-    border: 1px solid #292929;
-    text-align: left;
-    background: #292929;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-
-}
-.education-block h3 {
-    font-weight: 500;
-    float: left;
-    margin: 0;
-    color: #FFFFFF;
-}
-.education-block span {
-    color: #B0BEC5;
-    float: right;
-}
-.education-block h4 {
-    color: #B0BEC5;
-    clear: both;
-    font-weight: 500;
-    margin: 0 0 15px 0;
-}
-.education-block p,
-.education-block ul {
-    margin: 0;
-    color: #B0BEC5;
-    font-size: 0.9em;
-}
-.education-block ul {
-    padding: 0 0 0 15px;
-}
-
-
 
 /* ------------------ PROJECTS ------------------ */
 #projects h2 {
@@ -465,68 +204,8 @@ header img:hover {
 }
 
 .project a {
-    color: #4f7370;
+    color: #1f6feb;
 }
-
-
-
-/* ------------------ SKILLS ------------------ */
-#skills h2 {
-    color: #FFFFFF;
-    margin-bottom: 50px;
-}
-#skills h3:after {
-    position: relative;
-    content: "";
-    bottom: 50%;
-    height: 1px;
-    width: 75px;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    background: #4f7370;
-}
-
-
-.skills-heading {
-    display: flex;
-    justify-content: right;
-    width: 30%;
-    text-align: right;
-}
-
-.skills-ul {
-    width: 60%;
-    display: block;
-    margin-left: auto;
-    text-align: left;
-}
-
-#skills h3 {
-    color: #B0BEC5;
-    text-align: right;
-
-}
-
-#skills ul {
-    display: block;
-    margin: 0 auto 20px;
-    padding: 0;
-    max-width: 800px;
-}
-#skills li {
-    display: inline-block;
-    margin: 7px;
-    padding: 5px 10px;
-    color: #B0BEC5;
-    background: #292929;
-    list-style: none;
-    cursor: default;
-    font-size: 1.2em;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-
 
 
 
@@ -593,7 +272,7 @@ header img:hover {
 #contact-form button {
     display: block;
     width: 100%;
-    background: #4f7370;
+    background: #1f6feb;
     border-radius: 1px;
     padding: 5px 10px;
     border: none;
@@ -614,19 +293,6 @@ header img:hover {
 /* ------------------ FOOTER ------------------ */
 .top {
     text-align: center;
-}
-.top span {
-    cursor: pointer;
-    display: block;
-    margin: 15px auto 0 auto;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    border: 3px solid #b9bfc4;
-    text-align: center;
-}
-.top i {
-    color: #ededee;
 }
 .social {
     text-align: right;
@@ -680,7 +346,7 @@ header img:hover {
     left: 0;
     right: 0;
     margin: 0 auto;
-    background: #4f7370;
+    background: #1f6feb;
 }
 
 .row {
@@ -689,51 +355,19 @@ header img:hover {
 }
 
 
-.skills-ul li:hover {
-    color: #FFFFFF;
-    transform: scale(1.07);
-    transition: ease-out 0.2s;
-
-}
-
 .btn-rounded {
     display: inline-block;
     color: #d1d3d5;
     padding: 15px 25px;
-    border: 3px solid #4f7370;
+    border: 3px solid #1f6feb;
     border-radius: 30px;
     margin-top: 5%;
     transition: 0.3s ease all;
 }
 .btn-rounded:hover {
     color: #f9f9fa;
-    background: #4f7370;
+    background: #1f6feb;
     text-decoration: none;
-}
-
-.typing-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%
-}
-
-.fa-chevron-down, .fa-chevron-up {
-    padding-left: 0;
-    padding-right: 0;
-}
-.sentence:empty:before {
-    content: "\200b";
-}
-
-.input-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 25px;
-    background-color: white;
-    margin-left: 6px;
-    margin-bottom: 0;
-    animation: blink .6s linear infinite alternate;
 }
 
 .slide-in {
@@ -749,28 +383,6 @@ header img:hover {
 
 
 /* ------------------ ANIMATIONS ------------------ */
-@keyframes blink {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes pulsate {
-    0% {
-        transform: scale(1, 1);
-    }
-    50% {
-        transform: scale(1.2, 1.2);
-    }
-    100% {
-        transform: scale(1, 1);
-    }
-}
-
 @keyframes dropHeader {
     0% {
         transform: translateY(-100%);
@@ -778,13 +390,6 @@ header img:hover {
     100% {
         transform: translateY(0);
     }
-}
-
-@keyframes blink {
-    0% {opacity: 1;}
-    40% {opacity: 1;}
-    60% {opacity: 0;}
-    100% {opacity: 0;}
 }
 
 @keyframes slide-in {
@@ -819,170 +424,22 @@ header img:hover {
 
 
 
-/* ------------------ NO JS ------------------ */
-.no-js #experience-timeline > div {
-    background: #4f7370;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #dcd9d9;
-}
-
-.no-js #experience-timeline > div h3 {
-    font-size: 1.5em;
-    font-weight: 300;
-    color: #B0BEC5;
-    display: inline-block;
-    margin: 0;
-}
-
-.no-js #experience-timeline > div h4 {
-    font-size: 1.2em;
-    font-weight: 300;
-    color: #7e8890;
-    margin: 0 0 15px 0;
-}
-
-.no-js #experience-timeline > div p {
-    color: #74808a;
-    font-size: 0.9em;
-    margin: 0;
-}
-
-.no-js #experience-timeline:before,
-.no-js #experience-timeline:after {
-    content: none;
-}
-
-
-
-/* ------------------ MOBILE MENU ------------------ */
-#menu.active {
-    display: block;
-}
-
-#menu-lang.active {
-    display: block;
-}
-
-#mobile-menu-open {
-    display: none;
-    cursor: pointer;
-    position: fixed;
-    left: 15px;
-    top: 10px;
-    color: #B0BEC5;
-    font-size: 1.5em;
-    padding: 5px;
-    border-radius: 1px;
-    background: #3F3F3F;
-    z-index: 999;
-}
-
-
-#mobile-menu-close {
-    display: none;
-    flex-direction: column;
-    text-align: center;
-    padding-right: 70px;
-    padding-bottom: 20px;
-    width: 100%;
-    font-size: 1.5em;
-    right: 25px;
-    cursor: pointer;
-    color: #B0BEC5;
-    vertical-align: center;
-}
-#mobile-menu-close span {
-    font-size: 0.5em;
-    text-transform: uppercase;
-}
-#mobile-menu-close i {
-    vertical-align: middle;
-}
-
-
-
 /* ------------------ MEDIA QUERIES ------------------ */
 @media only screen and (max-width: 992px) {
-
-    body {
-        top: 0;
-        height: 100vh;
-        width: 100vw;
-    }
-
     section {
         box-sizing:border-box;
         height: auto;
     }
     
-    #about, #experience, #education, #projects, #skills, #contact {
+    #projects, #contact {
     width: 100%;
     height: 100%;
     margin: 0;
     border: none;
 }
 
-    #mobile-menu-open, #mobile-menu-close {
-        display: flex;
-    }
-    
-    #navbar {
-        transform: translateX(-100%);
-        -webkit-transform: translateX(-100%);
-    }
-
-    header {
-        position: fixed;
-        display: none;
-        z-index: 999;
-        justify-content: space-evenly;
-        animation: none;
-        bottom: 0;
-        width: 150px;
-        height: 100%;
-    }
-    
     footer {
         text-align: center;
-    }
-
-    #menu {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
-        top: 5%;
-        height: 70%;
-        width: 100%;
-        margin: 0;
-        z-index: 9;
-    }
-
-    #menu-lang {
-        position: absolute;
-        padding: 0;
-        bottom: 10%;
-        left: 2%;
-        margin: 60vh 10px;
-        list-style: none;
-        cursor: pointer;
-    }
-
-
-    #menu-buttons ul {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
-        justify-items: center;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        z-index: 9;
-    }
-
-    #menu li {
-        display: block;
-        margin-bottom: 10px;
     }
 
     #lead-content h1 {
@@ -992,21 +449,10 @@ header img:hover {
         font-size: 1.75em;
     }
 
-    #lead-content span {
-        font-size: 1.5em;
-    }
-    
     #lead-down {
         bottom: 10%;
 }
     
-    #about {
-        text-align: center;
-    }
-    #about p {
-        text-align: left;
-    }
-
     .row {
         display: flex;
         flex-direction: column;
@@ -1014,20 +460,6 @@ header img:hover {
         align-items: center;
     }
 
-    .skills-heading {
-        display: flex;
-        justify-content: center;
-        text-align: center;
-        margin-top: -25px;
-        margin-bottom: -25px;
-    }
-
-    .skills-ul {
-        width: 80%;
-        display: block;
-        margin: 0;
-        text-align: center;
-    }
     .row ul:after {
         content: none;
     }
@@ -1038,63 +470,9 @@ header img:hover {
         padding: 10px 20px;
     }
 
-    .education-block h3,
-    .education-block span {
-        float: none;
-    }
-
-    .project {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        max-height: max-content;
-    }
-
-    .project-image, .project-video {
-        display: none;
-        float: none;
-        margin: 0;
-    }
-
-    .project-info {
-        margin: 0;
-        padding: 15px 15px;
-        top: auto;
-        transform: none;
-    }
-
     .social {
         text-align: center;
     }
-}
-
-@media only screen and (max-width: 750px) {
-    #experience-timeline:before,
-    #experience-timeline:after {
-        left: 23px;
-    }
-
-    .vtimeline-date {
-        width: auto;
-        text-align: left;
-        position: relative;
-        margin-bottom: 15px;
-        display: block;
-        margin-left: 70px;
-    }
-
-    .vtimeline-icon {
-        margin-left: 0;
-    }
-
-    .vtimeline-content {
-        margin-left: 70px;
-    }
-
-
-
 }
 
 @media only screen and (max-width: 480px) {
@@ -1106,14 +484,8 @@ header img:hover {
         font-size: 1.5em;
     }
 
-    #lead-content span {
-        font-size: 1.4em;
-    }
-
     #lead-content a {
         font-size: 1em;
         padding: 5px 10px;
     }
 }
-
-

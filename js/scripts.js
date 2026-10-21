@@ -11,13 +11,8 @@
             window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reducedMotion || !('IntersectionObserver' in window)) return;
 
-        var targets = document.querySelectorAll(
-            '#about, #skills .row, #experience .vtimeline-point, .education-block, .project'
-        );
-        var staggerTargets = document.querySelectorAll(
-            '#skills .row, #experience .vtimeline-point, .education-block, .project'
-        );
-        staggerTargets.forEach(function(target, index) {
+        var targets = document.querySelectorAll('.project');
+        targets.forEach(function(target, index) {
             target.style.setProperty('--reveal-delay', `${Math.min(index * 45, 180)}ms`);
         });
 
@@ -34,32 +29,6 @@
             observer.observe(target);
         });
     }
-    
-    $('header a').click(function(e) {
-
-        // Treat as normal link if no-scroll class
-        if ($(this).hasClass('no-scroll')) return;
-
-        var heading = $(this).attr('href');
-        if (!heading || !heading.startsWith('#')) return;
-        var target = document.querySelector(heading);
-        if (!target) {
-            console.error(`Navigation target not found: ${heading}`);
-            return;
-        }
-
-        e.preventDefault();
-        var scrollDistance = $(target).offset().top;
-
-        animateScroll(scrollDistance, 350);
-
-        // Hide the menu once clicked if mobile
-        if ($('header').hasClass('active')) {
-            setMobileMenuOpen(false, false);
-        }
-        target.focus({preventScroll: true});
-    });
-    
     // Scroll to top
     $('#to-top').click(function() {
         animateScroll(0, 200);
@@ -83,144 +52,96 @@
         }, reducedMotion ? 0 : duration);
     }
 
-    // Create timeline
-    $('#experience-timeline').each(function() {
-        $this = $(this); // Store reference to this
-        $userContent = $this.children('div'); // user content
+    function setupCarousel() {
+        const carousel = document.getElementById('hero-carousel');
+        const track = carousel.querySelector('.carousel-track');
+        const slides = Array.from(track.children);
+        const dots = Array.from(carousel.querySelectorAll('.carousel-dots button'));
+        const rotationButton = carousel.querySelector('.carousel-rotation');
+        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let index = 0;
+        let paused = motion.matches;
+        let hovered = false;
+        let inView = !('IntersectionObserver' in window);
+        let timer;
 
-        // Create each timeline block
-        $userContent.each(function() {
-            $(this).addClass('vtimeline-content').wrap('<div class="vtimeline-point"><div class="vtimeline-block"></div></div>');
-        });
-
-        // Add icons to each block
-        $this.find('.vtimeline-point').each(function() {
-            $(this).prepend('<div class="vtimeline-icon"><i class="fa fa-map-marker"></i></div>');
-        });
-
-        // Add dates to the timeline if exists
-        $this.find('.vtimeline-content').each(function() {
-            var date = $(this).data('date');
-            if (date) { // Prepend if exists
-                $(this).parent().prepend('<span class="vtimeline-date">'+date+'</span>');
+        function scheduleRotation() {
+            window.clearTimeout(timer);
+            const rotating = !paused && !hovered && inView && !document.hidden && !motion.matches;
+            carousel.dataset.rotating = String(rotating);
+            if (rotating) {
+                timer = window.setTimeout(() => showSlide(index + 1), 6000);
             }
-        });
+        }
 
-    });
+        function updateRotation() {
+            carousel.dataset.paused = String(paused);
+            rotationButton.querySelector('[data-carousel-pause]').hidden = paused;
+            rotationButton.querySelector('[data-carousel-resume]').hidden = !paused;
+            rotationButton.hidden = motion.matches;
+            track.setAttribute('aria-live', paused ? 'polite' : 'off');
+            scheduleRotation();
+        }
+
+        function showSlide(nextIndex, manual = false) {
+            if (manual) paused = true;
+            index = (nextIndex + slides.length) % slides.length;
+            track.style.setProperty('--slide', index);
+            slides.forEach((slide, slideIndex) => {
+                const active = slideIndex === index;
+                slide.inert = !active;
+                slide.setAttribute('aria-hidden', String(!active));
+                if (active) {
+                    dots[slideIndex].setAttribute('aria-current', 'true');
+                } else {
+                    dots[slideIndex].removeAttribute('aria-current');
+                }
+            });
+            carousel.querySelector('.carousel-counter').textContent =
+                `${String(index + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+            updateRotation();
+        }
+
+        carousel.querySelector('.carousel-prev').addEventListener('click', () => showSlide(index - 1, true));
+        carousel.querySelector('.carousel-next').addEventListener('click', () => showSlide(index + 1, true));
+        dots.forEach((dot, dotIndex) => dot.addEventListener('click', () => showSlide(dotIndex, true)));
+        rotationButton.addEventListener('click', () => {
+            paused = !paused;
+            updateRotation();
+        });
+        carousel.addEventListener('focusin', event => {
+            if (rotationButton.contains(event.target)) return;
+            paused = true;
+            updateRotation();
+        });
+        carousel.addEventListener('pointerenter', event => {
+            if (event.pointerType !== 'mouse') return;
+            hovered = true;
+            scheduleRotation();
+        });
+        carousel.addEventListener('pointerleave', event => {
+            if (event.pointerType !== 'mouse') return;
+            hovered = false;
+            scheduleRotation();
+        });
+        document.addEventListener('visibilitychange', scheduleRotation);
+        motion.addEventListener('change', () => {
+            if (motion.matches) paused = true;
+            updateRotation();
+        });
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver(entries => {
+                inView = entries[0].isIntersecting;
+                scheduleRotation();
+            }, {threshold: 0.25});
+            observer.observe(carousel);
+        }
+        carousel.querySelector('.carousel-controls').hidden = false;
+        showSlide(0);
+    }
 
     setupScrollReveal();
-
-    // Open mobile menu
-    $('#mobile-menu-open').click(function() {
-        setMobileMenuOpen(true);
-    });
-
-    // Close mobile menu
-    $('#mobile-menu-close').click(function() {
-        setMobileMenuOpen(false);
-    });
-    
-    $('section').click(function() {
-        if ($('header').hasClass('active')) {
-            setMobileMenuOpen(false, false);
-        }
-    });
-
-    $(document).keydown(function(e) {
-        if (e.key === 'Escape' && $('header').hasClass('active')) {
-            setMobileMenuOpen(false);
-        }
-    });
-
-    function setMobileMenuOpen(isOpen, returnFocus = true) {
-        var header = document.getElementById('navbar');
-        var openButton = document.getElementById('mobile-menu-open');
-        var closeButton = document.getElementById('mobile-menu-close');
-
-        header.classList.toggle('active', isOpen);
-        document.body.classList.toggle('active', isOpen);
-        openButton.setAttribute('aria-expanded', String(isOpen));
-
-        if (isOpen) {
-            closeButton.focus();
-        } else if (returnFocus && document.activeElement === closeButton) {
-            openButton.focus();
-        }
-    }
-
-    // Load additional projects
-    $('#view-more-projects').click(function(e){
-        e.preventDefault();
-        $(this).fadeOut(300, function() {
-            $('#more-projects').fadeIn(300);
-        });
-    });
-
-
-    // -----------------------------------------------------------------------------------
-    const carouselText = [
-        {text: "UI/UX"},
-        {text: "Java" },
-        {text: "PL/SQL"},
-        {text: "C#"},
-        {text: "Responsive Design"},
-        {text: "Large language models"},
-        {text: "Web development"},
-        {text: "Database management systems"},
-        {text: "Spring MVC"}
-    ]
-
-    jQuery(function ($) {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            $('#feature-text').text('Java');
-            return;
-        }
-
-        // Randomly shuffle CarouselText
-      for (let i = carouselText.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [carouselText[i], carouselText[j]] = [carouselText[j], carouselText[i]];
-        }
-      carousel(carouselText, "#feature-text")
-    });
-
-    async function typeSentence(sentence, eleRef, delay = 100) {
-      const letters = sentence.split("");
-      let i = 0;
-      while(i < letters.length) {
-        await waitForMs(delay);
-        $(eleRef).append(letters[i]);
-        i++
-      }
-      return;
-    }
-
-    async function deleteSentence(eleRef) {
-      const sentence = $(eleRef).html();
-      const letters = sentence.split("");
-      let i = 0;
-      while(letters.length > 0) {
-        await waitForMs(40);
-        letters.pop();
-        $(eleRef).html(letters.join(""));
-      }
-    }
-
-    async function carousel(carouselList, eleRef) {
-        var i = 0;
-        while(true) {
-          await typeSentence(carouselList[i].text, eleRef);
-          await waitForMs(1500);
-          await deleteSentence(eleRef);
-          await waitForMs(1000);
-          i++
-          if(i >= carouselList.length) {i = 0;}
-        }
-    }
-
-    function waitForMs(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms))
-    }
+    setupCarousel();
 
 })(jQuery);
 
@@ -236,7 +157,7 @@
 // -----------------------------------------------------------------------------------
 // LANGUAGE
 // -----------------------------------------------------------------------------------
-const defaultLocale = 'en';
+const defaultLocale = 'no';
 const supportedLocales = ['en', 'no'];
 // The active locale
 let locale;
@@ -246,9 +167,8 @@ let translations = {};
 
 // When the page content is ready...
 document.addEventListener("DOMContentLoaded", () => {
-    const initialLocale =
-        supportedOrDefault(browserLocales(true));
-    setLocale(initialLocale);
+    const requestedLocale = new URLSearchParams(window.location.search).get("lang");
+    setLocale(isSupported(requestedLocale) ? requestedLocale : defaultLocale);
 });
 
 
@@ -256,19 +176,6 @@ function isSupported(locale) {
     // Check if locale is supported
     return supportedLocales.indexOf(locale) > -1;
 }
-
-function supportedOrDefault(locales) {
-    // Retrieve the first locale we support from the given
-    // array, or return our default locale
-    return locales.find(isSupported) || defaultLocale;
-}
-
-function browserLocales(languageCodeOnly = false) {
-    return navigator.languages.map((locale) =>
-        languageCodeOnly ? locale.split("-")[0] : locale,
-    );
-}
-
 
 async function setLocale(newLocale) {
     // Load translations for the given locale and translate
@@ -287,6 +194,18 @@ async function setLocale(newLocale) {
             button.getAttribute("i18n-aria-label") === `language-${newLocale === "no" ? "norwegian" : "english"}`
         ));
     });
+
+    const pageUrl = new URL(window.location.href);
+    if (newLocale === "en") {
+        pageUrl.searchParams.set("lang", "en");
+    } else {
+        pageUrl.searchParams.delete("lang");
+    }
+    window.history.replaceState(null, "", `${pageUrl.pathname}${pageUrl.search}${pageUrl.hash}`);
+
+    const canonicalUrl = `${pageUrl.origin}${pageUrl.pathname}${newLocale === "en" ? "?lang=en" : ""}`;
+    document.querySelector('link[rel="canonical"]').setAttribute("href", canonicalUrl);
+    document.querySelector('meta[property="og:url"]').setAttribute("content", canonicalUrl);
 
     translatePage();
 }
@@ -308,25 +227,34 @@ function translatePage() {
     // data-i18n-key attribute with the translation corresponding
     // to its data-i18n-key
     document.querySelectorAll("[i18n-key]").forEach(translateElement);
-    document.querySelectorAll("[i18n-aria-label]").forEach(element => {
-        const key = element.getAttribute("i18n-aria-label");
-        const label = translations[key];
-        if (typeof label !== "string") {
-            console.error(`Missing translation for aria-label: ${key}`);
+    document.querySelectorAll("[i18n-content]").forEach(element => {
+        const key = element.getAttribute("i18n-content");
+        const content = translations[key];
+        if (typeof content !== "string") {
+            console.error(`Missing translation for content: ${key}`);
             return;
         }
-        element.setAttribute("aria-label", label);
+        element.setAttribute("content", content);
     });
-    document.querySelectorAll("[i18n-date-key]").forEach(element => {
-        const key = element.getAttribute("i18n-date-key");
-        const date = translations[key];
-        if (typeof date !== "string") {
-            console.error(`Missing translation for date: ${key}`);
+    document.querySelectorAll("[i18n-src]").forEach(element => {
+        const key = element.getAttribute("i18n-src");
+        const source = translations[key];
+        if (typeof source !== "string") {
+            console.error(`Missing translation for image source: ${key}`);
             return;
         }
-        element.setAttribute("data-date", date);
-        const renderedDate = element.parentElement.querySelector(".vtimeline-date");
-        if (renderedDate) renderedDate.innerText = date;
+        element.setAttribute("src", source);
+    });
+    ["aria-label", "aria-roledescription"].forEach(attribute => {
+        document.querySelectorAll(`[i18n-${attribute}]`).forEach(element => {
+            const key = element.getAttribute(`i18n-${attribute}`);
+            const label = translations[key];
+            if (typeof label !== "string") {
+                console.error(`Missing translation for ${attribute}: ${key}`);
+                return;
+            }
+            element.setAttribute(attribute, label);
+        });
     });
     changePortfolioDlLink()
 }
