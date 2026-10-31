@@ -282,9 +282,18 @@ section {
 .carousel-art-wilds img,
 .project-image.project-image-wilds img,
 .carousel-art-valheim img,
-.project-image.project-image-valheim img {
+.project-image.project-image-valheim img,
+.carousel-art-tycoon img,
+.project-image.project-image-tycoon img {
     padding: 22px;
     object-fit: contain;
+}
+
+.carousel-art-tycoon,
+.project-image.project-image-tycoon {
+    background:
+        radial-gradient(ellipse at 50% 50%, rgba(53, 196, 106, 0.16), transparent 70%),
+        linear-gradient(135deg, #1d2422, #111513);
 }
 
 .carousel-art-valheim,
@@ -1142,11 +1151,6 @@ button:focus-visible,
         font-size: clamp(2.8rem, 12vw, 4.3rem);
     }
 
-    .hero-showcase {
-        max-width: 410px;
-        margin: 0 auto;
-    }
-
     #lead-down {
         display: none;
     }
@@ -1182,25 +1186,19 @@ button:focus-visible,
     }
 }
 
+@media (max-width: 760px), (max-height: 500px) {
+    #lead {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero-showcase {
+        display: none;
+    }
+}
+
 @media (max-width: 480px) {
     .hero-actions {
         gap: 15px;
-    }
-
-    .carousel-counter {
-        display: none;
-    }
-
-    .carousel-caption {
-        padding: 18px 20px 20px;
-    }
-
-    .carousel-result {
-        min-height: 76px;
-    }
-
-    .carousel-result-text {
-        font-size: 1.5rem;
     }
 
     #projects,
