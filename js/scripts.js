@@ -185,6 +185,8 @@ async function setLocale(newLocale) {
         throw new RangeError(`Unsupported locale: ${newLocale}`);
     }
 
+    NeonLogo.render(newLocale);
+
     const newTranslations = await fetchTranslationsFor(newLocale);
     locale = newLocale;
     translations = newTranslations;
@@ -235,15 +237,6 @@ function translatePage() {
             return;
         }
         element.setAttribute("content", content);
-    });
-    document.querySelectorAll("[i18n-src]").forEach(element => {
-        const key = element.getAttribute("i18n-src");
-        const source = translations[key];
-        if (typeof source !== "string") {
-            console.error(`Missing translation for image source: ${key}`);
-            return;
-        }
-        element.setAttribute("src", source);
     });
     ["aria-label", "aria-roledescription"].forEach(attribute => {
         document.querySelectorAll(`[i18n-${attribute}]`).forEach(element => {

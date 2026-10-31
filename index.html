@@ -99,9 +99,7 @@
                              i18n-aria-roledescription="carousel-slide-role"
                              aria-label="Boms og president" i18n-aria-label="project-norwegian-tycoon">
                             <div class="carousel-art carousel-art-tycoon">
-                                <!-- Game logo: Norwegian-tycoon repo, icons/logo.svg and icons/logo-en.svg. -->
-                                <img src="/media/projects/norwegian-tycoon-logo.svg" i18n-src="project-logo"
-                                     alt="" width="620" height="140" />
+                                <div class="tycoon-neon" data-neon-logo="carousel-neon" aria-hidden="true"></div>
                             </div>
                             <div class="carousel-caption">
                                 <p class="carousel-result carousel-result-text" i18n-key="carousel-tycoon-result">Rett i nettleseren.</p>
@@ -189,7 +187,7 @@
             <div class="project-grid">
                 <article class="project project-featured" id="project-norwegian-tycoon">
                     <div class="project-image project-image-tycoon">
-                        <img src="/media/projects/norwegian-tycoon-logo.svg" i18n-src="project-logo" alt="" width="620" height="140" />
+                        <div class="tycoon-neon" data-neon-logo="project-neon" aria-hidden="true"></div>
                     </div>
                     <div class="project-info">
                         <p class="project-platform" i18n-key="project-norwegian-tycoon-platform">Nettleserspill · Firebase · Mobil</p>
@@ -285,6 +283,7 @@
     </footer>
     <!-- End footer -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/neon-logo.js"></script>
     <script src="js/scripts.js"></script>
 </body>
 </html>
