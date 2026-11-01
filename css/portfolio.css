@@ -287,6 +287,24 @@ section {
     object-fit: contain;
 }
 
+.project-image.project-image-markitdown {
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(80, 70, 229, 0.24), transparent 70%),
+        linear-gradient(135deg, #17162a, #0f1015);
+}
+
+.project-image.project-image-shorts {
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(255, 78, 69, 0.16), transparent 70%),
+        linear-gradient(135deg, #24191b, #111418);
+}
+
+.project-image.project-image-markitdown img,
+.project-image.project-image-shorts img {
+    padding: 22px;
+    object-fit: contain;
+}
+
 .carousel-art-tycoon,
 .project-image.project-image-tycoon {
     display: flex;
