@@ -63,5 +63,13 @@
 
   "project-1": "EZBuild",
   "project-1-desc": "A Valheim building quality-of-life mod with a pipette for building and resource gathering, automatic tool selection, interaction while building, and quick hammer/repair hotkeys.",
-  "project-ezbuild-reception": "Nexus Mods: 57 endorsements · 1.7k downloads. Players praise its useful building shortcuts and quality-of-life improvements."
+  "project-ezbuild-reception": "Nexus Mods: 57 endorsements · 1.7k downloads. Players praise its useful building shortcuts and quality-of-life improvements.",
+
+  "project-open-link": "Open in browser",
+  "project-markitdown-platform": "Web app · Python · Pyodide · WebAssembly",
+  "project-markitdown-desc": "A browser port of Microsoft's MarkItDown that turns PDF, Word, PowerPoint, Excel and more into Markdown. Python runs in the browser through WebAssembly, so files are never uploaded.",
+  "project-markitdown-open-label": "Open MarkItDown Web in this browser",
+  "project-markitdown-github-label": "View the MarkItDown Web source code on GitHub",
+  "project-shorts-desc": "An automated pipeline that makes YouTube Shorts from a topic: Gemini writes and voices the script, stock footage comes from Pexels or Pixabay, FFmpeg edits it with transitions, and ComfyUI generates a lip-synced AI presenter.",
+  "project-shorts-github-label": "View the Auto YT Shorts source code on GitHub"
 }
