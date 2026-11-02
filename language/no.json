@@ -70,6 +70,6 @@
   "project-markitdown-desc": "En nettleserversjon av Microsofts MarkItDown som gjør PDF, Word, PowerPoint, Excel og mer om til Markdown. Python kjører i nettleseren via WebAssembly, så filene lastes aldri opp.",
   "project-markitdown-open-label": "Åpne MarkItDown Web i nettleseren",
   "project-markitdown-github-label": "Se kildekoden til MarkItDown Web på GitHub",
-  "project-shorts-desc": "En automatisert pipeline som lager YouTube Shorts fra et tema: Gemini skriver manus og leser det inn, stockvideo hentes fra Pexels eller Pixabay, FFmpeg klipper med overganger, og en leppesynkronisert AI-programleder lages med ComfyUI.",
-  "project-shorts-github-label": "Se kildekoden til Auto YT Shorts på GitHub"
+  "project-comfyui-auto-gen-desc": "Lager video med ComfyUI fra ett panel, med to pipelines: YouTube Shorts fra et tema, der Gemini skriver og leser inn manus, stockvideo hentes fra Pexels eller Pixabay og en leppesynkronisert AI-programleder lages med ComfyUI, og generell video fra et bilde og en beskrivelse, med eller uten lyd.",
+  "project-comfyui-auto-gen-github-label": "Se kildekoden til ComfyUI auto-gen på GitHub"
 }
