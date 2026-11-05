@@ -61,6 +61,8 @@
   "project-2": "Detektering og varsling av hjortevilt ved veibane ved bruk av dyplæring",
   "project-2-desc": "Utvikling av en dyplæringsmodell og et Python-program for presis gjenkjenning og varsling av hjortevilt nær offentlige veier i sanntid.",
 
+  "project-comfyui-desc": "Et nettpanel som lager YouTube Shorts, filmer og bilder med ComfyUI-arbeidsflytene dine. Det henter innstillingene fra hver arbeidsflyt, deler én kø på tvers av alle tre og styres fra mobilen.",
+  "project-comfyui-github-label": "Åpne ComfyUI auto-gen på GitHub",
   "project-1": "EZBuild",
   "project-1-desc": "En Valheim-mod for enklere bygging med pipette for bygging og ressursinnsamling, automatisk valg av verktøy, interaksjon mens du bygger og hurtigtaster for hammer/reparasjon.",
   "project-ezbuild-reception": "Nexus Mods: 57 anbefalinger · 1,7k nedlastinger. Spillere setter pris på nyttige byggeverktøy og forbedringer av spillopplevelsen."

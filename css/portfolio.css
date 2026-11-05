@@ -325,6 +325,21 @@ section {
         linear-gradient(135deg, #25201f, #12171c);
 }
 
+.project-image.project-image-comfyui {
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(ellipse at 50% 60%, rgba(70, 150, 200, 0.25), transparent 70%),
+        linear-gradient(135deg, #14202b, #0f1317);
+}
+
+.project-wordmark {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #cfe8f7;
+}
+
 .carousel-caption {
     display: flex;
     flex: 1;

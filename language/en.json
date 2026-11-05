@@ -60,6 +60,8 @@
   "project-immersivehud-reception": "Nexus Mods: 15 endorsements · 598 downloads. Players praise the dynamic HUD and thank the author for continuing to maintain it.",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
   "project-2-desc": "Development of a deep learning model and Python application for accurate real-time detection and warning of game close to public roads.",
+  "project-comfyui-desc": "A web panel that makes YouTube Shorts, films and images with your ComfyUI workflows. It reads each workflow's settings, shares one queue across all three, and runs from your phone.",
+  "project-comfyui-github-label": "Open ComfyUI auto-gen on GitHub",
 
   "project-1": "EZBuild",
   "project-1-desc": "A Valheim building quality-of-life mod with a pipette for building and resource gathering, automatic tool selection, interaction while building, and quick hammer/repair hotkeys.",
