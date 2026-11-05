@@ -70,6 +70,6 @@
   "project-markitdown-desc": "En nettleserversjon av Microsofts MarkItDown som gjør PDF, Word, PowerPoint, Excel og mer om til Markdown. Python kjører i nettleseren via WebAssembly, så filene lastes aldri opp.",
   "project-markitdown-open-label": "Åpne MarkItDown Web i nettleseren",
   "project-markitdown-github-label": "Se kildekoden til MarkItDown Web på GitHub",
-  "project-comfyui-auto-gen-desc": "Lager video med ComfyUI fra ett panel, med to pipelines: YouTube Shorts fra et tema, der Gemini skriver og leser inn manus, stockvideo hentes fra Pexels eller Pixabay og en leppesynkronisert AI-programleder lages med ComfyUI, og generell video fra et bilde og en beskrivelse, med eller uten lyd.",
+  "project-comfyui-auto-gen-desc": "Lager video og bilder med ComfyUI fra ett panel, med tre pipelines: YouTube Shorts fra et tema, der Gemini skriver og leser inn manus, stockvideo hentes fra Pexels eller Pixabay og en leppesynkronisert AI-programleder lages med ComfyUI, generell video fra et bilde og en beskrivelse, og bilder fra tekst eller redigering. Panelet bruker innstillingene fra ComfyUI-arbeidsflytene dine, deler én kø og styres fra mobilen.",
   "project-comfyui-auto-gen-github-label": "Se kildekoden til ComfyUI auto-gen på GitHub"
 }

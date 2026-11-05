@@ -70,6 +70,6 @@
   "project-markitdown-desc": "A browser port of Microsoft's MarkItDown that turns PDF, Word, PowerPoint, Excel and more into Markdown. Python runs in the browser through WebAssembly, so files are never uploaded.",
   "project-markitdown-open-label": "Open MarkItDown Web in this browser",
   "project-markitdown-github-label": "View the MarkItDown Web source code on GitHub",
-  "project-comfyui-auto-gen-desc": "Makes videos with ComfyUI from one panel, with two pipelines: YouTube Shorts from a topic, where Gemini writes and voices the script, stock footage comes from Pexels or Pixabay and ComfyUI generates a lip-synced AI presenter, and generic video from an image and a description, with or without audio.",
+  "project-comfyui-auto-gen-desc": "Makes videos and images with ComfyUI from one panel, with three pipelines: YouTube Shorts from a topic, where Gemini writes and voices the script, stock footage comes from Pexels or Pixabay and ComfyUI generates a lip-synced AI presenter, general video from an image and a description, and images from text or by editing. The panel uses the settings from your ComfyUI workflows, shares one queue and runs from your phone.",
   "project-comfyui-auto-gen-github-label": "View the ComfyUI auto-gen source code on GitHub"
 }
