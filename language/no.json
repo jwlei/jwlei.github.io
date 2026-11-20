@@ -70,6 +70,6 @@
   "project-markitdown-desc": "En nettleserversjon av Microsofts MarkItDown som gjør PDF, Word, PowerPoint, Excel og mer om til Markdown. Python kjører i nettleseren via WebAssembly, så filene lastes aldri opp.",
   "project-markitdown-open-label": "Åpne MarkItDown Web i nettleseren",
   "project-markitdown-github-label": "Se kildekoden til MarkItDown Web på GitHub",
-  "project-gen-center-desc": "Lager video og bilder med ComfyUI fra ett panel, med tre pipelines: YouTube Shorts fra et tema, der Gemini skriver og leser inn manus, stockvideo hentes fra Pexels eller Pixabay og en leppesynkronisert AI-programleder lages med ComfyUI, generell video fra et bilde og en beskrivelse, og bilder fra tekst eller redigering. Panelet bruker innstillingene fra ComfyUI-arbeidsflytene dine, deler én kø og styres fra mobilen.",
+  "project-gen-center-desc": "Et selvhostet studio for AI-generert video og bilder med ComfyUI. Tre pipelines: YouTube Shorts fra et tema (manus og fortellerstemme fra Gemini, stockvideo, en leppesynkronisert AI-programleder og automatisk opplasting), filmer på opptil 10 minutter fra ett bilde, og bildeserier fra tekst eller ved redigering, innmaling og utvidelse. Gemini eller lokale språkmodeller skriver promptene, én GPU-kø gjenopptar arbeid og tåler krasj, og et responsivt panel styrer alt fra mobilen, hvor som helst.",
   "project-gen-center-github-label": "Se kildekoden til gen-center på GitHub"
 }
