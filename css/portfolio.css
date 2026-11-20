@@ -299,8 +299,15 @@ section {
         linear-gradient(135deg, #24191b, #111418);
 }
 
+.project-image.project-image-llm {
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(160, 124, 255, 0.18), transparent 70%),
+        linear-gradient(135deg, #1b1826, #111418);
+}
+
 .project-image.project-image-markitdown img,
-.project-image.project-image-shorts img {
+.project-image.project-image-shorts img,
+.project-image.project-image-llm img {
     padding: 22px;
     object-fit: contain;
 }
