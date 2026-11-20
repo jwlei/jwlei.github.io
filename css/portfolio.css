@@ -305,9 +305,16 @@ section {
         linear-gradient(135deg, #1b1826, #111418);
 }
 
+.project-image.project-image-deepfield {
+    background:
+        radial-gradient(ellipse at 50% 38%, rgba(84, 140, 255, 0.22), transparent 68%),
+        linear-gradient(135deg, #0b1424, #07090f);
+}
+
 .project-image.project-image-markitdown img,
 .project-image.project-image-shorts img,
-.project-image.project-image-llm img {
+.project-image.project-image-llm img,
+.project-image.project-image-deepfield img {
     padding: 22px;
     object-fit: contain;
 }
@@ -516,11 +523,13 @@ section {
     color: var(--accent);
 }
 
-#project-section {
+#project-section,
+#funzone-section {
     background: rgba(255, 255, 255, 0.018);
 }
 
 #projects,
+#funzone,
 #contact {
     display: block;
     width: 100%;
@@ -537,6 +546,7 @@ section {
 
 .heading,
 #projects h2,
+#funzone h2,
 #contact h2 {
     position: relative;
     display: table;
@@ -556,14 +566,20 @@ section {
     background: var(--accent-strong);
 }
 
-#projects p {
+#projects p,
+#funzone p {
     margin: 0;
     color: #b1bac4;
     line-height: 1.85;
 }
 
-#projects h2 {
+#projects h2,
+#funzone h2 {
     margin-bottom: 42px;
+}
+
+#funzone .funzone-intro {
+    margin: -18px 0 28px;
 }
 
 .project-grid {
@@ -1267,6 +1283,7 @@ button:focus-visible,
     }
 
     #projects,
+    #funzone,
     #contact {
         padding: 28px 22px;
     }
@@ -1313,6 +1330,7 @@ button:focus-visible,
     }
 
     #projects,
+    #funzone,
     #contact {
         padding: 24px 18px;
     }

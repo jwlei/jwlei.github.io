@@ -73,5 +73,14 @@
   "project-gen-center-desc": "A self-hosted studio for AI video and image generation on ComfyUI. Three pipelines: YouTube Shorts from a topic (Gemini script and narration, stock footage, a lip-synced AI presenter, automatic upload), films up to 10 minutes from one image, and image sets from text or by editing, inpainting and expanding. Gemini or local LLMs write the prompts, one GPU queue resumes and recovers from crashes, and a responsive panel runs it from a phone anywhere.",
   "project-gen-center-github-label": "View the gen-center source code on GitHub",
   "project-local-llm-host-desc": "A self-hosted chat for local LLMs. Drop GGUF models in a folder and chat with them from your PC or phone, anywhere over Tailscale. llama.cpp loads a model on the first message and unloads it when idle; conversations are kept on the server and shared across devices, with streaming Markdown replies, images for vision models, edit and regenerate, and a context meter. It can start headless in the background when you sign in to Windows, and nothing leaves your own GPU.",
-  "project-local-llm-host-github-label": "View the local-llm-host source code on GitHub"
+  "project-local-llm-host-github-label": "View the local-llm-host source code on GitHub",
+
+  "funzone": "Funzone",
+  "funzone-intro": "Things that are simply fun to play with, hosted right here on the site.",
+  "funzone-deepfield-platform": "Web app · TypeScript · Three.js · WebGL",
+  "funzone-deepfield-desc": "Explore the observable universe in your browser. Fly from the Solar System to the edge of the cosmic web, with 2.8 million real stars, 6,400 exoplanets, 284,000 asteroids and comets, 44,000 galaxies and real-time ray-traced black holes. Scrub through time, land on planets and plan space missions.",
+  "funzone-deepfield-credit": "Based on",
+  "funzone-deepfield-credit-by": "by BigBrains (AGPL-3.0).",
+  "funzone-deepfield-open-label": "Open Deep Field in this browser",
+  "funzone-deepfield-github-label": "View the Deep Field source code on GitHub"
 }
