@@ -3,78 +3,85 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#03060d" />
-    <meta name="description" content="Hivemind: an interactive full-screen simulation of AI agents and neural nets thinking, talking, planning and staying ahead of the curve." />
+    <meta name="theme-color" content="#0c1320" />
+    <meta name="description" content="Hivemind: watch a team of AI agents work together on a goal. See who is doing what, what they say to each other, and what it costs." />
     <title>Hivemind · jleiros.com</title>
     <link rel="icon" type="image/svg+xml" href="/media/images/icons/favicon.svg" />
     <link rel="stylesheet" href="hivemind.css" />
 </head>
 <body>
-    <canvas id="sim" role="img" aria-label="Interactive simulation of AI agents and neural networks working together"></canvas>
-    <div class="fx" aria-hidden="true"></div>
+    <canvas id="sim" role="img" aria-label="A team of AI agents working together on a goal"></canvas>
 
     <header class="topbar" id="topbar">
         <a class="back" href="/#garden-section">← jleiros.com</a>
-        <div class="brand"><span class="mark" aria-hidden="true">◈</span> HIVEMIND <small>autonomous collective · v9.4</small></div>
+        <div class="brand"><span class="mark" aria-hidden="true"></span>Hivemind <small>AI team workspace</small></div>
+        <div class="spend-pill" title="What this session has cost in AI usage">
+            <span>API spend</span><b id="spend-top" class="num">$0.00</b>
+        </div>
         <div class="controls">
-            <span id="clock" class="clock"></span>
+            <span id="clock" class="clock num"></span>
             <button type="button" class="btn" id="btn-pause" title="Pause (Space)">Pause</button>
-            <button type="button" class="btn" id="btn-speed" title="Speed (1–5)">1×</button>
-            <button type="button" class="btn" id="btn-spawn" title="Spawn an agent (N)">+ Agent</button>
-            <button type="button" class="btn" id="btn-hud" title="Hide HUD (H)">Hide HUD</button>
+            <button type="button" class="btn" id="btn-speed" title="Speed (1–4)">1×</button>
+            <button type="button" class="btn" id="btn-spawn" title="Add an agent (N)">+ Agent</button>
+            <button type="button" class="btn" id="btn-hud" title="Hide panels (H)">Hide panels</button>
             <button type="button" class="btn" id="btn-full" title="Fullscreen (F)">Fullscreen</button>
-            <button type="button" class="btn icon" id="btn-help" title="Controls (?)" aria-label="Controls">?</button>
+            <button type="button" class="btn icon" id="btn-help" title="How it works (?)" aria-label="How it works">?</button>
         </div>
     </header>
 
-    <aside class="panel left" aria-label="Inter-agent messages">
-        <h2><span class="live"></span>Inter-agent comms</h2>
+    <aside class="panel left" aria-label="Models and team chat">
+        <h2>Model fleet</h2>
+        <div id="fleet" class="fleet"></div>
+        <h2>Team chat</h2>
         <ol id="log" class="log"></ol>
     </aside>
 
-    <aside class="panel right" id="panel-right" aria-label="Collective telemetry">
-        <h2><span class="live"></span>Collective telemetry</h2>
-        <div class="metrics">
-            <div class="m"><span>Agents online</span><b id="m-agents">9/9</b></div>
-            <div class="m"><span>Tokens processed</span><b id="m-tokens">0</b></div>
-            <div class="m"><span>Thoughts / s</span><b id="m-thoughts">0</b></div>
-            <div class="m"><span>Messages / min</span><b id="m-msgs">0</b></div>
-            <div class="m"><span>Consensus</span><b id="m-consensus">0%</b></div>
-            <div class="m"><span>Plans executed</span><b id="m-plans">0</b></div>
-            <div class="m"><span>Backprop epoch</span><b id="m-epoch">0</b></div>
-            <div class="m"><span>Foresight lead</span><b id="m-lead">+0 d</b></div>
+    <aside class="panel right" id="panel-right" aria-label="Costs and progress">
+        <h2>API costs</h2>
+        <div class="spend-card">
+            <span class="label">This session</span>
+            <b id="spend" class="num">$0.00</b>
+            <span id="spend-rate" class="sub">≈ $0 per hour</span>
+            <div class="budget"><i id="budget-bar"></i></div>
+            <span id="budget-label" class="sub"></span>
         </div>
-        <h3>Ahead of the curve</h3>
-        <canvas id="curve" class="chart"></canvas>
-        <p class="legend"><i class="real"></i>Reality <i class="fc"></i>Hivemind forecast</p>
-        <h3>Throughput</h3>
-        <canvas id="spark" class="chart spark"></canvas>
+        <h3>Spend over time</h3>
+        <canvas id="c-spend" class="chart"></canvas>
+        <h3>Spend by agent</h3>
+        <canvas id="c-agents" class="chart tall"></canvas>
+        <h3>Progress vs plan</h3>
+        <canvas id="c-progress" class="chart"></canvas>
+        <p class="legend"><i class="actual"></i>Actual <i class="planned"></i>Planned <span id="progress-label"></span></p>
+        <div class="metrics">
+            <div class="m"><span>Tasks done</span><b id="m-tasks" class="num">0</b></div>
+            <div class="m"><span>Messages / min</span><b id="m-msgs" class="num">0</b></div>
+            <div class="m"><span>Avg. response</span><b id="m-latency" class="num">0 s</b></div>
+            <div class="m"><span>Tokens used</span><b id="m-tokens" class="num">0</b></div>
+        </div>
+        <p class="note">Example prices per million tokens (in / out): large $15 / $75, standard $3 / $15, fast $0.80 / $4.</p>
     </aside>
 
     <form id="cmd" class="cmd" autocomplete="off">
-        <label for="cmd-input" class="prompt">OBJECTIVE ›</label>
-        <input id="cmd-input" maxlength="60" placeholder="Give the hivemind a goal and press Enter" />
+        <label for="cmd-input" class="prompt">New goal</label>
+        <input id="cmd-input" maxlength="70" placeholder="Give the team a goal and press Enter" />
     </form>
 
-    <div class="ticker" aria-hidden="true"><div id="ticker-track" class="track"></div></div>
     <div id="tip" class="tip" hidden></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <div id="help" class="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
         <div class="help-box">
-            <h2 id="help-title">Steer the hivemind</h2>
+            <h2 id="help-title">How it works</h2>
+            <p>A team of AI agents is working on a goal. The orchestrator in the middle hands out tasks, the agents talk to each other to get them done, and every message costs a little money.</p>
             <dl>
-                <dt>Drag an agent</dt><dd>Drop it on another agent and the two start a conversation (on touch: hold it first)</dd>
-                <dt>Click an agent</dt><dd>It broadcasts an idea to the whole collective</dd>
-                <dt>Click the core</dt><dd>Call a vote; everyone weighs in</dd>
-                <dt>Click a plan task</dt><dd>Prioritise it; its owner works faster</dd>
-                <dt>Click empty space</dt><dd>Drop an external signal for the nearest agent</dd>
-                <dt>Type an objective</dt><dd>The Planner drafts a new mission for it (/ or Enter to focus)</dd>
-                <dt>Scroll · pinch</dt><dd>Zoom; drag empty space to pan; 0 resets the view</dd>
-                <dt>Double-tap</dt><dd>On touch: zoom in, or back out when zoomed</dd>
-                <dt>N</dt><dd>Spawn a new agent (up to 14)</dd>
-                <dt>1 – 5</dt><dd>Speed 0.25× to 4×</dd>
-                <dt>Space · H · F</dt><dd>Pause · hide the HUD · fullscreen</dd>
+                <dt>Click an agent</dt><dd>Ask it what it is doing</dd>
+                <dt>Drag an agent onto another</dt><dd>Pair them up on a task (on touch: hold first)</dd>
+                <dt>Click the orchestrator</dt><dd>Ask everyone for a status update</dd>
+                <dt>Click a task</dt><dd>Make it the top priority</dd>
+                <dt>Type a goal</dt><dd>Give the team something new to work on</dd>
+                <dt>Scroll · pinch</dt><dd>Zoom; drag empty space to move around; 0 resets</dd>
+                <dt>N · 1–4 · Space</dt><dd>Add an agent · speed · pause</dd>
+                <dt>H · F</dt><dd>Hide the side panels · fullscreen</dd>
             </dl>
             <button type="button" class="btn primary" id="help-close">Got it</button>
         </div>
