@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b0b10" />
+    <meta name="theme-color" content="#0a0d12" />
     <meta name="description" content="Hivemind: a simulated graph of AI agents on GPU pods solving hard engineering problems. Rearrange the nodes, switch their models and watch the costs." />
     <title>Hivemind · jleiros.com</title>
     <link rel="icon" type="image/svg+xml" href="/media/images/icons/favicon.svg" />
@@ -26,7 +26,8 @@
 
     <form id="cmd" class="cmd" autocomplete="off">
         <label for="cmd-input" class="prompt"><span class="tag">command line</span><span class="path">~/hivemind $</span></label>
-        <input id="cmd-input" maxlength="90" spellcheck="false" autocapitalize="off" placeholder="type a goal, or: help · approve · spawn · model qa opus" />
+        <input id="cmd-input" maxlength="90" spellcheck="false" autocapitalize="off" placeholder="type a goal and press Enter · or try: help, approve, spawn" />
+        <button type="submit" class="run">run ⏎</button>
     </form>
 
     <div id="model-menu" class="model-menu" hidden role="dialog" aria-label="Choose a model">
@@ -38,15 +39,16 @@
     <div id="help" class="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
         <div class="help-box">
             <h2 id="help-title">how it works</h2>
-            <p>A simulated team of AI agents, each a node running on its own GPU pod, works through a hard engineering goal. The orchestrator bus hands out work; layer 1 researches and designs, layer 2 builds, layer 3 verifies and ships. Every token costs money.</p>
+            <p>A simulated team of AI agents, each a node running on its own GPU pod, works through a hard engineering goal. The orchestrator bus hands out work; layer 1 researches and designs, layer 2 builds, layer 3 verifies, layer 4 deploys. Every token costs money.</p>
             <dl>
                 <dt>hover / tap a node</dt><dd>open it up: the neural net at work and the hardware under it</dd>
                 <dt>drag a node</dt><dd>drop it into any slot. Neighbours in a column form links: synergies speed work up, clashes slow it down</dd>
-                <dt>click a model tag</dt><dd>switch the node to Fable, Opus, Sonnet or Haiku. Cheaper models get more work sent back</dd>
+                <dt>click a model tag</dt><dd>switch the node between Claude models, from Haiku up to Fable in fast mode. Cheaper models get more work sent back</dd>
+                <dt>node health</dt><dd>every pod shows its status, uptime and error rate; incidents slow or stop a node until platform or SRE fixes it</dd>
                 <dt>human gate</dt><dd>before shipping, the run waits for you: click approve or type <code>approve</code></dd>
                 <dt>click the bus</dt><dd>ask every node for a status update</dd>
                 <dt>click a dispatch row</dt><dd>make that task the top priority</dd>
-                <dt>command line</dt><dd>type a goal, or <code>help</code>, <code>approve</code>, <code>spawn</code>, <code>pause</code>, <code>model &lt;node&gt; &lt;fable|opus|sonnet|haiku&gt;</code></dd>
+                <dt>command line</dt><dd>type a goal, or <code>help</code>, <code>approve</code>, <code>spawn</code>, <code>pause</code>, <code>model &lt;node&gt; &lt;model&gt;</code> (e.g. <code>model qa opus-fast</code>)</dd>
                 <dt>scroll · pinch</dt><dd>zoom; drag empty space to pan; 0 resets</dd>
             </dl>
             <button type="button" class="btn primary" id="help-close">got it</button>

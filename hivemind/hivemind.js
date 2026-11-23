@@ -1,6 +1,6 @@
 /* Hivemind: a simulated graph of AI agents, each a node on its own GPU pod, working through a hard engineering goal.
-   Left: input nodes. Middle: the orchestrator bus. Right: agent nodes in three layer columns. Bottom: run log,
-   dispatch and costs, then the command line. Plain canvas 2D, no dependencies.
+   Left: input nodes. Middle: the orchestrator bus. Right: agent nodes in four layer columns (research, build,
+   verify, deploy). Bottom: run log, dispatch and costs, then the command line. Plain canvas 2D, no dependencies.
    The graph uses "world" coordinates (1 unit = 1 CSS px at zoom 1); the header and bottom panels are screen space. */
 (() => {
     'use strict';
@@ -13,11 +13,12 @@
     const TAU = Math.PI * 2;
     const SPEEDS = [0.5, 1, 2, 4];
     let speedIdx = 1;
-    const ZMIN = 0.6, ZMAX = 2.5;
-    const MAX_NODES = 15;
+    const ZMIN = 0.5, ZMAX = 2.5;
+    const MAX_NODES = 17;
+    const LOAD = 25; // big workloads: every node pushes 25x more tokens than a single chat would
     const C = {
-        bg: '#0b0b10', node: '#14141c', nodeHot: '#1a1a25', line: '#2a2331', head: '#5e1f33', headHot: '#8a2a48',
-        crimson: '#b8325a', text: '#d8cfd6', dim: '#7d6f7a', faint: '#4d424c', yellow: '#f2c94c', green: '#7bd88f', red: '#ff5470',
+        bg: '#0a0d12', node: '#111720', nodeHot: '#16202c', line: '#243040', head: '#14303a', headHot: '#1b4a57',
+        accent: '#39c5d6', text: '#dfe7ee', dim: '#8a99a8', faint: '#556372', amber: '#ffb547', green: '#5fd38f', red: '#ff6b6b',
     };
 
     const rand = (a, b) => a + Math.random() * (b - a);
@@ -37,56 +38,68 @@
         return `rgba(${c},${a})`;
     }
     const money = (v, d = 2) => '$' + v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
-    const kfmt = (v) => (v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'k' : String(Math.round(v)));
+    const kfmt = (v) => (v >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'k' : String(Math.round(v)));
+    const hash = (n) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
 
     // ---------------------------------------------------------------- models
-    // Prices are Anthropic list prices per million tokens (input / output). Hardware, speed and quality are simulated.
+    // Anthropic list prices per million tokens (input / output). Hardware, speed and quality are simulated.
     const MODELS = [
+        { id: 'fable-fast', name: 'Claude Fable 5.2 · fast', short: 'fable 5.2 fast', pin: 16, pout: 80, speed: 1.5, quality: 1, dot: '#e7a6ff',
+          note: 'most capable, fast mode · $16 / $80', gpus: 16, gpu: 'H200', kw: 23, tps: 6500 },
         { id: 'fable', name: 'Claude Fable 5.2', short: 'fable 5.2', pin: 8, pout: 40, speed: 0.85, quality: 1, dot: '#c49bff',
-          note: 'most capable · slower · $8 / $40 per 1M tokens', gpus: 16, gpu: 'h200', kw: 21, tps: 2600 },
-        { id: 'opus', name: 'Claude Opus 5.5', short: 'opus 5.5', pin: 4, pout: 20, speed: 1, quality: 0.95, dot: '#f2c94c',
-          note: 'deep reasoning · $4 / $20 per 1M tokens', gpus: 8, gpu: 'h200', kw: 10.5, tps: 4200 },
+          note: 'most capable · $8 / $40', gpus: 16, gpu: 'H200', kw: 21, tps: 2600 },
+        { id: 'mythos', name: 'Claude Mythos 5.2', short: 'mythos 5.2', pin: 8, pout: 40, speed: 0.85, quality: 1, dot: '#9f8cff',
+          note: 'Fable-class, verified organizations only · $8 / $40', gpus: 16, gpu: 'H200', kw: 21, tps: 2600 },
+        { id: 'fable51', name: 'Claude Fable 5.1', short: 'fable 5.1', pin: 10, pout: 50, speed: 0.8, quality: 0.98, dot: '#b48ad8',
+          note: 'previous Fable, pricier · $10 / $50', gpus: 16, gpu: 'H200', kw: 21, tps: 2300 },
+        { id: 'opus-fast', name: 'Claude Opus 5.5 · fast', short: 'opus 5.5 fast', pin: 8, pout: 40, speed: 1.6, quality: 0.95, dot: '#ffd27a',
+          note: 'deep reasoning, fast mode · $8 / $40', gpus: 8, gpu: 'H200', kw: 12, tps: 10500 },
+        { id: 'opus', name: 'Claude Opus 5.5', short: 'opus 5.5', pin: 4, pout: 20, speed: 1, quality: 0.95, dot: '#ffb547',
+          note: 'deep reasoning · $4 / $20', gpus: 8, gpu: 'H200', kw: 10.5, tps: 4200 },
         { id: 'sonnet', name: 'Claude Sonnet 5.5', short: 'sonnet 5.5', pin: 2, pout: 10, speed: 1.25, quality: 0.86, dot: '#6fb3ff',
-          note: 'fast and capable · $2 / $10 per 1M tokens', gpus: 8, gpu: 'h100', kw: 8.2, tps: 7800 },
-        { id: 'haiku', name: 'Claude Haiku 5.5', short: 'haiku 5.5', pin: 0.1, pout: 0.5, speed: 1.7, quality: 0.68, dot: '#7bd88f',
-          note: 'fastest, cheapest · more rework · $0.10 / $0.50 per 1M tokens', gpus: 4, gpu: 'l40s', kw: 1.6, tps: 21000 },
+          note: 'fast and capable · $2 / $10', gpus: 8, gpu: 'H100', kw: 8.2, tps: 7800 },
+        { id: 'haiku', name: 'Claude Haiku 5.5', short: 'haiku 5.5', pin: 0.1, pout: 0.5, speed: 1.7, quality: 0.68, dot: '#5fd38f',
+          note: 'fastest, cheapest, more rework · $0.10 / $0.50', gpus: 4, gpu: 'L40S', kw: 1.6, tps: 21000 },
     ];
     const modelById = Object.fromEntries(MODELS.map((m) => [m.id, m]));
-    const REGIONS = ['us-east-1', 'us-west-2', 'eu-west-1'];
+    const REGIONS = ['us-east-1', 'us-west-2', 'eu-west-1', 'ap-south-1'];
 
-    // ---------------------------------------------------------------- the team
+    // ---------------------------------------------------------------- the team; viz = what you see inside the node
     const ROLES = [
-        { name: 'Planner', key: 'planner', layer: 0, model: 'fable', job: 'breaks goals into milestones' },
-        { name: 'Researcher', key: 'researcher', layer: 0, model: 'opus', job: 'reads papers, docs and postmortems' },
-        { name: 'Architect', key: 'architect', layer: 0, model: 'opus', job: 'designs systems and interfaces' },
-        { name: 'ML engineer', key: 'ml_engineer', layer: 1, model: 'opus', job: 'trains and tunes models' },
-        { name: 'Data engineer', key: 'data_engineer', layer: 1, model: 'sonnet', job: 'builds pipelines and datasets' },
-        { name: 'Backend', key: 'backend', layer: 1, model: 'sonnet', job: 'writes services and APIs' },
-        { name: 'Frontend', key: 'frontend', layer: 1, model: 'sonnet', job: 'builds dashboards and UI' },
-        { name: 'Security', key: 'security', layer: 2, model: 'opus', job: 'threat models and audits' },
-        { name: 'QA', key: 'qa', layer: 2, model: 'haiku', job: 'tests at scale' },
-        { name: 'SRE', key: 'sre', layer: 2, model: 'sonnet', job: 'runs production and rollouts' },
+        { name: 'Planner', key: 'planner', layer: 0, model: 'fable', viz: 'gantt', job: 'breaks goals into milestones' },
+        { name: 'Researcher', key: 'researcher', layer: 0, model: 'opus', viz: 'docs', job: 'reads papers, docs and postmortems' },
+        { name: 'Architect', key: 'architect', layer: 0, model: 'opus', viz: 'boxes', job: 'designs systems and interfaces' },
+        { name: 'ML engineer', key: 'ml_engineer', layer: 1, model: 'opus', viz: 'net', job: 'trains and tunes models' },
+        { name: 'Data engineer', key: 'data_engineer', layer: 1, model: 'sonnet', viz: 'pipeline', job: 'builds pipelines and datasets' },
+        { name: 'Backend', key: 'backend', layer: 1, model: 'sonnet', viz: 'trace', job: 'writes services and APIs' },
+        { name: 'Frontend', key: 'frontend', layer: 1, model: 'sonnet', viz: 'ui', job: 'builds dashboards and UI' },
+        { name: 'Security', key: 'security', layer: 2, model: 'opus', viz: 'radar', job: 'threat models and audits' },
+        { name: 'QA', key: 'qa', layer: 2, model: 'haiku', viz: 'tests', job: 'tests at scale' },
+        { name: 'SRE', key: 'sre', layer: 3, model: 'sonnet', viz: 'latency', job: 'runs production' },
+        { name: 'Release', key: 'release', layer: 3, model: 'sonnet', viz: 'rollout', job: 'ships builds safely, region by region' },
+        { name: 'Platform', key: 'platform', layer: 3, model: 'haiku', viz: 'racks', job: 'keeps the GPU fleet healthy' },
     ];
     const EXTRA_ROLES = [
-        { name: 'Performance', key: 'performance', layer: 1, model: 'opus', job: 'profiles and optimises hot paths' },
-        { name: 'DBA', key: 'dba', layer: 1, model: 'sonnet', job: 'tunes databases and queries' },
-        { name: 'Red team', key: 'red_team', layer: 2, model: 'opus', job: 'attacks the system before others do' },
-        { name: 'Compliance', key: 'compliance', layer: 2, model: 'sonnet', job: 'maps work to regulations' },
-        { name: 'Tech writer', key: 'tech_writer', layer: 2, model: 'haiku', job: 'writes docs and runbooks' },
+        { name: 'Performance', key: 'performance', layer: 1, model: 'opus', viz: 'trace', job: 'profiles and optimises hot paths' },
+        { name: 'DBA', key: 'dba', layer: 1, model: 'sonnet', viz: 'pipeline', job: 'tunes databases and queries' },
+        { name: 'Red team', key: 'red_team', layer: 2, model: 'opus', viz: 'radar', job: 'attacks the system before others do' },
+        { name: 'Compliance', key: 'compliance', layer: 2, model: 'sonnet', viz: 'checklist', job: 'maps work to regulations' },
+        { name: 'Tech writer', key: 'tech_writer', layer: 3, model: 'haiku', viz: 'docs', job: 'writes docs and runbooks' },
     ];
-    const COLUMNS = ['layer 1 · research & design', 'layer 2 · build', 'layer 3 · verify & ship'];
+    const COLUMNS = ['layer 1 · research & design', 'layer 2 · build', 'layer 3 · verify', 'layer 4 · deploy'];
+    const NCOL = COLUMNS.length;
 
     // Neighbours in a column affect each other. Unlisted pairs get a small default boost.
     const SYN_PAIRS = [
-        ['Architect', 'Backend', 18, 'shared design context'], ['ML engineer', 'Researcher', 20, 'papers into experiments'],
-        ['Data engineer', 'ML engineer', 22, 'features into training'], ['Backend', 'SRE', 12, 'shared telemetry'],
-        ['SRE', 'Security', 15, 'one incident channel'], ['Frontend', 'QA', 14, 'tests next to the UI'],
-        ['Architect', 'Planner', 10, 'plans match the design'], ['Backend', 'Data engineer', 12, 'schemas in lockstep'],
-        ['Backend', 'QA', 10, 'faster test loops'], ['DBA', 'Data engineer', 16, 'query plans tuned in place'],
-        ['Performance', 'Backend', 15, 'profiles on the same hosts'], ['Red team', 'Security', 18, 'attack and defend'],
-        ['QA', 'Security', -6, 'overlapping reviews'], ['Data engineer', 'Frontend', -5, 'schema churn'],
-        ['Researcher', 'SRE', -4, 'noisy neighbours'], ['Planner', 'QA', -3, 'too many status checks'],
-        ['Red team', 'QA', -7, 'duplicate test traffic'],
+        ['Architect', 'Researcher', 14, 'research shapes the design'], ['Architect', 'Planner', 10, 'plans match the design'],
+        ['Data engineer', 'ML engineer', 22, 'features into training'], ['Backend', 'Data engineer', 12, 'schemas in lockstep'],
+        ['Frontend', 'Backend', 10, 'one API contract'], ['ML engineer', 'Backend', 8, 'model serving in one place'],
+        ['QA', 'Security', -6, 'overlapping reviews'], ['Release', 'SRE', 16, 'one rollout pipeline'],
+        ['Platform', 'SRE', 12, 'shared fleet view'], ['Release', 'Platform', 9, 'capacity ready before deploys'],
+        ['DBA', 'Data engineer', 16, 'query plans tuned in place'], ['Performance', 'Backend', 15, 'profiles on the same hosts'],
+        ['Red team', 'Security', 18, 'attack and defend'], ['Red team', 'QA', -7, 'duplicate test traffic'],
+        ['Data engineer', 'Frontend', -5, 'schema churn'], ['Planner', 'Researcher', -3, 'too many status checks'],
+        ['Compliance', 'Security', 12, 'controls map to findings'], ['Tech writer', 'Release', 8, 'release notes on time'],
     ];
     const SYN = new Map(SYN_PAIRS.map(([a, b, pct, why]) => [[a, b].sort().join('|'), { pct, why }]));
     const SYN_LINES = ['same rack now, streaming results straight to you', 'same fabric, no more waiting on the network',
@@ -94,9 +107,15 @@
     const CLASH_LINES = ['we keep evicting each other\'s cache here', 'crowded, my latency just doubled', 'we\'re duplicating work now'];
     const HELP_REPLIES = ['yes please, start with the edge cases', 'thanks, double-check the numbers?', 'that helps, sending my notes',
         'sure, take the second half'];
+    const WARN = ['GPU {g} running hot (89 °C), throttling', 'NVLink retries on GPU {g}', 'KV cache pressure at 94%', 'p99 latency spike on {pod}'];
+    const ERR = ['GPU {g} ECC error, draining it', 'out of memory on shard {g}, restarting the worker', 'lost heartbeat, failing over to the standby'];
+    const FIXES = ['draining GPU {g}, moving your shard to a spare', 'restarting your worker on a fresh host', 'failing you over to the standby pod',
+        'lowering your batch size until it cools down', 'rebalancing your KV cache across GPUs'];
 
     // ---------------------------------------------------------------- goals
     // [stage, task, owner, helper, steps, question, answer, result]
+    const SHIP = [4, 'Ship to production', 'Release', 'Platform', ['building release artifacts', 'deploying to the canary pool', 'promoting region by region', 'tagging the release'],
+        'are the GPU pools warmed up for the new build?', 'yes, 4 regions warm and ready', 'release live in 4 regions'];
     const GOALS = [
         { title: 'Migrate a 40 TB Postgres cluster to multi-region with zero downtime', tasks: [
             [0, 'Scope the migration', 'Planner', 'Architect', ['reading the current topology', 'listing 212 dependent services', 'ranking the risky steps', 'writing the cutover plan'],
@@ -115,8 +134,6 @@
                 'are the replication slots on rotated keys?', 'yes, rotated 20 minutes ago', 'no critical findings, 2 low-risk fixes merged'],
             [4, 'Run the cutover', 'SRE', 'Backend', ['raising dual writes to 100%', 'moving reads region by region', 'watching the error budget', 'retiring the old primary'],
                 'ready to switch billing to quorum reads?', 'ready, the flag is on', 'cutover complete with zero downtime'],
-            [4, 'Write the postmortem', 'Planner', 'Researcher', ['collecting the timeline', 'summarising what went well', 'listing follow-ups', 'publishing the doc'],
-                'can you pull the lag graphs into the doc?', 'added, annotated at each phase', 'postmortem published, 7 follow-ups'],
         ] },
         { title: 'Cut LLM inference p99 latency by 50% at the same cost', tasks: [
             [0, 'Set the latency budget', 'Planner', 'SRE', ['reading 30 days of traces', 'breaking p99 into stages', 'setting a target per stage', 'agreeing on guardrails'],
@@ -133,10 +150,8 @@
                 'which percentiles should the charts show?', 'p50, p95 and p99, per region', 'dashboard live for every on-call engineer'],
             [3, 'Check output quality', 'QA', 'ML engineer', ['running 12k eval prompts', 'comparing against the baseline', 'checking edge cases', 'signing off'],
                 'are outputs identical with speculation on?', 'yes, rejection sampling keeps them identical', 'no quality change across 12k evals'],
-            [3, 'Canary in one region', 'SRE', 'Backend', ['routing 5% of traffic', 'watching p99 and errors', 'scaling to 25%', 'comparing cost per token'],
-                'error rate is flat, okay to go to 25%?', 'go, rollback is one flag away', 'canary p99 1.1 s, cost per token unchanged'],
-            [4, 'Roll out globally', 'Planner', 'SRE', ['planning the region order', 'rolling out region by region', 'confirming the target', 'writing the summary'],
-                'any region we should hold back?', 'hold ap-south until its GPU upgrade on Friday', 'p99 down 54% globally at the same cost'],
+            [4, 'Canary, then global', 'SRE', 'Backend', ['routing 5% of traffic', 'watching p99 and errors', 'scaling to every region', 'comparing cost per token'],
+                'error rate is flat, okay to go global?', 'go, rollback is one flag away', 'p99 down 54% globally at the same cost'],
         ] },
         { title: 'Ship SOC 2 Type II and EU data residency', tasks: [
             [0, 'Map the controls', 'Planner', 'Security', ['reading 64 SOC 2 controls', 'mapping them to our systems', 'finding the gaps', 'assigning owners'],
@@ -155,8 +170,6 @@
                 'can you export 90 days of change approvals?', 'exported 4,210 changes, all approved', 'evidence ready for 64 of 64 controls'],
             [4, 'Turn on EU residency', 'SRE', 'Data engineer', ['routing EU sign-ups to the EU', 'migrating existing EU customers', 'watching error rates', 'confirming with legal'],
                 'error rates okay after the routing change?', 'flat, 0.02% as before', 'EU residency live for 3,400 customers'],
-            [4, 'Hand over to the auditor', 'Planner', 'Researcher', ['scheduling the audit window', 'walking through each control', 'answering follow-ups', 'receiving the report'],
-                'do we have the vendor list the auditor wants?', 'yes, 37 vendors with their own SOC 2 reports', 'audit passed with no exceptions'],
         ] },
         { title: 'Build real-time fraud detection at 1M events per second', tasks: [
             [0, 'Define detection goals', 'Planner', 'ML engineer', ['reading last year\'s fraud cases', 'setting precision and recall targets', 'defining the latency budget', 'writing the spec'],
@@ -175,7 +188,7 @@
                 'any drift on weekend traffic?', 'slightly, recalibrated the weekend scores', 'replay: 93.8% caught, 0.07% false positives'],
             [3, 'Red-team the model', 'Security', 'ML engineer', ['crafting adversarial transactions', 'probing for feature gaming', 'testing rate-limit evasion', 'writing fixes'],
                 'can it be fooled by splitting payments?', 'it could; added a velocity feature', '2 evasion tricks found and closed'],
-            [4, 'Go live', 'SRE', 'Backend', ['shadow mode for 48 hours', 'blocking at 10%', 'scaling to 100%', 'setting up on-call alerts'],
+            [4, 'Shadow, then block', 'SRE', 'Backend', ['shadow mode for 48 hours', 'blocking at 10%', 'scaling to 100%', 'setting up on-call alerts'],
                 'shadow results look good, switch to 10%?', 'switched, watching chargebacks', 'blocking fraud live at 1M events/s'],
         ] },
     ];
@@ -196,8 +209,6 @@
             'where are the service credentials stored?', 'in the vault, rotated every 24 hours', 'no critical issues, 3 fixes merged'],
         [4, 'Roll out gradually', 'SRE', 'Backend', ['shipping to 1% of users', 'watching the error budget', 'ramping to 100%', 'setting up alerts'],
             'error budget healthy, ramp to 50%?', 'go ahead', 'fully rolled out, no incidents'],
-        [4, 'Report the results', 'Planner', 'Researcher', ['collecting metrics', 'comparing against the goal', 'listing follow-ups', 'sharing the report'],
-            'can you add before/after charts?', 'added on the first page', 'report shared: goal met'],
     ];
     const STAGES = ['scope', 'research', 'build', 'verify', 'ship'];
     const snake = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
@@ -209,8 +220,8 @@
     let paused = false;
     const cam = { x: 0, y: 0, z: 1 };
     const mouse = { sx: -1e4, sy: -1e4, type: 'mouse' };
-    const stats = { spend: 0, monthBase: 18420, budget: 50000, tokens: 0, msgTimes: [], tasksDone: 0, bucket: 0,
-        hist: [], perSec: [], util: [], lastSec: 0, runs: [], runNo: 0 };
+    const stats = { spend: 0, monthBase: 184200, budget: 500000, tokens: 0, tasksDone: 0, bucket: 0,
+        hist: [], perSec: [], util: [], lastSec: 0, runs: [], runNo: 0, lastShip: null };
     const timers = [];
     const packets = [];
     const runLog = [];
@@ -223,6 +234,9 @@
     let gesture = null;
     let synergy = [];
     let committed = new Set();
+    let redirect = null; // { t0 (real ms), goal }
+    let nextIncident = rand(14, 24);
+    let flashCost = 0;
     const ui = { approve: null, dispatchRows: [] };
 
     const font = (px, w = '') => `${w} ${Math.round(px * L.s * (L.f || 1) * 10) / 10}px ${MONO}`;
@@ -238,27 +252,29 @@
             nextIdle: rand(8, 18), spend: 0, tokIn: 0, tokOut: 0, sent: 0, said: null, talkUntil: 0,
             loadingUntil: 0, loadingFrom: 0, loadingModel: null, seed: rand(0, 100), chip: null, rect: null,
             podId: `pod-${region.slice(0, 2)}${String(randi(1, 48)).padStart(2, '0')}`, region, rack: randi(3, 40),
+            health: 'ok', healthUntil: 0, upSince: -rand(2, 40) * 86400, errRate: rand(0.005, 0.03),
             gpu: Array.from({ length: 16 }, () => rand(5, 15)),
             wire: Array.from({ length: 4 }, () => Array.from({ length: 9 }, () => [randi(0, 11), randi(0, 11)])),
         };
     }
     const nodes = ROLES.map(makeNode);
     const byName = Object.fromEntries(nodes.map((a) => [a.name, a]));
-    const cols = [0, 1, 2].map((c) => nodes.filter((a) => a.layer === c));
-    const hub = Object.assign(makeNode({ name: 'Orchestrator', key: 'orchestrator', layer: -1, model: 'fable', job: 'hands out work and tracks the goal' }),
+    const cols = Array.from({ length: NCOL }, (_, c) => nodes.filter((a) => a.layer === c));
+    const hub = Object.assign(makeNode({ name: 'Orchestrator', key: 'orchestrator', layer: -1, model: 'fable', viz: 'gantt', job: 'hands out work and tracks the goal' }),
         { isHub: true, shownProgress: 0, status: 'waiting for a goal' });
     const all = () => [hub, ...nodes];
     const colOf = (a) => cols.findIndex((c) => c.includes(a));
 
     function charge(a, tin, tout) {
         const m = modelById[a.model];
-        const cost = (tin * m.pin + tout * m.pout) / 1e6;
+        const cost = (tin * LOAD * m.pin + tout * LOAD * m.pout) / 1e6;
         a.spend += cost;
-        a.tokIn += tin;
-        a.tokOut += tout;
+        a.tokIn += tin * LOAD;
+        a.tokOut += tout * LOAD;
         stats.spend += cost;
-        stats.tokens += tin + tout;
+        stats.tokens += (tin + tout) * LOAD;
         stats.bucket += cost;
+        if (plan && !plan.doneAt) plan.cost += cost;
     }
 
     function focusOn(a, secs) {
@@ -282,12 +298,11 @@
         from.said = { to, text, until: t + dur + 3.5 };
         from.flash = 1;
         from.sent++;
-        packets.push({ from, to, k: 0, dur, onArrive, you: false });
+        packets.push({ from, to, k: 0, dur, onArrive });
         charge(from, randi(3000, 14000), randi(80, 500));
-        stats.msgTimes.push(t);
-        log(`${from.key}→${to.key}`, from.isHub ? C.yellow : C.crimson, text);
+        log(`${from.key} → ${to.key}`, from.isHub ? C.amber : C.accent, text);
     }
-    function sys(text, you) { log(you ? 'you' : 'sys', you ? C.yellow : C.dim, text); }
+    function sys(text, kind) { log(kind === 'you' ? 'you' : kind === 'err' ? 'alert' : 'system', kind === 'you' ? C.amber : kind === 'err' ? C.red : C.dim, text); }
 
     let toastTimer = 0;
     function toast(text) {
@@ -300,25 +315,28 @@
 
     // ---------------------------------------------------------------- plans
     function newPlan(goalTitle, defs) {
+        const switching = plan && !plan.doneAt;
         for (const a of nodes) { a.task = null; a.helping = null; }
-        const tasks = defs.filter((d) => byName[d[2]] && byName[d[3]]).map(([phase, name, owner, helper, steps, ask, reply, result]) => ({
+        packets.length = 0;
+        const list = defs.some((d) => d[2] === 'Release') ? defs : [...defs, SHIP];
+        const tasks = list.filter((d) => byName[d[2]] && byName[d[3]]).map(([phase, name, owner, helper, steps, ask, reply, result]) => ({
             phase, name, key: snake(name), owner: byName[owner], helper: byName[helper], steps, ask, reply, result,
             deps: [], progress: 0, state: 'pending', dur: rand(16, 26), asked: false, deep: false, reworked: false, boost: 1,
         }));
-        for (let s = 0; s < STAGES.length; s++) {
-            const st = tasks.filter((x) => x.phase === s);
-            st.forEach((x) => { x.deps = tasks.filter((y) => y.phase === s - 1); });
-        }
+        for (let s = 0; s < STAGES.length; s++) tasks.filter((x) => x.phase === s).forEach((x) => { x.deps = tasks.filter((y) => y.phase === s - 1); });
         const plannedDur = 5 + STAGES.reduce((sum, _, s) => {
             const st = tasks.filter((x) => x.phase === s);
             return sum + (st.length ? Math.max(...st.map((x) => x.dur)) * 1.3 + 4 : 0);
         }, 0);
         stats.runNo++;
-        plan = { seq: ++planSeq, goal: goalTitle, tasks, born: t, doneAt: 0, done: 0, plannedDur, gate: 'closed', gateAt: 0 };
+        plan = { seq: ++planSeq, goal: goalTitle, tasks, born: t, doneAt: 0, done: 0, plannedDur, gate: 'closed', gateAt: 0, cost: 0 };
+        // the whole graph visibly re-routes to the new goal
+        redirect = { t0: performance.now(), goal: goalTitle, switching };
+        for (const a of nodes) { a.flash = 1; a.status = switching ? 'rerouting' : 'idle'; }
         hub.status = 'planning';
-        sys(`goal accepted: ${goalTitle}`);
-        toast(`new goal: ${goalTitle}`);
-        say(hub, byName.Planner, `new goal "${goalTitle}", break it into milestones`);
+        sys(`${switching ? 'redirecting to' : 'goal accepted'}: ${goalTitle}`);
+        toast(`${switching ? 'redirecting →' : 'new goal:'} ${goalTitle}`);
+        after(1.2, () => say(hub, byName.Planner, `new goal "${goalTitle}", break it into milestones`));
     }
     function nextGoal() {
         goalIdx = (goalIdx + 1) % GOALS.length;
@@ -331,14 +349,12 @@
         return clamp(s, -30, 60) / 100;
     }
 
-    // a human approves the ship stage; if nobody does, policy approves it after a while
     function approve(byYou) {
         if (!plan || plan.gate !== 'waiting') { if (byYou) toast('nothing is waiting for approval'); return; }
         plan.gate = 'open';
-        if (byYou) sys('you approved the ship stage', true);
-        else sys('no answer at the human gate: auto-approved by policy');
+        sys(byYou ? 'you approved the ship stage' : 'no answer at the human gate: auto-approved by policy', byYou ? 'you' : '');
         toast(byYou ? 'approved: shipping' : 'auto-approved by policy');
-        say(hub, byName.SRE, 'approval received, go ahead and ship');
+        say(hub, byName.Release, 'approval received, go ahead and ship');
     }
 
     function updatePlan(dt) {
@@ -365,10 +381,10 @@
                 });
             } else if (task.state === 'active') {
                 active++;
-                if (o.loadingUntil > t) continue;
+                if (o.loadingUntil > t || o.health === 'err') continue;
                 const m = modelById[o.model];
                 const helped = task.helper.helping === task && t < task.helper.helpUntil;
-                const rate = (m.speed * task.boost * (1 + synergyBonus(o)) * (helped ? 1.2 : 1)) / task.dur;
+                const rate = (m.speed * task.boost * (1 + synergyBonus(o)) * (helped ? 1.2 : 1) * (o.health === 'warn' ? 0.6 : 1)) / task.dur;
                 task.progress = Math.min(1, task.progress + dt * rate);
                 if (!o.task) o.task = task;
                 if (o.task === task) o.status = task.steps[Math.min(task.steps.length - 1, Math.floor(task.progress * task.steps.length))];
@@ -408,12 +424,14 @@
         if (!plan.doneAt) hub.status = plan.gate === 'waiting' ? 'waiting at the human gate' : active ? `coordinating ${active} task${active > 1 ? 's' : ''}` : 'planning';
         if (done === plan.tasks.length && !plan.doneAt) {
             plan.doneAt = t;
-            hub.status = 'goal complete';
+            hub.status = 'goal shipped';
             const took = t - plan.born;
             const ahead = plan.plannedDur - took;
-            stats.runs.push({ took, ahead });
-            sys(`goal complete in ${fmtDur(took)}${ahead > 0 ? `, ${fmtDur(ahead)} ahead of plan` : ''}`);
-            toast(`goal complete: ${plan.goal}`);
+            stats.runs.push({ took, ahead, cost: plan.cost });
+            stats.lastShip = { goal: plan.goal, cost: plan.cost, took };
+            flashCost = 3;
+            sys(`shipped in ${fmtDur(took)} for ${money(plan.cost)}${ahead > 0 ? `, ${fmtDur(ahead)} ahead of plan` : ''}`);
+            toast(`shipped: ${plan.goal} · ${money(plan.cost)}`);
             const seq = plan.seq;
             after(8, () => { if (plan && plan.seq === seq) nextGoal(); });
         }
@@ -422,11 +440,33 @@
         const v = Math.max(0, Math.round(sec));
         return `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')}`;
     }
+    function fmtUp(sec) {
+        const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600), m = Math.floor((sec % 3600) / 60);
+        return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m ${Math.floor(sec % 60)}s`;
+    }
+
+    // ---------------------------------------------------------------- incidents: big fleets have bad minutes
+    function incident() {
+        const a = pick(nodes.filter((n) => n.health === 'ok' && !n.loadingUntil));
+        if (!a) return;
+        const severe = Math.random() < 0.3;
+        const g = randi(0, modelById[a.model].gpus - 1);
+        const text = pick(severe ? ERR : WARN).replace('{g}', g).replace('{pod}', a.podId);
+        a.health = severe ? 'err' : 'warn';
+        a.healthUntil = t + (severe ? 5 : 7);
+        a.errRate = severe ? rand(3, 6) : rand(0.6, 1.4);
+        a.flash = 1;
+        sys(`${a.key} (${a.podId}): ${text}`, severe ? 'err' : '');
+        const fixer = a === byName.Platform ? byName.SRE : byName.Platform;
+        if (fixer) after(1, () => say(fixer, a, pick(FIXES).replace('{g}', g)));
+        focusOn(a, 3);
+    }
 
     // ---------------------------------------------------------------- interactions
     function askNode(a) {
         a.flash = 1;
-        if (a.loadingUntil > t) say(a, hub, `loading ${modelById[a.loadingModel].short} weights, back in a moment`);
+        if (a.health !== 'ok') say(a, hub, `${a.health === 'err' ? 'down' : 'degraded'}: platform is on it`);
+        else if (a.loadingUntil > t) say(a, hub, `loading ${modelById[a.loadingModel].short} weights, back in a moment`);
         else if (a.task) say(a, hub, `${a.task.key}: ${a.status}, ${Math.round(a.task.progress * 100)}% done`);
         else if (a.helping && t < a.helpUntil) say(a, hub, `helping ${a.helping.owner.key} with ${a.helping.key}`);
         else {
@@ -435,7 +475,7 @@
         }
     }
     function statusRound() {
-        sys('you asked every node for a status update', true);
+        sys('you asked every node for a status update', 'you');
         hub.flash = 1;
         nodes.filter((a) => a.task).slice(0, 5).forEach((a, i) => after(0.6 + i * 1.4, () => {
             if (a.task) say(a, hub, `${a.task.key}: ${Math.round(a.task.progress * 100)}%`);
@@ -444,7 +484,7 @@
     function prioritise(task) {
         if (task.state === 'done') { toast(`${task.key} is already done`); return; }
         task.boost = Math.min(2, task.boost + 0.6);
-        sys(`you made ${task.key} the top priority`, true);
+        sys(`you made ${task.key} the top priority`, 'you');
         say(hub, task.owner, `${task.key} is now top priority`, () => { if (task.state === 'active') task.owner.task = task; });
     }
     function idleChat(a) {
@@ -467,7 +507,7 @@
         a.loadingFrom = t;
         a.loadingUntil = t + 2.4;
         a.status = `loading ${m.short} weights`;
-        sys(`you moved ${a.key} to ${m.name}`, true);
+        sys(`you moved ${a.key} to ${m.name}`, 'you');
         autoFocus = { node: a, until: t + 4 };
     }
     function spawnNode() {
@@ -479,7 +519,7 @@
         cols[role.layer].push(a);
         layout();
         a.y = a.ty;
-        sys(`you added ${a.key} on ${modelById[a.model].name}`, true);
+        sys(`you added ${a.key} on ${modelById[a.model].name}`, 'you');
         toast(`${a.key} online · ${modelById[a.model].name}`);
         focusOn(a, 4);
         commitSynergy();
@@ -512,7 +552,7 @@
     }
 
     // ---------------------------------------------------------------- layout
-    const INPUTS = ['brief', 'constraints', 'budget', 'cluster', 'models', 'prior_runs'];
+    const INPUTS = ['brief', 'budget', 'cluster', 'models', 'prior_runs'];
     function layout(snap = true) {
         DPR = Math.min(window.devicePixelRatio || 1, 2);
         W = window.innerWidth;
@@ -521,48 +561,54 @@
         canvas.height = Math.round(H * DPR);
         canvas.style.width = W + 'px';
         canvas.style.height = H + 'px';
-        L.s = (parseFloat(getComputedStyle(document.documentElement).fontSize) || 11) / 11;
+        L.s = (parseFloat(getComputedStyle(document.documentElement).fontSize) || 12) / 11;
         const s = L.s;
         L.portrait = W < 760;
-        const top = ($('topbar').offsetHeight || 34) + 8;
-        const cmdTop = $('cmd').getBoundingClientRect().top || H - 40;
-        L.bpH = L.portrait ? Math.min(170, H * 0.24) : clamp(H * 0.2, 150, 230 * s);
-        L.bpY = cmdTop - 6 - L.bpH;
-        L.gx = 10;
+        const top = ($('topbar').offsetHeight || 40) + 8;
+        const cmdTop = $('cmd').getBoundingClientRect().top || H - 60;
+        L.bpH = L.portrait ? Math.min(180, H * 0.24) : clamp(H * 0.22, 170, 260 * s);
+        L.bpY = cmdTop - 10 - L.bpH;
+        L.gx = 12;
         L.gy = top;
-        L.gw = W - 20;
+        L.gw = W - 24;
         L.gh = L.bpY - 10 - top;
 
         if (!L.portrait) {
-            L.icW = clamp(L.gw * 0.16, 150, 250 * s);
-            L.busX = L.gx + L.icW + L.gw * 0.055;
-            L.busW = 16 * s;
-            L.gridX = L.busX + L.busW + L.gw * 0.045;
+            L.icW = clamp(L.gw * 0.15, 170, 270 * s);
+            L.busX = L.gx + L.icW + L.gw * 0.04;
+            L.busW = 18 * s;
+            L.gridX = L.busX + L.busW + L.gw * 0.035;
+            L.colW = (L.gx + L.gw - L.gridX) / NCOL;
         } else {
+            // phones: readable columns wider than the screen; swipe empty space (or two fingers) to see layers 3 and 4
             L.icW = 0;
             L.busX = L.gx + 2;
-            L.busW = 10;
+            L.busW = 12;
             L.gridX = L.busX + L.busW + 14;
+            L.colW = Math.max(176, (L.gx + L.gw - L.gridX) / 2);
         }
-        L.gridW = L.gx + L.gw - L.gridX;
-        L.colW = L.gridW / 3;
-        L.nodeW = L.colW - (L.portrait ? 6 : 16 * s);
-        L.colTop = L.gy + 16 * s;
+        L.gridW = L.colW * NCOL;
+        L.nodeW = L.colW - (L.portrait ? 10 : 18 * s);
+        L.colTop = L.gy + 20 * s;
+        L.contentL = L.gx;
+        L.contentR = L.gridX + L.gridW;
 
-        // node metrics; shrink rows if the tallest column would not fit
+        // node metrics; shrink a little if the tallest column would not fit (scroll covers the rest)
         L.f = 1;
-        const rows = L.portrait ? 3 : 5;
-        for (let i = 0; i < 6; i++) {
-            L.rowH = (L.portrait ? 10.5 : 12) * s * L.f;
-            L.headH = (L.portrait ? 13 : 15) * s * L.f;
-            L.gap = (L.portrait ? 14 : 18) * s * L.f;
-            L.nodeH = L.headH + rows * L.rowH + 6 * s * L.f;
-            L.expH = clamp(L.nodeW * 0.5, 60, 140 * s) * L.f;
+        const rows = L.portrait ? 4 : 5;
+        for (let i = 0; i < 5; i++) {
+            L.rowH = 15 * s * L.f;
+            L.headH = 19 * s * L.f;
+            L.stripH = 18 * s * L.f;
+            L.gap = 22 * s * L.f;
+            L.nodeH = L.headH + L.stripH + rows * L.rowH + 8 * s * L.f;
+            L.expH = clamp(L.nodeW * 0.6, 100, 210 * s) * L.f;
             const n = Math.max(...cols.map((c) => c.length));
             const need = n * L.nodeH + (n - 1) * L.gap + L.expH;
             const avail = L.gy + L.gh - L.colTop;
             if (need <= avail) break;
-            L.f *= Math.max(0.6, avail / need);
+            L.f = Math.max(0.8, L.f * (avail / need));
+            if (L.f === 0.8) break;
         }
         L.rows = rows;
         reflow(snap !== false);
@@ -573,6 +619,7 @@
     // stack nodes in their columns; an expanded node pushes the ones below it down
     function reflow(snap) {
         const drag = gesture && gesture.type === 'node' && gesture.moved ? gesture : null;
+        let bottom = 0;
         cols.forEach((col, c) => {
             const x = L.gridX + L.colW * c + L.colW / 2;
             let y = L.colTop;
@@ -587,14 +634,18 @@
                 slot++;
             }
             if (drag && drag.col === c && drag.idx >= slot) drag.slotY = y;
+            bottom = Math.max(bottom, y);
         });
+        L.contentB = bottom;
     }
 
     function clampCam() {
         cam.z = clamp(cam.z, ZMIN, ZMAX);
-        const cx = W / 2, cy = L.gy + L.gh / 2;
-        cam.x = clamp(cam.x, W * 0.1 - cx * cam.z, W * 0.9 - cx * cam.z);
-        cam.y = clamp(cam.y, H * 0.05 - cy * cam.z, H * 0.95 - cy * cam.z);
+        const z = cam.z;
+        const loX = Math.min(0, W - 12 - L.contentR * z) - W * 0.15, hiX = Math.max(0, 12 - L.contentL * z) + W * 0.15;
+        const loY = Math.min(0, L.bpY - 10 - L.contentB * z) - H * 0.1, hiY = Math.max(0, L.gy - L.gy * z) + H * 0.1;
+        cam.x = clamp(cam.x, loX, hiX);
+        cam.y = clamp(cam.y, loY, hiY);
     }
     function zoomAt(sx, sy, z) {
         const w = toWorld(sx, sy);
@@ -619,10 +670,16 @@
                 a.status = a.task ? a.task.steps[0] : 'idle';
                 sys(`${a.key} now runs ${modelById[a.model].name}`);
             }
+            if (a.health !== 'ok' && t >= a.healthUntil) {
+                if (a.health === 'err') a.upSince = t;
+                a.health = 'ok';
+                a.errRate = rand(0.005, 0.03);
+                sys(`${a.key} (${a.podId}) recovered`);
+            }
             const helpingNow = a.helping && t < a.helpUntil;
             if (a.helping && !helpingNow) a.helping = null;
             const working = a.isHub ? !!plan && !plan.doneAt : !!a.task || helpingNow || a.loadingUntil > t;
-            a.act = lerp(a.act, working ? 1 : 0.1, Math.min(1, dt * 1.5));
+            a.act = lerp(a.act, a.health === 'err' ? 0 : working ? 1 : 0.1, Math.min(1, dt * 1.5));
             const m = modelById[a.model];
             for (let k = 0; k < m.gpus; k++) {
                 const target = a.loadingUntil > t ? 35 + 30 * Math.sin(t * 9 + k) : 6 + a.act * (72 + 18 * Math.sin(t * 1.7 + k * 1.3 + a.seed));
@@ -631,7 +688,7 @@
             if (a.isHub) continue;
             if (helpingNow) charge(a, 1200 * dt, 25 * dt);
             if (!working) {
-                if (a.status.startsWith('helping') || (plan && plan.tasks.some((x) => x.steps.includes(a.status)))) a.status = 'idle';
+                if (a.status.startsWith('helping') || a.status === 'rerouting' || (plan && plan.tasks.some((x) => x.steps.includes(a.status)))) a.status = 'idle';
                 a.nextIdle -= dt;
                 if (a.nextIdle <= 0) { a.nextIdle = rand(12, 22); idleChat(a); }
             }
@@ -646,6 +703,8 @@
                 if (p.onArrive) p.onArrive();
             }
         }
+        nextIncident -= dt;
+        if (nextIncident <= 0) { nextIncident = rand(18, 34); incident(); }
         updatePlan(dt);
         if (t - stats.lastSec >= 1) {
             stats.lastSec = t;
@@ -659,8 +718,8 @@
             if (stats.util.length > 40) stats.util.shift();
         }
     }
+    const ratePerMin = () => stats.hist.reduce((a, b) => a + b, 0) * (60 / Math.max(1, stats.hist.length)) * SPEEDS[speedIdx];
 
-    // expansion follows hover, selection and the node most recently doing something interesting
     function animate(raw) {
         const focus = focusNode();
         for (const a of nodes) {
@@ -673,6 +732,7 @@
             if (gesture && gesture.type === 'node' && gesture.moved && gesture.node === a) continue;
             a.y += (a.ty - a.y) * Math.min(1, raw * 10);
         }
+        flashCost = Math.max(0, flashCost - raw);
     }
     function focusNode() {
         if (hovered && (hovered.kind === 'node' || hovered.kind === 'chip') && !hovered.obj.isHub) return hovered.obj;
@@ -680,6 +740,7 @@
         if (autoFocus && autoFocus.until > t) return autoFocus.node;
         return null;
     }
+    const redirectK = () => (redirect ? clamp((performance.now() - redirect.t0) / 2200, 0, 1) : 1);
 
     // ---------------------------------------------------------------- draw helpers
     function fitText(text, maxW) {
@@ -708,12 +769,14 @@
             y: u * u * u * y1 + 3 * u * u * k * y1 + 3 * u * k * k * y2 + k * k * k * y2,
         };
     }
-    function busY(frac) { return L.colTop + frac * (L.gy + L.gh - L.colTop); }
+    function busY(frac) { return L.colTop + frac * (Math.max(L.gy + L.gh, L.contentB) - L.colTop); }
     function anchor(a, side) {
         if (a.isHub) return { x: L.busX + L.busW, y: busY(0.5) };
         const x = side === 'left' ? a.x - L.nodeW / 2 : a.x + L.nodeW / 2;
         return { x, y: a.y + L.headH / 2 };
     }
+    const scramble = (text, k) => text.split('').map((ch, i) => (ch === ' ' || i / text.length < k ? ch : '#$%&*+=<>/01'[(Math.random() * 12) | 0])).join('');
+    const healthColor = (h) => (h === 'err' ? C.red : h === 'warn' ? C.amber : C.green);
 
     // ---------------------------------------------------------------- draw
     let inputRects = [];
@@ -733,92 +796,96 @@
         for (const a of nodes) if (!(gesture && gesture.type === 'node' && gesture.moved && gesture.node === a)) drawNode(a, a === focus);
         if (gesture && gesture.type === 'node' && gesture.moved) {
             const g = gesture;
-            ctx.setLineDash([4, 4]);
-            ctx.strokeStyle = C.yellow;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = C.amber;
             ctx.strokeRect(L.gridX + L.colW * g.col + (L.colW - L.nodeW) / 2 + 0.5, (g.slotY || L.colTop) + 0.5, L.nodeW - 1, L.nodeH - 1);
             ctx.setLineDash([]);
             drawNode(g.node, true, true);
         }
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        drawRedirect();
         drawBottom();
     }
 
     function drawColumnLabels() {
-        ctx.font = font(8.5);
+        ctx.font = font(10, '600');
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = C.faint;
+        ctx.fillStyle = C.dim;
         COLUMNS.forEach((label, c) => {
             const x = L.gridX + L.colW * c + (L.colW - L.nodeW) / 2;
-            ctx.fillText(fitText(label, L.nodeW), x, L.gy + 6 * L.s);
+            ctx.fillText(fitText(label, L.nodeW), x, L.gy + 8 * L.s);
         });
-        if (!L.portrait) ctx.fillText('inputs', L.gx, L.gy + 6 * L.s);
+        if (!L.portrait) ctx.fillText('inputs', L.gx, L.gy + 8 * L.s);
         ctx.textBaseline = 'alphabetic';
     }
 
     // left column: the inputs the run works from, each with a little bar chart
     function inputRows(key) {
         const month = stats.monthBase + stats.spend;
-        const rate = stats.hist.reduce((a, b) => a + b, 0) * (3600 / Math.max(1, stats.hist.length)) * SPEEDS[speedIdx];
         switch (key) {
-            case 'brief': return [['goal', plan ? plan.goal : '-'], ['owner', 'you'], ['mode', 'autonomous'], ['stage', plan ? `${STAGES[Math.min(4, Math.max(0, ...plan.tasks.filter((x) => x.state !== 'pending').map((x) => x.phase), 0))]} ${plan.done}/${plan.tasks.length}` : '-']];
-            case 'constraints': return [['downtime', '0 s'], ['data', 'public + scrubbed'], ['human gate', 'before ship'], ['max spend', '$400 / run']];
-            case 'budget': return [['spent', money(stats.spend)], ['rate', money(rate, 0) + '/h'], ['month', `$${kfmt(month)} / $${kfmt(stats.budget)}`], ['cap', 'ok']];
-            case 'cluster': return [['gpus', '2,048'], ['util', Math.round((stats.util[stats.util.length - 1] || 0.6) * 100) + '%'], ['power', ((stats.util[stats.util.length - 1] || 0.6) * 4).toFixed(2) + ' MW'], ['team', `${all().length} pods`]];
-            case 'models': return MODELS.map((m) => [m.short, `$${m.pin}/$${m.pout} ·${all().filter((a) => a.model === m.id).length}`]);
-            default: return [['runs', String(Math.max(0, stats.runNo - 1))], ['avg', stats.runs.length ? fmtDur(stats.runs.reduce((a, r) => a + r.took, 0) / stats.runs.length) : '-'],
-                ['ahead', stats.runs.length ? fmtDur(stats.runs.reduce((a, r) => a + r.ahead, 0) / stats.runs.length) : '-'], ['last', stats.runs.length ? 'ok' : '-']];
+            case 'brief': {
+                const stage = plan ? STAGES[Math.max(0, ...plan.tasks.filter((x) => x.state !== 'pending').map((x) => x.phase), 0)] : '-';
+                return [['goal', plan ? plan.goal : '-'], ['stage', plan ? `${stage} ${plan.done}/${plan.tasks.length}` : '-'], ['gate', plan ? plan.gate : '-']];
+            }
+            case 'budget': return [['spent', money(stats.spend)], ['per min', money(ratePerMin())], ['month', `$${kfmt(month)}/$${kfmt(stats.budget)}`]];
+            case 'cluster': {
+                const u = stats.util[stats.util.length - 1] || 0.6;
+                const bad = nodes.filter((a) => a.health !== 'ok').length;
+                return [['gpus', '2,048 · 4 regions'], ['util', Math.round(u * 100) + '% · ' + (u * 4).toFixed(1) + ' MW'], ['health', bad ? `${bad} degraded` : 'all green']];
+            }
+            case 'models': return MODELS.filter((m) => all().some((a) => a.model === m.id)).slice(0, 3)
+                .map((m) => [m.short, `$${m.pin}/$${m.pout} ×${all().filter((a) => a.model === m.id).length}`]);
+            default: return [['runs', String(stats.runs.length)], ['avg', stats.runs.length ? fmtDur(stats.runs.reduce((a, r) => a + r.took, 0) / stats.runs.length) : '-'],
+                ['avg cost', stats.runs.length ? money(stats.runs.reduce((a, r) => a + r.cost, 0) / stats.runs.length, 0) : '-']];
         }
     }
     function inputSpark(key) {
         if (key === 'budget') return stats.perSec;
         if (key === 'cluster') return stats.util;
-        if (key === 'prior_runs') return stats.runs.map((r) => r.took).slice(-20);
+        if (key === 'prior_runs') return stats.runs.map((r) => r.cost).slice(-20);
         if (key === 'models') return all().map((a) => a.spend);
-        if (key === 'brief') return plan ? plan.tasks.map((x) => x.progress) : [];
-        return [0.4, 0.6, 0.5, 0.7, 0.3, 0.8, 0.5, 0.6];
+        return plan ? plan.tasks.map((x) => x.progress) : [];
     }
     function drawInputs() {
         const s = L.s;
         const x = L.gx, w = L.icW;
-        const rowH = 11 * s, headH = 14 * s, sparkH = 16 * s;
-        const nodeHt = headH + 4 * rowH + sparkH + 10 * s;
+        const rowH = 15 * s, headH = 19 * s, sparkH = 20 * s;
+        const nodeHt = headH + 3 * rowH + sparkH + 12 * s;
         const avail = L.gy + L.gh - L.colTop;
-        const n = Math.min(INPUTS.length, Math.max(2, Math.floor((avail + 10 * s) / (nodeHt + 10 * s))));
-        const gap = n > 1 ? (avail - n * nodeHt) / (n - 1) : 0;
+        const n = Math.min(INPUTS.length, Math.max(2, Math.floor((avail + 12 * s) / (nodeHt + 12 * s))));
+        const gap = n > 1 ? Math.min(40 * s, (avail - n * nodeHt) / (n - 1)) : 0;
         inputRects = [];
         for (let i = 0; i < n; i++) {
             const key = INPUTS[i];
-            const y = L.colTop + i * (nodeHt + Math.min(gap, 40 * s));
+            const y = L.colTop + i * (nodeHt + gap);
             inputRects.push({ key, x, y, w, h: nodeHt });
             box(x, y, w, nodeHt, C.node, C.line);
             box(x, y, w, headH, C.head);
-            ctx.font = font(8.5, '600');
+            ctx.font = fontS(10.5, '700');
             ctx.fillStyle = C.text;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            ctx.fillText(key, x + 6 * s, y + headH / 2);
-            ctx.font = font(8);
-            inputRows(key).slice(0, 4).forEach(([k, v], r) => {
+            ctx.fillText(key, x + 7 * s, y + headH / 2);
+            ctx.font = fontS(10);
+            inputRows(key).forEach(([k, v], r) => {
                 const yy = y + headH + rowH * (r + 0.6);
                 ctx.fillStyle = C.dim;
                 ctx.textAlign = 'left';
-                ctx.fillText(k, x + 6 * s, yy);
+                ctx.fillText(k, x + 7 * s, yy);
                 ctx.fillStyle = C.text;
                 ctx.textAlign = 'right';
-                ctx.fillText(fitText(v, w - 60 * s), x + w - 6 * s, yy);
-                ctx.fillStyle = C.crimson;
-                ctx.fillRect(x + w - 1, yy - 1.5, 3, 3);
+                ctx.fillText(fitText(v, w - 70 * s), x + w - 7 * s, yy);
             });
             const data = inputSpark(key);
             const max = Math.max(1e-9, ...data);
-            const sx = x + 6 * s, sy = y + nodeHt - 5 * s, sw = w - 12 * s;
-            const bars = 32;
+            const sx = x + 7 * s, sy = y + nodeHt - 6 * s, sw = w - 14 * s;
+            const bars = 28;
             for (let k = 0; k < bars; k++) {
                 const v = data.length ? data[Math.floor((k / bars) * data.length)] / max : 0.3 + 0.3 * Math.sin(k + t);
                 const hh = Math.max(1, v * sparkH * 0.9);
-                ctx.fillStyle = rgba(C.crimson, 0.45 + 0.5 * v);
-                ctx.fillRect(sx + (k * sw) / bars, sy - hh, sw / bars - 1, hh);
+                ctx.fillStyle = rgba(C.accent, 0.35 + 0.6 * v);
+                ctx.fillRect(sx + (k * sw) / bars, sy - hh, sw / bars - 1.5, hh);
             }
         }
         ctx.textBaseline = 'alphabetic';
@@ -828,26 +895,26 @@
     function drawBusWires() {
         const s = L.s;
         const bx = L.busX, bw = L.busW;
-        ctx.lineWidth = 0.7;
+        const rk = redirectK();
+        ctx.lineWidth = 0.8;
         if (!L.portrait) {
-            if (!particles.length) particles = Array.from({ length: 260 }, () => ({ w: randi(0, 23), k: Math.random(), v: rand(0.05, 0.25), j: rand(-6, 6) }));
+            if (!particles.length) particles = Array.from({ length: 220 }, () => ({ w: randi(0, 19), k: Math.random(), v: rand(0.05, 0.25), j: rand(-6, 6) }));
             const wires = [];
             inputRects.forEach((r, i) => {
                 for (let k = 0; k < 4; k++) {
-                    const y1 = r.y + 14 * s + 11 * s * (k + 0.6);
-                    const y2 = busY(((i * 4 + k) * 0.37 + 0.05) % 1);
-                    wires.push([r.x + r.w + 1, y1, bx, y2]);
+                    const y1 = r.y + 19 * s + 15 * s * (Math.min(k, 2) + 0.6);
+                    wires.push([r.x + r.w + 1, y1, bx, busY(((i * 4 + k) * 0.37 + 0.05) % 1)]);
                 }
             });
-            ctx.strokeStyle = 'rgba(184,50,90,0.18)';
+            ctx.strokeStyle = rgba(C.accent, 0.14);
             for (const [x1, y1, x2, y2] of wires) { bez(x1, y1, x2, y2); ctx.stroke(); }
-            ctx.fillStyle = 'rgba(216,207,214,0.45)';
+            ctx.fillStyle = rgba(C.text, 0.4);
             for (const p of particles) {
                 const wv = wires[p.w % wires.length];
                 if (!wv) break;
-                p.k = (p.k + p.v / 60) % 1;
+                p.k = (p.k + (p.v * (rk < 1 ? 4 : 1)) / 60) % 1;
                 const q = bezPt(wv[0], wv[1], wv[2], wv[3], p.k);
-                ctx.fillRect(q.x + p.j * Math.sin(p.k * 3), q.y + p.j * 0.6, 1.2, 1.2);
+                ctx.fillRect(q.x + p.j * Math.sin(p.k * 3), q.y + p.j * 0.6, 1.3, 1.3);
             }
         }
         for (const a of nodes) {
@@ -855,42 +922,50 @@
             const hot = a.task || (a.helping && t < a.helpUntil);
             const gateHot = plan && plan.gate === 'waiting' && plan.tasks.some((x) => x.phase === 4 && x.owner === a);
             for (let k = 0; k < 3; k++) {
-                const y1 = busY(((a.seed * 0.17 + k * 0.29) % 1));
-                ctx.strokeStyle = gateHot ? rgba(C.yellow, 0.5) : hot ? rgba(C.crimson, 0.45) : 'rgba(184,50,90,0.14)';
-                ctx.lineWidth = hot && k === 0 ? 1.2 : 0.7;
+                const y1 = busY((a.seed * 0.17 + k * 0.29) % 1);
+                ctx.strokeStyle = rk < 1 ? rgba(C.amber, 0.5 * (1 - rk) + 0.1) : gateHot ? rgba(C.amber, 0.5) : hot ? rgba(C.accent, 0.42) : rgba(C.accent, 0.12);
+                ctx.lineWidth = hot && k === 0 ? 1.3 : 0.8;
                 bez(bx + bw, y1, left.x - 3, left.y + k * L.rowH);
                 ctx.stroke();
+                if (rk < 1) {
+                    // redirect: a pulse races from the bus to every node
+                    const q = bezPt(bx + bw, y1, left.x - 3, left.y + k * L.rowH, clamp(rk * 1.4 - k * 0.1, 0, 1));
+                    ctx.fillStyle = C.amber;
+                    ctx.fillRect(q.x - 3, q.y - 2, 6, 4);
+                }
             }
         }
     }
 
     function drawBus() {
         const s = L.s;
-        const x = L.busX, w = L.busW, y0 = L.colTop - 10 * s, y1 = L.gy + L.gh;
+        const x = L.busX, w = L.busW, y0 = L.colTop - 12 * s, y1 = Math.max(L.gy + L.gh, L.contentB);
         const hot = hovered && hovered.kind === 'hub';
-        box(x, y0, w, y1 - y0, '#101017', hot ? C.crimson : C.line);
-        // two columns of port squares, lit by traffic
-        const n = Math.floor((y1 - y0 - 8) / (6 * s));
+        const rk = redirectK();
+        box(x, y0, w, y1 - y0, '#0e141c', hot ? C.accent : C.line);
+        const n = Math.floor((y1 - y0 - 8) / (7 * s));
+        const sweep = rk < 1 ? y0 + (y1 - y0) * rk : -1e9;
         for (let i = 0; i < n; i++) {
+            const py = y0 + 5 + i * 7 * s;
             for (let c = 0; c < 2; c++) {
                 const v = 0.5 + 0.5 * Math.sin(t * 2.3 + i * 0.7 + c * 2);
-                ctx.fillStyle = rgba(v > 0.85 && hub.act > 0.5 ? C.crimson : '#d8cfd6', 0.12 + 0.35 * v * hub.act);
-                ctx.fillRect(x + 3 + c * (w / 2 - 2), y0 + 5 + i * 6 * s, w / 2 - 5, 3 * s);
+                const near = Math.abs(py - sweep) < 30 * s;
+                ctx.fillStyle = near ? C.amber : rgba(v > 0.85 && hub.act > 0.5 ? C.accent : C.text, 0.12 + 0.35 * v * hub.act);
+                ctx.fillRect(x + 3 + c * (w / 2 - 2), py, w / 2 - 5, 3.5 * s);
             }
         }
-        // label and model chip above the bus
-        ctx.font = font(8, '600');
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'bottom';
-        ctx.fillStyle = C.yellow;
-        const label = L.portrait ? '' : `orchestrator · ${modelById[hub.model].short} · ${Math.round(hub.shownProgress * 100)}%`;
-        ctx.fillText(label, x - 2, y0 - 2);
-        ctx.textBaseline = 'alphabetic';
         const target = plan ? (plan.done + plan.tasks.filter((q) => q.state === 'active').reduce((sum, q) => sum + q.progress, 0)) / plan.tasks.length : 0;
         hub.shownProgress = lerp(hub.shownProgress, target, 0.05);
-        // progress fill along the bus edge
-        ctx.fillStyle = rgba(C.yellow, 0.8);
-        ctx.fillRect(x + w - 2, y1 - (y1 - y0) * hub.shownProgress, 2, (y1 - y0) * hub.shownProgress);
+        ctx.fillStyle = rgba(C.amber, 0.85);
+        ctx.fillRect(x + w - 3, y1 - (y1 - y0) * hub.shownProgress, 3, (y1 - y0) * hub.shownProgress);
+        if (!L.portrait) {
+            ctx.font = font(10, '700');
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillStyle = C.amber;
+            ctx.fillText(`orchestrator · ${modelById[hub.model].short} · ${Math.round(hub.shownProgress * 100)}%`, x - 2, y0 - 3);
+            ctx.textBaseline = 'alphabetic';
+        }
         hub.rect = { x: x - 4, y: y0, w: w + 8, h: y1 - y0 };
     }
 
@@ -900,14 +975,14 @@
             const b = p.to.isHub ? anchor(p.to) : anchor(p.to, p.from.isHub || p.from.x < p.to.x ? 'left' : 'right');
             if (Math.abs(a.x - b.x) < 4) { a.x = p.from.x + L.nodeW / 2; b.x = p.to.x + L.nodeW / 2; }
             const e = ease(p.k);
-            const c = p.from.isHub ? C.yellow : C.crimson;
-            ctx.strokeStyle = rgba(c, 0.55);
-            ctx.lineWidth = 1.2;
+            const c = p.from.isHub ? C.amber : C.accent;
+            ctx.strokeStyle = rgba(c, 0.6);
+            ctx.lineWidth = 1.4;
             bez(a.x, a.y, b.x, b.y);
             ctx.stroke();
             const q = bezPt(a.x, a.y, b.x, b.y, e);
             ctx.fillStyle = c;
-            ctx.fillRect(q.x - 3, q.y - 2, 6, 4);
+            ctx.fillRect(q.x - 4, q.y - 2.5, 8, 5);
         }
     }
 
@@ -921,17 +996,16 @@
             ctx.strokeStyle = rgba(c, 0.8);
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(x - L.nodeW * 0.3, y1);
-            ctx.lineTo(x - L.nodeW * 0.3, y2);
-            ctx.moveTo(x + L.nodeW * 0.3, y1);
-            ctx.lineTo(x + L.nodeW * 0.3, y2);
+            ctx.moveTo(x - L.nodeW * 0.34, y1);
+            ctx.lineTo(x - L.nodeW * 0.34, y2);
+            ctx.moveTo(x + L.nodeW * 0.34, y1);
+            ctx.lineTo(x + L.nodeW * 0.34, y2);
             ctx.stroke();
-            ctx.font = font(8, '600');
-            const label = `${l.pct > 0 ? '+' : ''}${l.pct}% ${L.portrait ? '' : l.why}`.trim();
-            const txt = fitText(label, L.nodeW * 0.55);
-            const tw = ctx.measureText(txt).width + 8 * s;
+            ctx.font = font(9.5, '700');
+            const txt = fitText(`${l.pct > 0 ? '+' : ''}${l.pct}% ${l.why}`, L.nodeW * 0.62);
+            const tw = ctx.measureText(txt).width + 10 * s;
             const my = (y1 + y2) / 2;
-            box(x - tw / 2, my - 6 * s, tw, 12 * s, l.pct > 0 ? '#11261a' : '#2c1118', c);
+            box(x - tw / 2, my - 7.5 * s, tw, 15 * s, l.pct > 0 ? '#0f2a1c' : '#2c1416', c);
             ctx.fillStyle = c;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -943,14 +1017,14 @@
     function drawChip(a, rx, cy, maxW) {
         const m = modelById[a.loadingUntil > t ? a.loadingModel : a.model];
         const s = L.s;
-        ctx.font = font(7.5, '600');
-        const label = fitText(m.short + ' ▾', maxW - 6 * s);
-        const w = ctx.measureText(label).width + 8 * s, h = L.headH - 4 * s;
-        box(rx - w, cy - h / 2, w, h, '#0b0b10', rgba(m.dot, 0.7));
+        ctx.font = font(9, '700');
+        const label = fitText(m.short + ' ▾', maxW - 8 * s);
+        const w = ctx.measureText(label).width + 10 * s, h = L.headH - 5 * s;
+        box(rx - w, cy - h / 2, w, h, '#0a0d12', rgba(m.dot, 0.8));
         ctx.fillStyle = m.dot;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(label, rx - w + 4 * s, cy + 0.5);
+        ctx.fillText(label, rx - w + 5 * s, cy + 0.5);
         return { x: rx - w, y: cy - h / 2, w, h };
     }
 
@@ -958,83 +1032,371 @@
         const s = L.s, w = L.nodeW, h = nodeH(a);
         const x0 = a.x - w / 2, y0 = a.y;
         a.rect = { x: x0, y: y0, w, h };
-        const m = modelById[a.model];
         const gateHot = plan && plan.gate === 'waiting' && plan.tasks.some((x) => x.phase === 4 && x.owner === a);
-        if (floating) box(x0 + 4, y0 + 6, w, h, 'rgba(0,0,0,0.5)');
-        box(x0, y0, w, h, focused ? C.nodeHot : C.node, gateHot ? C.yellow : focused ? C.crimson : rgba(C.crimson, 0.25 + 0.5 * a.flash * 0.6));
-        box(x0, y0, w, L.headH, gateHot ? '#6b5718' : focused || a.flash > 0.3 ? C.headHot : C.head);
-        a.chip = drawChip(a, x0 + w - 3 * s, y0 + L.headH / 2, w * 0.5);
-        ctx.font = font(8.5, '600');
+        const hc = healthColor(a.health);
+        if (floating) box(x0 + 5, y0 + 8, w, h, 'rgba(0,0,0,0.5)');
+        const border = gateHot ? C.amber : a.health !== 'ok' ? hc : focused ? C.accent : rgba(C.accent, 0.22 + 0.4 * a.flash);
+        box(x0, y0, w, h, focused ? C.nodeHot : C.node, border);
+        box(x0, y0, w, L.headH, gateHot ? '#4a3a12' : a.health === 'err' ? '#3a1618' : focused || a.flash > 0.3 ? C.headHot : C.head);
+        a.chip = drawChip(a, x0 + w - 4 * s, y0 + L.headH / 2, w * 0.52);
+        // health dot, then the name
+        ctx.fillStyle = hc;
+        ctx.beginPath();
+        ctx.arc(x0 + 9 * s, y0 + L.headH / 2, 3.5 * s, 0, TAU);
+        ctx.fill();
+        ctx.font = font(10.5, '700');
         ctx.fillStyle = C.text;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(fitText(a.key, a.chip.x - x0 - 8 * s), x0 + 5 * s, y0 + L.headH / 2 + 0.5);
+        ctx.fillText(fitText(a.key, a.chip.x - x0 - 22 * s), x0 + 17 * s, y0 + L.headH / 2 + 0.5);
 
-        // key / value rows, with port ticks on both edges
+        // a strip with this role's own little animation
+        drawViz(a, x0 + 1, y0 + L.headH + 1, w - 2, L.stripH - 2, true);
+
+        const rk = redirectK();
         const rows = [];
         const loading = a.loadingUntil > t;
         const said = a.said && a.said.until > t ? a.said : null;
-        if (!L.portrait) rows.push(['task', loading ? 'swapping model' : a.task ? a.task.key : a.helping ? `help:${a.helping.key}` : 'idle']);
-        rows.push(['step', a.status]);
+        if (!L.portrait) rows.push(['task', loading ? 'swapping model' : a.task ? a.task.key : a.helping ? `help: ${a.helping.key}` : 'idle']);
+        rows.push(['step', rk < 1 ? scramble(a.status, rk) : a.status]);
         rows.push(['prog', null]);
-        if (!L.portrait) rows.push(['gpu', null]);
-        rows.push(said ? ['says', `→${said.to.key}: ${said.text}`] : ['cost', `${money(a.spend)} · ${kfmt(a.tokIn + a.tokOut)} tok`]);
-        ctx.font = font(8);
+        rows.push(['health', null]);
+        rows.push(said ? ['says', `→ ${said.to.key}: ${said.text}`] : ['cost', `${money(a.spend)} · ${kfmt(a.tokIn + a.tokOut)} tok`]);
+        ctx.font = font(10);
+        const top = y0 + L.headH + L.stripH;
         rows.slice(0, L.rows).forEach(([k, v], r) => {
-            const yy = y0 + L.headH + L.rowH * (r + 0.6);
-            ctx.fillStyle = C.crimson;
-            ctx.fillRect(x0 - 2, yy - 1.5, 3, 3);
-            ctx.fillRect(x0 + w - 1, yy - 1.5, 3, 3);
+            const yy = top + L.rowH * (r + 0.6);
             ctx.fillStyle = C.dim;
             ctx.textAlign = 'left';
-            ctx.fillText(k, x0 + 5 * s, yy);
-            const vx = x0 + 34 * s * L.f, vw = x0 + w - 5 * s - vx;
+            ctx.fillText(k, x0 + 7 * s, yy);
+            const vx = x0 + 52 * s * L.f, vw = x0 + w - 7 * s - vx;
             if (k === 'prog') {
                 const p = loading ? (t - a.loadingFrom) / (a.loadingUntil - a.loadingFrom) : a.task ? a.task.progress : 0;
-                const ticks = Math.max(8, Math.floor(vw / (4 * s)));
-                for (let i = 0; i < ticks - 6; i++) {
-                    ctx.fillStyle = i / (ticks - 6) < p ? (loading ? m.dot : C.crimson) : '#2a2331';
-                    ctx.fillRect(vx + i * 4 * s, yy - 3 * s, 2.5 * s, 6 * s);
+                const ticks = Math.max(6, Math.floor((vw - 40 * s) / (5 * s)));
+                for (let i = 0; i < ticks; i++) {
+                    ctx.fillStyle = i / ticks < p ? (loading ? modelById[a.loadingModel].dot : C.accent) : '#1f2a37';
+                    ctx.fillRect(vx + i * 5 * s, yy - 4 * s, 3.2 * s, 8 * s);
                 }
                 ctx.fillStyle = C.text;
                 ctx.textAlign = 'right';
-                ctx.fillText(Math.round(p * 100) + '%', x0 + w - 5 * s, yy);
-            } else if (k === 'gpu') {
-                const n = m.gpus;
-                const gw = Math.min(vw * 0.55, n * 5 * s);
-                const bw = gw / n - 1;
-                for (let i = 0; i < n; i++) {
-                    const u = clamp(a.gpu[i] / 100, 0.05, 1);
-                    ctx.fillStyle = rgba(u > 0.8 ? C.yellow : C.crimson, 0.4 + 0.6 * u);
-                    ctx.fillRect(vx + i * (bw + 1), yy + 4 * s - 8 * s * u, bw, 8 * s * u);
-                }
-                ctx.fillStyle = C.text;
+                ctx.fillText(Math.round(p * 100) + '%', x0 + w - 7 * s, yy);
+            } else if (k === 'health') {
+                const label = a.health === 'ok' ? 'ok' : a.health === 'warn' ? 'degraded' : 'down';
+                ctx.fillStyle = hc;
+                ctx.fillText(label, vx, yy);
+                ctx.fillStyle = C.dim;
                 ctx.textAlign = 'right';
-                const util = a.gpu.slice(0, n).reduce((x, y) => x + y, 0) / n;
-                ctx.fillText(`${n}×${m.gpu} ${Math.round(util)}%`, x0 + w - 5 * s, yy);
+                ctx.fillText(fitText(`up ${fmtUp(Math.max(0, t - a.upSince))} · err ${a.errRate.toFixed(2)}%`, vw - ctx.measureText(label).width - 8 * s), x0 + w - 7 * s, yy);
             } else {
-                ctx.fillStyle = k === 'says' ? C.yellow : C.text;
+                ctx.fillStyle = k === 'says' ? C.amber : C.text;
                 ctx.textAlign = 'right';
-                ctx.fillText(fitText(v, vw), x0 + w - 5 * s, yy);
+                ctx.fillText(fitText(v, vw), x0 + w - 7 * s, yy);
             }
         });
-        if (a.exp > 0.05) drawInside(a, x0 + 4 * s, y0 + L.nodeH - 2 * s, w - 8 * s, a.exp * L.expH - 4 * s);
+        if (a.exp > 0.05) drawInside(a, x0 + 5 * s, y0 + L.nodeH - 2 * s, w - 10 * s, a.exp * L.expH - 4 * s);
         ctx.textBaseline = 'alphabetic';
     }
 
-    // Inside an open node: a rotating wireframe of layers on the left, an attention heatmap on the right.
-    // An illustration, not the real architecture of any model.
+    // Inside an open node: its role's visual large on the left, the hardware it runs on to the right.
     function drawInside(a, x, y, w, h) {
-        if (h < 12) return;
-        const s = L.s, m = modelById[a.model], act = 0.25 + 0.75 * a.act;
+        if (h < 14) return;
+        const s = L.s, m = modelById[a.model];
         ctx.save();
         ctx.beginPath();
         ctx.rect(x, y, w, h);
         ctx.clip();
-        box(x, y, w, h, '#0d0d13', C.line);
-        const split = L.portrait ? w : w * 0.56;
-        // wireframe
-        const cx = x + split / 2, cy = y + h / 2, R = Math.min(split * 0.42, h * 0.75);
+        box(x, y, w, h, '#0c1219', C.line);
+        const split = L.portrait ? w : w * 0.6;
+        drawViz(a, x + 2, y + 2, split - 4, h - 4, false);
+        if (!L.portrait) {
+            const hx = x + split + 6 * s, hw = w - split - 12 * s;
+            ctx.font = font(9.5, '700');
+            ctx.fillStyle = C.text;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(fitText(`${a.podId} · ${a.region}`, hw), hx, y + 5 * s);
+            ctx.font = font(9);
+            ctx.fillStyle = C.dim;
+            ctx.fillText(fitText(`${m.gpus}× ${m.gpu} · rack ${a.rack}`, hw), hx, y + 18 * s);
+            const gy = y + 32 * s, gh = Math.min(34 * s, h * 0.28), n = m.gpus, bw = Math.max(2, (hw - (n - 1) * 2) / n);
+            let sum = 0;
+            for (let k = 0; k < n; k++) {
+                const u = clamp(a.gpu[k] / 100, 0.03, 1);
+                sum += u;
+                ctx.fillStyle = '#1a2430';
+                ctx.fillRect(hx + k * (bw + 2), gy, bw, gh);
+                ctx.fillStyle = rgba(u > 0.85 ? C.amber : C.accent, 0.5 + 0.5 * u);
+                ctx.fillRect(hx + k * (bw + 2), gy + gh * (1 - u), bw, gh * u);
+            }
+            const rows = [
+                ['status', a.health === 'ok' ? 'healthy' : a.health === 'warn' ? 'degraded' : 'down'],
+                ['uptime', fmtUp(Math.max(0, t - a.upSince))],
+                ['errors', a.errRate.toFixed(2) + '%'],
+                ['tok/s', a.loadingUntil > t ? 'loading' : kfmt(m.tps * LOAD * (0.15 + 0.85 * a.act))],
+                ['power', `${(m.kw * (0.35 + 0.65 * sum / n)).toFixed(1)} kW · ${Math.round(38 + 30 * sum / n)} °C`],
+            ];
+            let yy = gy + gh + 6 * s;
+            for (const [k, v] of rows) {
+                if (yy > y + h - 11 * s) break;
+                ctx.fillStyle = C.dim;
+                ctx.textAlign = 'left';
+                ctx.fillText(k, hx, yy);
+                ctx.fillStyle = k === 'status' ? healthColor(a.health) : C.text;
+                ctx.textAlign = 'right';
+                ctx.fillText(fitText(v, hw - 46 * s), hx + hw, yy);
+                yy += 12.5 * s;
+            }
+        }
+        ctx.restore();
+    }
+
+    // ---------------------------------------------------------------- per-role visuals (work as a thin strip or a big panel)
+    function drawViz(a, x, y, w, h, mini) {
+        if (w < 10 || h < 6) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
+        ctx.fillStyle = mini ? '#0d141c' : 'transparent';
+        if (mini) ctx.fillRect(x, y, w, h);
+        const act = a.health === 'err' ? 0.05 : 0.2 + 0.8 * a.act;
+        const sp = t * (0.4 + act);
+        const A = C.accent, s = L.s;
+        const seed = a.seed;
+        ctx.lineWidth = 1;
+        switch (a.viz) {
+            case 'gantt': {
+                const rows = mini ? 2 : 6, rh = h / rows;
+                const now = (sp * 0.08) % 1;
+                for (let i = 0; i < rows; i++) {
+                    const st = hash(seed + i) * 0.6, len = 0.15 + hash(seed + i * 3) * 0.35;
+                    const done = clamp((now - st) / len, 0, 1);
+                    ctx.fillStyle = rgba(A, 0.2);
+                    ctx.fillRect(x + st * w, y + i * rh + rh * 0.2, len * w, rh * 0.6);
+                    ctx.fillStyle = rgba(A, 0.75);
+                    ctx.fillRect(x + st * w, y + i * rh + rh * 0.2, len * w * done, rh * 0.6);
+                }
+                ctx.fillStyle = C.amber;
+                ctx.fillRect(x + now * w, y, 1.5, h);
+                break;
+            }
+            case 'docs': {
+                const pages = mini ? 1 : 3, pw = mini ? w : (w - 12) / 3;
+                const scan = (sp * 0.25) % 1;
+                for (let p = 0; p < pages; p++) {
+                    const px = x + p * (pw + 6);
+                    if (!mini) { ctx.strokeStyle = rgba(A, 0.4); ctx.strokeRect(px + 0.5, y + 4, pw - 1, h - 8); }
+                    const lines = mini ? 2 : Math.floor((h - 14) / 7);
+                    for (let i = 0; i < lines; i++) {
+                        const ly = mini ? y + h * (0.3 + i * 0.4) : y + 9 + i * 7;
+                        const lw = (0.5 + hash(seed + p * 31 + i) * 0.45) * (pw - 10);
+                        const lit = Math.abs(i / lines - scan) < (mini ? 0.5 : 0.08) && (p === Math.floor(sp * 0.25) % pages);
+                        ctx.fillStyle = lit ? C.amber : rgba(C.text, 0.25);
+                        ctx.fillRect(px + 5, ly, mini ? lw * ((sp * 0.3 + i * 0.5) % 1) : lw, mini ? 2 : 2.5);
+                    }
+                }
+                break;
+            }
+            case 'boxes': {
+                const n = mini ? 5 : 6;
+                const pts = Array.from({ length: n }, (_, i) => ({
+                    x: x + w * (mini ? (i + 0.5) / n : 0.15 + 0.7 * hash(seed + i)),
+                    y: y + h * (mini ? 0.5 : 0.15 + 0.7 * hash(seed + i * 7)),
+                }));
+                ctx.strokeStyle = rgba(A, 0.45);
+                for (let i = 0; i < n - 1; i++) { ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[i + 1].x, pts[i + 1].y); ctx.stroke(); }
+                const bw = mini ? Math.min(w / n * 0.5, 18) : 34 * s, bh = mini ? h * 0.55 : 18 * s;
+                pts.forEach((p, i) => {
+                    const lit = Math.floor(sp * 1.2) % n === i;
+                    ctx.fillStyle = lit ? rgba(C.amber, 0.8) : '#132433';
+                    ctx.fillRect(p.x - bw / 2, p.y - bh / 2, bw, bh);
+                    ctx.strokeStyle = rgba(A, 0.7);
+                    ctx.strokeRect(p.x - bw / 2 + 0.5, p.y - bh / 2 + 0.5, bw - 1, bh - 1);
+                });
+                const k = (sp * 1.2) % 1, i0 = Math.floor(sp * 1.2) % (n - 1);
+                ctx.fillStyle = C.amber;
+                ctx.fillRect(lerp(pts[i0].x, pts[i0 + 1].x, k) - 2, lerp(pts[i0].y, pts[i0 + 1].y, k) - 2, 4, 4);
+                break;
+            }
+            case 'net': {
+                // falling loss curve, plus (when large) a rotating wireframe of layers
+                const lw = mini ? w : w * 0.45, lx = mini ? x : x + w - lw;
+                ctx.strokeStyle = C.amber;
+                ctx.beginPath();
+                const N = 40;
+                for (let i = 0; i <= N; i++) {
+                    const k = i / N;
+                    const v = Math.exp(-k * 3 - (sp * 0.05) % 1) * 0.8 + 0.08 + 0.04 * Math.sin(k * 40 + sp * 4) * act;
+                    const px = lx + k * lw, py = y + h - v * h * 0.9 - 2;
+                    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+                }
+                ctx.stroke();
+                if (!mini) wireframe(a, x, y, w * 0.55, h, act);
+                break;
+            }
+            case 'pipeline': {
+                const st = mini ? 4 : 5, bw = mini ? 10 : 26 * s, gap = (w - st * bw) / (st - 1);
+                for (let i = 0; i < st; i++) {
+                    ctx.strokeStyle = rgba(A, 0.7);
+                    ctx.strokeRect(x + i * (bw + gap) + 0.5, y + h * 0.25 + 0.5, bw - 1, h * 0.5 - 1);
+                }
+                const dots = mini ? 10 : 24;
+                for (let i = 0; i < dots; i++) {
+                    const k = (sp * 0.18 + i / dots) % 1;
+                    const dy = y + h * (0.35 + 0.3 * hash(seed + i));
+                    ctx.fillStyle = hash(i + Math.floor(sp)) > 0.97 ? C.red : rgba(C.amber, 0.9);
+                    ctx.fillRect(x + k * w - 1.5, dy - 1.5, 3, 3);
+                }
+                break;
+            }
+            case 'trace': {
+                const rows = mini ? 2 : 7, rh = h / rows;
+                for (let i = 0; i < rows; i++) {
+                    const st = i === 0 ? 0 : hash(seed + i) * 0.5, len = i === 0 ? 1 : 0.1 + hash(seed + i * 5) * (1 - st) * 0.8;
+                    const jitter = 0.03 * Math.sin(sp + i);
+                    ctx.fillStyle = rgba(i % 3 === 2 ? C.amber : A, 0.35 + 0.4 * act);
+                    ctx.fillRect(x + (st + jitter) * w, y + i * rh + 1, len * w, rh - 2);
+                }
+                ctx.fillStyle = C.text;
+                ctx.fillRect(x + ((sp * 0.15) % 1) * w, y, 1, h);
+                break;
+            }
+            case 'ui': {
+                const k = (sp * 0.12) % 1;
+                if (!mini) {
+                    ctx.strokeStyle = rgba(A, 0.5);
+                    ctx.strokeRect(x + 4.5, y + 4.5, w - 9, h - 9);
+                    ctx.fillStyle = rgba(A, 0.3);
+                    ctx.fillRect(x + 5, y + 5, w - 10, 9);
+                }
+                const blocks = mini ? 6 : 8;
+                for (let i = 0; i < blocks; i++) {
+                    if (i / blocks > k * 1.2) break;
+                    const bx = mini ? x + (i * w) / blocks + 2 : x + 10 + (i % 4) * ((w - 20) / 4);
+                    const by = mini ? y + h * 0.2 : y + 20 + Math.floor(i / 4) * ((h - 26) / 2);
+                    const bw = mini ? w / blocks - 4 : (w - 20) / 4 - 6, bh = mini ? h * 0.6 : (h - 26) / 2 - 6;
+                    ctx.fillStyle = i === Math.floor(k * 1.2 * blocks) ? rgba(C.amber, 0.7) : rgba(A, 0.3);
+                    ctx.fillRect(bx, by, bw, bh);
+                }
+                break;
+            }
+            case 'radar': {
+                const cx = mini ? x + w / 2 : x + w / 2, cy = mini ? y + h / 2 : y + h / 2;
+                if (mini) {
+                    const k = (sp * 0.4) % 1;
+                    ctx.fillStyle = rgba(A, 0.5);
+                    ctx.fillRect(x + k * w, y, 2, h);
+                    for (let i = 0; i < 5; i++) {
+                        const bx = x + hash(seed + i) * w;
+                        const age = (k - hash(seed + i)) % 1;
+                        ctx.fillStyle = rgba(i === 2 ? C.red : C.amber, age > 0 && age < 0.4 ? 1 - age * 2.5 : 0);
+                        ctx.fillRect(bx - 2, y + h * (0.3 + 0.4 * hash(seed + i * 3)) - 2, 4, 4);
+                    }
+                    break;
+                }
+                const R = Math.min(w, h) * 0.45;
+                ctx.strokeStyle = rgba(A, 0.3);
+                for (let r = 1; r <= 3; r++) { ctx.beginPath(); ctx.arc(cx, cy, (R * r) / 3, 0, TAU); ctx.stroke(); }
+                const ang = sp * 1.5;
+                for (let k = 0; k < 16; k++) {
+                    ctx.fillStyle = rgba(A, 0.18 * (1 - k / 16));
+                    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, ang - (k + 1) * 0.05, ang - k * 0.05); ctx.closePath(); ctx.fill();
+                }
+                for (let i = 0; i < 7; i++) {
+                    const ba = hash(seed + i) * TAU, br = (0.2 + 0.75 * hash(seed + i * 9)) * R;
+                    const d = ((ang - ba) % TAU + TAU) % TAU;
+                    ctx.fillStyle = rgba(i === 3 ? C.red : C.amber, d < 2 ? 1 - d / 2 : 0.1);
+                    ctx.fillRect(cx + Math.cos(ba) * br - 2.5, cy + Math.sin(ba) * br - 2.5, 5, 5);
+                }
+                break;
+            }
+            case 'tests': {
+                const cols2 = mini ? 30 : 16, rows = mini ? 2 : Math.max(3, Math.floor(h / 12));
+                const cw = w / cols2, ch = h / rows;
+                const total = cols2 * rows, done = Math.floor((sp * 3) % (total + 10));
+                for (let i = 0; i < total; i++) {
+                    const fail = hash(seed + i) > 0.96;
+                    ctx.fillStyle = i < done ? (fail ? C.red : rgba(C.green, 0.8)) : '#1a2430';
+                    ctx.fillRect(x + (i % cols2) * cw + 1, y + Math.floor(i / cols2) * ch + 1, cw - 2, ch - 2);
+                }
+                break;
+            }
+            case 'latency': {
+                const N = mini ? 30 : 60;
+                const slo = y + h * 0.3;
+                ctx.setLineDash([3, 3]);
+                ctx.strokeStyle = rgba(C.red, 0.6);
+                ctx.beginPath(); ctx.moveTo(x, slo); ctx.lineTo(x + w, slo); ctx.stroke();
+                ctx.setLineDash([]);
+                for (const [k, col, base] of [[0, A, 0.75], [1, C.amber, 0.45]]) {
+                    ctx.strokeStyle = col;
+                    ctx.beginPath();
+                    for (let i = 0; i <= N; i++) {
+                        const n = Math.floor(sp * 3) + i;
+                        const spike = a.health !== 'ok' && i > N - 8 ? 0.3 : 0;
+                        const v = base - spike - 0.08 * Math.sin(n * 0.7 + k) - 0.05 * hash(n + k * 100);
+                        const px = x + (i / N) * w, py = y + h * v;
+                        if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+                    }
+                    ctx.stroke();
+                }
+                break;
+            }
+            case 'rollout': {
+                const regions = REGIONS.length;
+                const rh = h / regions;
+                const k = (sp * 0.06) % 1.3;
+                REGIONS.forEach((r, i) => {
+                    const p = clamp((k - i * 0.15) / 0.6, 0, 1);
+                    ctx.fillStyle = '#1a2430';
+                    ctx.fillRect(x + (mini ? 0 : 70 * s), y + i * rh + rh * 0.2, w - (mini ? 0 : 70 * s), rh * 0.6);
+                    ctx.fillStyle = p >= 1 ? rgba(C.green, 0.8) : rgba(A, 0.8);
+                    ctx.fillRect(x + (mini ? 0 : 70 * s), y + i * rh + rh * 0.2, (w - (mini ? 0 : 70 * s)) * p, rh * 0.6);
+                    if (!mini) {
+                        ctx.font = font(9);
+                        ctx.fillStyle = C.dim;
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(r, x + 2, y + i * rh + rh / 2);
+                    }
+                });
+                break;
+            }
+            case 'racks': {
+                const units = mini ? 2 : Math.max(4, Math.floor(h / 9)), leds = mini ? 32 : 18;
+                const uh = h / units;
+                for (let u = 0; u < units; u++) {
+                    if (!mini) { ctx.strokeStyle = rgba(A, 0.25); ctx.strokeRect(x + 0.5, y + u * uh + 0.5, w - 1, uh - 1); }
+                    for (let l = 0; l < leds; l++) {
+                        const on = hash(seed + u * 100 + l + Math.floor(sp * (2 + (l % 3)))) > 0.45;
+                        const bad = a.health !== 'ok' && u === 1 && l < 4;
+                        ctx.fillStyle = bad ? C.red : on ? rgba(C.green, 0.85) : '#163024';
+                        ctx.fillRect(x + 4 + (l * (w - 8)) / leds, y + u * uh + uh * 0.3, (w - 8) / leds - 2, uh * 0.4);
+                    }
+                }
+                break;
+            }
+            case 'checklist': {
+                const rows = mini ? 1 : Math.floor(h / 13);
+                const done = Math.floor(sp * 0.8) % (rows * (mini ? 8 : 1) + 3);
+                for (let i = 0; i < (mini ? 8 : rows); i++) {
+                    const bx = mini ? x + 4 + (i * (w - 8)) / 8 : x + 6, by = mini ? y + h * 0.25 : y + 4 + i * 13;
+                    const sz = mini ? Math.min(h * 0.5, 9) : 8;
+                    ctx.strokeStyle = rgba(A, 0.7);
+                    ctx.strokeRect(bx + 0.5, by + 0.5, sz, sz);
+                    if (i < done) { ctx.fillStyle = C.green; ctx.fillRect(bx + 2, by + 2, sz - 3, sz - 3); }
+                    if (!mini) { ctx.fillStyle = rgba(C.text, i < done ? 0.6 : 0.25); ctx.fillRect(bx + 14, by + 3, (0.4 + hash(seed + i) * 0.5) * (w - 30), 3); }
+                }
+                break;
+            }
+            default: break;
+        }
+        ctx.restore();
+    }
+
+    // the "neural net" look: tilted planes of units, wired plane to plane, slowly turning (an illustration)
+    function wireframe(a, x, y, w, h, act) {
+        const cx = x + w / 2, cy = y + h / 2, R = Math.min(w * 0.42, h * 0.7);
         const th = t * 0.5 + a.seed, cosT = Math.cos(th), sinT = Math.sin(th), tilt = 0.45;
         const planes = 4, grid = [4, 3];
         const pts = [];
@@ -1045,15 +1407,15 @@
                 const X = (i / (grid[0] - 1) - 0.5) * R * 1.2, Y = (j / (grid[1] - 1) - 0.5) * R * 0.7;
                 const x1 = X * cosT + z * sinT, z1 = -X * sinT + z * cosT;
                 const y1 = Y * Math.cos(tilt) - z1 * Math.sin(tilt), z2 = Y * Math.sin(tilt) + z1 * Math.cos(tilt);
-                const f = 2.4 * R / (2.4 * R + z2);
+                const f = (2.4 * R) / (2.4 * R + z2);
                 pts[p].push({ x: cx + x1 * f, y: cy + y1 * f, d: f });
             }
         }
-        ctx.lineWidth = 0.6;
+        ctx.lineWidth = 0.7;
         for (let p = 0; p < planes; p++) {
             const c = pts[p];
             const corners = [c[0], c[grid[1] - 1], c[c.length - 1], c[c.length - grid[1]]];
-            ctx.strokeStyle = rgba(C.crimson, 0.5);
+            ctx.strokeStyle = rgba(C.accent, 0.5);
             ctx.beginPath();
             corners.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)));
             ctx.closePath();
@@ -1062,55 +1424,52 @@
                 for (const [i, j] of a.wire[p]) {
                     const q1 = c[i % c.length], q2 = pts[p + 1][j % c.length];
                     const v = 0.5 + 0.5 * Math.sin(t * 3 - p + i);
-                    ctx.strokeStyle = rgba(v > 0.85 ? C.yellow : C.crimson, (0.1 + 0.4 * v) * act);
+                    ctx.strokeStyle = rgba(v > 0.85 ? C.amber : C.accent, (0.1 + 0.4 * v) * act);
                     ctx.beginPath(); ctx.moveTo(q1.x, q1.y); ctx.lineTo(q2.x, q2.y); ctx.stroke();
                 }
             }
             for (const q of c) {
                 ctx.fillStyle = rgba(C.text, 0.3 + 0.5 * act * q.d);
-                ctx.fillRect(q.x - 1, q.y - 1, 2, 2);
+                ctx.fillRect(q.x - 1.2, q.y - 1.2, 2.4, 2.4);
             }
         }
-        // attention heatmap
-        if (!L.portrait) {
-            const hx = x + split + 6 * s, hw = w - split - 12 * s, hy = y + 6 * s, hh = h - 22 * s;
-            const nc = 10, nr = 7, cw = hw / nc, chh = hh / nr;
-            for (let i = 0; i < nc; i++) for (let j = 0; j < nr; j++) {
-                const v = (0.5 + 0.5 * Math.sin(t * (1 + (i % 3) * 0.4) + i * 0.9 + j * 1.7 + a.seed)) * act;
-                ctx.fillStyle = rgba(v > 0.8 ? '#ff7a9a' : C.crimson, 0.08 + 0.85 * v);
-                ctx.fillRect(hx + i * cw + 1, hy + j * chh + 1, cw - 2, chh - 2);
-            }
-            ctx.font = font(7);
-            ctx.fillStyle = C.dim;
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            const tps = a.loadingUntil > t ? 'loading weights' : `${kfmt(m.tps * (0.15 + 0.85 * a.act))} tok/s`;
-            ctx.fillText(fitText(`attention · ${a.podId} · ${tps}`, hw), hx, y + h - 8 * s);
-        }
-        ctx.font = font(7);
-        ctx.fillStyle = C.faint;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillText('layers · illustration', x + 4 * s, y + 3 * s);
-        ctx.restore();
+    }
+
+    // ---------------------------------------------------------------- redirect banner (screen space)
+    function drawRedirect() {
+        const k = redirectK();
+        if (k >= 1 || !redirect || !redirect.switching) return;
+        const s = L.s;
+        const alpha = Math.min(1, (1 - k) * 3);
+        const text = `redirecting → ${redirect.goal}`;
+        ctx.font = fontS(12, '700');
+        const w = Math.min(W - 40, ctx.measureText(text).width + 40 * s), h = 30 * s;
+        const x = (W - w) / 2, y = L.gy + 30 * s;
+        ctx.globalAlpha = alpha;
+        box(x, y, w, h, '#14110a', C.amber);
+        ctx.fillStyle = C.amber;
+        ctx.fillRect(x, y + h - 3, w * k, 3);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fitText(text, w - 20), W / 2, y + h / 2 - 1);
+        ctx.globalAlpha = 1;
+        ctx.textBaseline = 'alphabetic';
     }
 
     // ---------------------------------------------------------------- bottom panels (screen space)
-    function panel(x, y, w, h, title) {
-        box(x, y, w, h, '#101017', C.line);
-        ctx.font = fontS(8, '600');
-        ctx.fillStyle = C.dim;
+    function panel(x, y, w, h, title, color) {
+        box(x, y, w, h, '#0e141c', color || C.line);
+        ctx.font = fontS(10, '700');
+        ctx.fillStyle = color || C.dim;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(title, x + 8 * L.s, y + 9 * L.s);
+        ctx.fillText(title, x + 10 * L.s, y + 11 * L.s);
     }
     function drawBottom() {
-        const s = L.s, y = L.bpY, h = L.bpH;
-        const gap = 8;
-        const widths = L.portrait ? [0.56, 0, 0.44] : [0.36, 0.34, 0.3];
-        let x = 10;
-        const total = W - 20 - gap * (L.portrait ? 1 : 2);
-        const [lw, dw, ow] = widths.map((f) => f * total);
+        const y = L.bpY, h = L.bpH, gap = 10;
+        const total = W - 24 - gap * (L.portrait ? 1 : 2);
+        const [lw, dw, ow] = (L.portrait ? [0.56, 0, 0.44] : [0.38, 0.33, 0.29]).map((f) => f * total);
+        let x = 12;
         drawLog(x, y, lw, h);
         x += lw + gap;
         if (!L.portrait) { drawDispatch(x, y, dw, h); x += dw + gap; }
@@ -1120,88 +1479,83 @@
     function drawLog(x, y, w, h) {
         const s = L.s;
         panel(x, y, w, h, 'run log');
-        const lh = 11.5 * s, top = y + 20 * s;
-        const n = Math.floor((h - 24 * s) / lh);
+        const lh = 15 * s, top = y + 24 * s;
+        const n = Math.floor((h - 28 * s) / lh);
         const lines = runLog.slice(-n);
-        ctx.font = fontS(8);
+        ctx.font = fontS(10);
         ctx.textBaseline = 'middle';
+        const whoW = (L.portrait ? 90 : 150) * s;
         lines.forEach((l, i) => {
             const yy = top + i * lh + lh / 2;
-            ctx.fillStyle = C.faint;
             ctx.textAlign = 'left';
-            ctx.fillText(l.ts, x + 8 * s, yy);
+            ctx.fillStyle = C.faint;
+            if (!L.portrait) ctx.fillText(l.ts, x + 10 * s, yy);
+            const wx = x + (L.portrait ? 10 : 52) * s;
             ctx.fillStyle = l.color;
-            const who = fitText(l.who, (L.portrait ? 70 : 120) * s);
-            ctx.fillText(who, x + 42 * s, yy);
+            ctx.fillText(fitText(l.who, whoW - 8 * s), wx, yy);
             ctx.fillStyle = C.text;
-            const tx = x + 42 * s + (L.portrait ? 74 : 124) * s;
-            ctx.fillText(fitText(l.text, x + w - 8 * s - tx), tx, yy);
+            ctx.fillText(fitText(l.text, x + w - 10 * s - wx - whoW), wx + whoW, yy);
         });
     }
     function drawDispatch(x, y, w, h) {
         const s = L.s;
-        panel(x, y, w, h, 'dispatch');
+        panel(x, y, w, h, 'dispatch · click a row to prioritise');
         ui.dispatchRows = [];
         if (!plan) return;
         const order = { active: 0, assigning: 1, pending: 2, done: 3 };
         const list = plan.tasks.map((task, i) => ({ task, i })).sort((a, b) => order[a.task.state] - order[b.task.state] || a.i - b.i);
-        const lh = 12 * s, top = y + 20 * s;
-        const n = Math.max(1, Math.floor((h - 38 * s) / lh));
-        ctx.font = fontS(8);
+        const lh = 15 * s, top = y + 24 * s;
+        const n = Math.max(1, Math.floor((h - 30 * s) / lh));
+        ctx.font = fontS(10);
         ctx.textBaseline = 'middle';
         list.slice(0, n).forEach(({ task, i }, r) => {
             const yy = top + r * lh + lh / 2;
             ui.dispatchRows.push({ task, x, y: yy - lh / 2, w, h: lh });
-            const hot = hovered && hovered.kind === 'row' && hovered.obj === task;
-            if (hot) box(x + 2, yy - lh / 2, w - 4, lh, '#1a1a25');
+            if (hovered && hovered.kind === 'row' && hovered.obj === task) box(x + 2, yy - lh / 2, w - 4, lh, '#16202c');
             ctx.fillStyle = C.faint;
             ctx.textAlign = 'left';
-            ctx.fillText(`#${i + 1}`, x + 8 * s, yy);
+            ctx.fillText(`#${i + 1}`, x + 10 * s, yy);
             ctx.fillStyle = task.state === 'pending' ? C.dim : C.text;
-            ctx.fillText(fitText(task.key, w * 0.34), x + 30 * s, yy);
-            const bx = x + w * 0.45, bw = w * 0.36, ticks = Math.floor(bw / (4 * s));
+            ctx.fillText(fitText(task.key, w * 0.36), x + 36 * s, yy);
+            const bx = x + w * 0.46, bw = w * 0.32, ticks = Math.floor(bw / (5 * s));
             for (let k = 0; k < ticks; k++) {
-                ctx.fillStyle = k / ticks < task.progress ? (task.state === 'done' ? C.dim : C.crimson) : '#241f2a';
-                ctx.fillRect(bx + k * 4 * s, yy - 2.5 * s, 2.5 * s, 5 * s);
+                ctx.fillStyle = k / ticks < task.progress ? (task.state === 'done' ? rgba(C.green, 0.7) : C.accent) : '#1a2430';
+                ctx.fillRect(bx + k * 5 * s, yy - 3.5 * s, 3.2 * s, 7 * s);
             }
             const label = task.state === 'done' ? 'done' : task.state === 'active' ? (task.boost > 1.4 ? 'run ▲' : 'run') : task.phase === 4 && plan.gate !== 'open' ? 'gate' : 'queued';
-            ctx.fillStyle = label === 'gate' ? C.yellow : task.state === 'active' ? C.crimson : C.dim;
+            ctx.fillStyle = label === 'gate' ? C.amber : task.state === 'active' ? C.accent : task.state === 'done' ? C.green : C.dim;
             ctx.textAlign = 'right';
-            ctx.fillText(label, x + w - 8 * s, yy);
+            ctx.fillText(label, x + w - 10 * s, yy);
         });
-        const activeN = plan.tasks.filter((q) => q.state === 'active').length;
-        ctx.fillStyle = C.faint;
-        ctx.textAlign = 'left';
-        ctx.fillText(`parallel ${activeN} · scheduler online · click a row to prioritise`, x + 8 * s, y + h - 9 * s);
     }
     function drawOutput(x, y, w, h) {
         const s = L.s;
-        panel(x, y, w, h, plan && plan.gate === 'waiting' ? 'output / human gate' : 'output / costs');
-        const rate = stats.hist.reduce((a, b) => a + b, 0) * (3600 / Math.max(1, stats.hist.length)) * SPEEDS[speedIdx];
+        const gate = plan && plan.gate === 'waiting';
+        panel(x, y, w, h, gate ? 'output / human gate' : 'output / costs', gate ? C.amber : null);
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
-        ctx.font = fontS(L.portrait ? 20 : 24, '700');
+        ctx.font = fontS(L.portrait ? 20 : 26, '700');
         ctx.fillStyle = C.text;
-        ctx.fillText(money(stats.spend), x + 8 * s, y + (L.portrait ? 44 : 50) * s);
-        ctx.font = fontS(8);
+        ctx.fillText(money(plan ? plan.cost : 0), x + 10 * s, y + (L.portrait ? 48 : 56) * s);
+        ctx.font = fontS(10);
         ctx.fillStyle = C.dim;
         const lines = [
-            `≈ ${money(rate, 0)}/h at this pace · ${kfmt(stats.tokens)} tokens`,
-            `month ${money(stats.monthBase + stats.spend, 0)} of ${money(stats.budget, 0)}`,
-            plan ? `${plan.done}/${plan.tasks.length} tasks · ${plan.doneAt ? 'complete' : fmtDur(t - plan.born) + ' elapsed'}` : '',
+            `this run · ${money(ratePerMin())}/min at this pace`,
+            `session ${money(stats.spend)} · ${kfmt(stats.tokens)} tokens`,
+            stats.lastShip ? `last shipped ${money(stats.lastShip.cost)} in ${fmtDur(stats.lastShip.took)}` : `month ${money(stats.monthBase + stats.spend, 0)} of ${money(stats.budget, 0)}`,
         ];
-        lines.forEach((l, i) => ctx.fillText(fitText(l, w - 16 * s), x + 8 * s, y + (L.portrait ? 58 : 66) * s + i * 12 * s));
+        lines.forEach((l, i) => ctx.fillText(fitText(l, w - 20 * s), x + 10 * s, y + (L.portrait ? 66 : 76) * s + i * 15 * s));
         ui.approve = null;
-        if (plan && plan.gate === 'waiting') {
+        if (gate) {
             const left = Math.max(0, 18 - (t - plan.gateAt));
-            const bw = Math.min(w - 16 * s, 220 * s), bh = 18 * s;
-            const bx = x + 8 * s, by = y + h - bh - 8 * s;
+            const bw = Math.min(w - 20 * s, 260 * s), bh = 24 * s;
+            const bx = x + 10 * s, by = y + h - bh - 10 * s;
             const pulse = 0.6 + 0.4 * Math.sin(t * 4);
-            box(bx, by, bw, bh, rgba(C.yellow, 0.15 + 0.15 * pulse), C.yellow);
-            ctx.font = fontS(8.5, '700');
-            ctx.fillStyle = C.yellow;
+            box(bx, by, bw, bh, rgba(C.amber, 0.15 + 0.15 * pulse), C.amber);
+            ctx.font = fontS(10.5, '700');
+            ctx.fillStyle = C.amber;
             ctx.textBaseline = 'middle';
-            ctx.fillText(fitText(`[ approve ship ] auto in ${Math.ceil(left)}s`, bw - 10 * s), bx + 6 * s, by + bh / 2);
+            ctx.fillText(fitText(`[ approve ship ]  auto in ${Math.ceil(left)}s`, bw - 12 * s), bx + 8 * s, by + bh / 2);
             ui.approve = { x: bx, y: by, w: bw, h: bh };
         }
     }
@@ -1209,7 +1563,7 @@
     // ---------------------------------------------------------------- model menu
     const menuEl = $('model-menu');
     function openModelMenu(a, sx, sy) {
-        $('mm-title').textContent = `model for ${a.key} (${a.podId}, ${a.region})`;
+        $('mm-title').textContent = `model for ${a.key} (${a.podId}, ${a.region}) · list prices per 1M tokens`;
         const list = $('mm-list');
         list.innerHTML = '';
         for (const m of MODELS) {
@@ -1222,13 +1576,13 @@
             const name = document.createElement('b');
             name.textContent = m.name;
             const note = document.createElement('small');
-            note.textContent = `${m.note} · ${m.gpus}× ${m.gpu.toUpperCase()} pod`;
+            note.textContent = `${m.note} · ${m.gpus}× ${m.gpu} pod`;
             b.append(dot, name, note);
             b.addEventListener('click', () => { closeModelMenu(); switchModel(a, m.id); });
             list.append(b);
         }
         menuEl.hidden = false;
-        const mw = menuEl.offsetWidth || 240, mh = menuEl.offsetHeight || 240;
+        const mw = menuEl.offsetWidth || 260, mh = menuEl.offsetHeight || 360;
         menuEl.style.left = clamp(sx - mw / 2, 8, W - mw - 8) + 'px';
         menuEl.style.top = clamp(sy + 10, 40, H - mh - 8) + 'px';
     }
@@ -1250,9 +1604,8 @@
         if (inRect(hub.rect, w.x, w.y, 4)) return { kind: 'hub', obj: hub };
         return null;
     }
-    // where a dragged node would land: column by x, slot by y
     function dropSlot(wx, wy) {
-        const col = clamp(Math.floor((wx - L.gridX) / L.colW), 0, 2);
+        const col = clamp(Math.floor((wx - L.gridX) / L.colW), 0, NCOL - 1);
         const list = cols[col].filter((a) => a !== gesture.node);
         let idx = list.length;
         for (let i = 0; i < list.length; i++) if (wy < list[i].ty + L.nodeH / 2) { idx = i; break; }
@@ -1331,7 +1684,7 @@
         cols[from].splice(cols[from].indexOf(a), 1);
         cols[g.col].splice(Math.min(g.idx, cols[g.col].length), 0, a);
         a.layer = g.col;
-        if (from !== g.col) sys(`you moved ${a.key} to ${COLUMNS[g.col]}`, true);
+        if (from !== g.col) sys(`you moved ${a.key} to ${COLUMNS[g.col]}`, 'you');
         gesture = null;
         layout(false);
         commitSynergy();
@@ -1373,6 +1726,7 @@
     canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         const step = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+        if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) { cam.x -= e.deltaX || step; clampCam(); return; }
         zoomAt(e.clientX, e.clientY, cam.z * Math.exp(-step * 0.0015));
     }, { passive: false });
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -1384,8 +1738,8 @@
         e.preventDefault();
         const raw = cmdInput.value.trim().replace(/\s+/g, ' ');
         cmdInput.value = '';
-        if (!raw) return;
-        log('you', C.yellow, '$ ' + raw);
+        if (!raw) { cmdInput.focus(); return; }
+        log('you', C.amber, '$ ' + raw);
         const [cmd, ...rest] = raw.split(' ');
         const c = cmd.toLowerCase();
         if (c === 'help') { toggleHelp(true); return; }
@@ -1394,9 +1748,10 @@
         if (c === 'pause') { setPaused(!paused); return; }
         if (c === 'clear') { runLog.length = 0; return; }
         if (c === 'model') {
-            const node = nodes.find((a) => a.key === (rest[0] || '').toLowerCase() || a.name.toLowerCase() === (rest[0] || '').toLowerCase());
+            const want = (rest[0] || '').toLowerCase();
+            const node = nodes.find((a) => a.key === want || a.name.toLowerCase() === want);
             const m = MODELS.find((x) => x.id === (rest[1] || '').toLowerCase());
-            if (!node || !m) { sys('usage: model <node> <fable|opus|sonnet|haiku>'); return; }
+            if (!node || !m) { sys(`usage: model <node> <${MODELS.map((x) => x.id).join('|')}>`); return; }
             switchModel(node, m.id);
             return;
         }
@@ -1478,30 +1833,42 @@
     });
     window.addEventListener('resize', () => layout(true));
 
-    // ---------------------------------------------------------------- loop
-    let last = performance.now();
+    // ---------------------------------------------------------------- header: graph stats, and the cost of the current run
     let headNext = 0;
     function updateHead(raw) {
         headNext -= raw;
         if (headNext > 0) return;
-        headNext = 0.5;
-        const edges = 24 + nodes.length * 3 + synergy.length + packets.length;
-        const run = plan ? fmtDur(t - plan.born) : '0:00';
+        headNext = 0.25;
         const el = $('graph-line');
         el.innerHTML = '';
-        const parts = L.portrait
-            ? [['hivemind', ''], [`${nodes.length + 1}`, 'nodes'], [money(stats.spend), '', true]]
-            : [['graph', 'hivemind-01'], ['nodes', String(nodes.length + 1 + INPUTS.length)], ['edges', String(edges)], ['workers', String(nodes.length)],
-                ['orchestrator', modelById[hub.model].short], ['run ' + stats.runNo, run], ['spend', money(stats.spend), true], ['zoom', cam.z.toFixed(1) + '×']];
-        parts.forEach(([k, v, isMoney], i) => {
-            if (i) { const sep = document.createElement('span'); sep.className = 'sep'; sep.textContent = '·'; el.append(sep); }
-            el.append(k + ' ');
+        let parts = 0;
+        const add = (k, v, cls) => {
+            if (parts++) { const sep = document.createElement('span'); sep.className = 'sep'; sep.textContent = '·'; el.append(sep); }
+            if (k) el.append(k + ' ');
             const b = document.createElement('b');
-            if (isMoney) b.className = 'money';
+            if (cls) b.className = cls;
             b.textContent = v;
             el.append(b);
-        });
+        };
+        const run = plan ? fmtDur((plan.doneAt || t) - plan.born) : '0:00';
+        if (!L.portrait) {
+            add('graph', 'hivemind-01');
+            add('nodes', String(nodes.length + 1 + INPUTS.length));
+            add('workers', String(nodes.length));
+            add('orchestrator', modelById[hub.model].short);
+            add('run ' + stats.runNo, run);
+            add('', `${money(ratePerMin())}/min`, 'money');
+        }
+        const shipped = flashCost > 0 && stats.lastShip;
+        const label = shipped ? `shipped · ${money(stats.lastShip.cost)}` : `run cost ${money(plan ? plan.cost : 0)}`;
+        const b = document.createElement('span');
+        b.className = 'run-cost' + (shipped ? ' flash' : '');
+        b.textContent = label;
+        el.append(b);
     }
+
+    // ---------------------------------------------------------------- loop
+    let last = performance.now();
     function frame(now) {
         const raw = Math.min(0.05, (now - last) / 1000);
         last = now;
@@ -1526,7 +1893,7 @@
     after(1, () => newPlan(GOALS[goalIdx].title, GOALS[goalIdx].tasks));
     const coarse = window.matchMedia('(pointer: coarse)').matches;
     setTimeout(() => toast(coarse
-        ? 'drag nodes between slots to change synergies · tap a node to open it · tap a model tag to switch'
+        ? 'swipe empty space to see layers 3 and 4 · drag nodes to new slots · tap a model tag to switch'
         : 'hover a node to open it · drag nodes into new slots · click a model tag to switch it'), 5000);
     requestAnimationFrame(frame);
 })();
