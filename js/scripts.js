@@ -282,3 +282,22 @@ function changePortfolioDlLink() {
 // -----------------------------------------------------------------------------------
 // END LANGUAGE
 // -----------------------------------------------------------------------------------
+
+
+// -----------------------------------------------------------------------------------
+// DIGITAL GARDEN: each badge opens its "read more" dialog
+// -----------------------------------------------------------------------------------
+document.querySelectorAll("[data-garden-open]").forEach(button => {
+    button.addEventListener("click", () => {
+        const dialog = document.getElementById(button.dataset.gardenOpen);
+        if (dialog && typeof dialog.showModal === "function") dialog.showModal();
+    });
+});
+
+document.querySelectorAll(".garden-dialog").forEach(dialog => {
+    // a click on the backdrop lands on the dialog itself, not on its body
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) dialog.close();
+    });
+    dialog.querySelector(".garden-close").addEventListener("click", () => dialog.close());
+});

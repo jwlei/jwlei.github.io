@@ -305,27 +305,101 @@
             </div>
         </div>
     </section>
-    <section id="funzone-section" aria-labelledby="funzone-heading" tabindex="-1">
-        <div id="funzone" class="shadow-x-large">
-            <h2 id="funzone-heading" i18n-key="funzone" class="heading">Funzone</h2>
-            <p class="funzone-intro" i18n-key="funzone-intro">Ting som rett og slett er gøy å leke med, hostet her på siden.</p>
-            <div class="project-grid">
-                <article class="project" id="funzone-deepfield">
-                    <div class="project-image project-image-deepfield">
-                        <img src="/media/projects/deepfield-logo.svg" alt="" width="320" height="220" />
-                    </div>
-                    <div class="project-info">
-                        <p class="project-platform" i18n-key="funzone-deepfield-platform">Nettapp · TypeScript · Three.js · WebGL</p>
-                        <h3>Deep Field</h3>
-                        <p i18n-key="funzone-deepfield-desc">Utforsk det observerbare universet i nettleseren. Fly fra Solsystemet til kanten av det kosmiske nettet, med 2,8 millioner ekte stjerner, 6 400 eksoplaneter, 284 000 asteroider og kometer, 44 000 galakser og sanntids strålesporede sorte hull. Spol tiden, land på planeter og planlegg romferder.</p>
-                        <p class="project-reception"><span i18n-key="funzone-deepfield-credit">Basert på</span> <a href="https://github.com/berkcomba/youreyesinspace" target="_blank" rel="noopener noreferrer">Your Eyes In Space</a> <span i18n-key="funzone-deepfield-credit-by">av BigBrains (AGPL-3.0).</span></p>
-                        <div class="project-links">
-                            <a class="project-play-link" i18n-key="project-open-link" i18n-aria-label="funzone-deepfield-open-label" aria-label="Åpne Deep Field i nettleseren" href="/deepfield/">Åpne i nettleseren</a>
-                            <a i18n-key="project-link" i18n-aria-label="funzone-deepfield-github-label" aria-label="Se kildekoden til Deep Field på GitHub" href="https://github.com/jwlei/deepfield" target="_blank" rel="noopener noreferrer">Se prosjekt</a>
-                        </div>
-                    </div>
-                </article>
+    <section id="garden-section" aria-labelledby="garden-heading" tabindex="-1">
+        <span id="funzone-section" class="anchor-alias" aria-hidden="true"></span>
+        <div id="garden" class="shadow-x-large">
+            <div class="garden-intro-col">
+                <h2 id="garden-heading" i18n-key="garden" class="heading">Digital hage</h2>
+                <p class="garden-intro" i18n-key="garden-intro">Små eksperimenter som vokser fram i det åpne. Trykk på et merke for å lese mer.</p>
             </div>
+            <div class="garden-field">
+                <ul class="garden-grid">
+                    <li class="garden-badge" style="--c: #7fb2ff">
+                        <button type="button" class="garden-more" data-garden-open="garden-deepfield-dialog" aria-haspopup="dialog">
+                            <span class="garden-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="11" fill="none" stroke="currentColor" stroke-width="3"/><ellipse cx="24" cy="24" rx="20" ry="7" fill="none" stroke="currentColor" stroke-width="2" opacity="0.7" transform="rotate(-24 24 24)"/><circle cx="24" cy="24" r="3" fill="currentColor"/></svg></span>
+                            <span class="garden-name">Deep Field</span>
+                            <span class="garden-tag" i18n-key="garden-deepfield-tag">Univers-utforsker</span>
+                        </button>
+                        <a class="garden-go" href="/deepfield/" i18n-aria-label="garden-deepfield-open-label" aria-label="Åpne Deep Field i nettleseren"><span aria-hidden="true">↗</span></a>
+                    </li>
+                    <li class="garden-badge" style="--c: #38e8ff">
+                        <button type="button" class="garden-more" data-garden-open="garden-hivemind-dialog" aria-haspopup="dialog">
+                            <span class="garden-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><g stroke="currentColor" stroke-width="2" opacity="0.6"><path d="M24 24 24 7M24 24 39 15M24 24 39 33M24 24 24 41M24 24 9 33M24 24 9 15"/></g><circle cx="24" cy="24" r="6" fill="none" stroke="currentColor" stroke-width="3"/><g fill="currentColor"><circle cx="24" cy="7" r="3.5"/><circle cx="39" cy="15" r="3.5"/><circle cx="39" cy="33" r="3.5"/><circle cx="24" cy="41" r="3.5"/><circle cx="9" cy="33" r="3.5"/><circle cx="9" cy="15" r="3.5"/></g></svg></span>
+                            <span class="garden-name">Hivemind</span>
+                            <span class="garden-tag" i18n-key="garden-hivemind-tag">KI-kollektiv</span>
+                        </button>
+                        <a class="garden-go" href="/hivemind/" i18n-aria-label="garden-hivemind-open-label" aria-label="Åpne Hivemind i nettleseren"><span aria-hidden="true">↗</span></a>
+                    </li>
+                    <li class="garden-badge" style="--c: #39ff88">
+                        <button type="button" class="garden-more" data-garden-open="garden-breachline-dialog" aria-haspopup="dialog">
+                            <span class="garden-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="9" width="38" height="30" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><path d="M12 20l6 5-6 5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 31h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
+                            <span class="garden-name">Breachline</span>
+                            <span class="garden-tag" i18n-key="garden-breachline-tag">Filmhacker-skriving</span>
+                        </button>
+                        <a class="garden-go" href="/breachline/" i18n-aria-label="garden-breachline-open-label" aria-label="Åpne Breachline i nettleseren"><span aria-hidden="true">↗</span></a>
+                    </li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20M24 36V26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 28c-6 0-8-4-8-7 4 0 8 2 8 7zM24 26c5 0 7-3 7-6-4 0-7 2-7 6z" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="33" r="2.5" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 38h20M24 38V18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 30c-7 0-10-5-10-9 5 0 10 3 10 9zM24 24c6 0 9-4 9-8-5 0-9 3-9 8zM24 18c-3 0-5-3-5-6 3 0 5 2 5 6z" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="33" r="2.5" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20M24 36V26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 28c-6 0-8-4-8-7 4 0 8 2 8 7zM24 26c5 0 7-3 7-6-4 0-7 2-7 6z" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 38h20M24 38V18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 30c-7 0-10-5-10-9 5 0 10 3 10 9zM24 24c6 0 9-4 9-8-5 0-9 3-9 8zM24 18c-3 0-5-3-5-6 3 0 5 2 5 6z" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="33" r="2.5" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20M24 36V26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 28c-6 0-8-4-8-7 4 0 8 2 8 7zM24 26c5 0 7-3 7-6-4 0-7 2-7 6z" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="33" r="2.5" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 38h20M24 38V18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 30c-7 0-10-5-10-9 5 0 10 3 10 9zM24 24c6 0 9-4 9-8-5 0-9 3-9 8zM24 18c-3 0-5-3-5-6 3 0 5 2 5 6z" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20M24 36V26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 28c-6 0-8-4-8-7 4 0 8 2 8 7zM24 26c5 0 7-3 7-6-4 0-7 2-7 6z" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="33" r="2.5" fill="currentColor"/></svg></li>
+                    <li class="garden-plot" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20M24 36V26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 28c-6 0-8-4-8-7 4 0 8 2 8 7zM24 26c5 0 7-3 7-6-4 0-7 2-7 6z" fill="currentColor"/></svg></li>
+                </ul>
+                <p class="sr-only" i18n-key="garden-growing">Flere eksperimenter vokser fram her.</p>
+            </div>
+            <dialog class="garden-dialog" id="garden-deepfield-dialog" aria-labelledby="garden-deepfield-title">
+                <div class="garden-dialog-body">
+                    <button type="button" class="garden-close icon-close" i18n-aria-label="garden-close" aria-label="Lukk"><span aria-hidden="true">×</span></button>
+                    <div class="project-image project-image-deepfield">
+                        <img src="/media/projects/deepfield-logo.svg" alt="" width="320" height="220" loading="lazy" />
+                    </div>
+                    <p class="project-platform" i18n-key="garden-deepfield-platform">Nettapp · TypeScript · Three.js · WebGL</p>
+                    <h3 id="garden-deepfield-title">Deep Field</h3>
+                    <p i18n-key="garden-deepfield-desc">Utforsk det observerbare universet i nettleseren. Fly fra Solsystemet til kanten av det kosmiske nettet, med 2,8 millioner ekte stjerner, 6 400 eksoplaneter, 284 000 asteroider og kometer, 44 000 galakser og sanntids strålesporede sorte hull. Spol tiden, land på planeter og planlegg romferder.</p>
+                    <p class="project-reception"><span i18n-key="garden-deepfield-credit">Basert på</span> <a href="https://github.com/berkcomba/youreyesinspace" target="_blank" rel="noopener noreferrer">Your Eyes In Space</a> <span i18n-key="garden-deepfield-credit-by">av BigBrains (AGPL-3.0).</span></p>
+                    <div class="project-links">
+                        <a class="project-play-link" i18n-key="project-open-link" i18n-aria-label="garden-deepfield-open-label" aria-label="Åpne Deep Field i nettleseren" href="/deepfield/">Åpne i nettleseren</a>
+                        <a i18n-key="project-link" i18n-aria-label="garden-deepfield-github-label" aria-label="Se kildekoden til Deep Field på GitHub" href="https://github.com/jwlei/deepfield" target="_blank" rel="noopener noreferrer">Se prosjekt</a>
+                    </div>
+                </div>
+            </dialog>
+            <dialog class="garden-dialog" id="garden-hivemind-dialog" aria-labelledby="garden-hivemind-title">
+                <div class="garden-dialog-body">
+                    <button type="button" class="garden-close icon-close" i18n-aria-label="garden-close" aria-label="Lukk"><span aria-hidden="true">×</span></button>
+                    <div class="project-image project-image-hivemind">
+                        <img src="/media/projects/hivemind-logo.svg" alt="" width="320" height="220" loading="lazy" />
+                    </div>
+                    <p class="project-platform" i18n-key="garden-hivemind-platform">Nettapp · JavaScript · Canvas</p>
+                    <h3 id="garden-hivemind-title">Hivemind</h3>
+                    <p i18n-key="garden-hivemind-desc">En interaktiv fullskjermsimulering av KI-agenter og nevrale nett i arbeid. Agentene tenker, sender meldinger, legger planer, stemmer seg fram til enighet og varsler trender før markedet ser dem. Gi dem et mål, dra agenter sammen så de begynner å snakke, prioriter oppgaver, utløs avstemninger, rekrutter nye agenter og zoom inn på det som skjer.</p>
+                    <div class="project-links">
+                        <a class="project-play-link" i18n-key="project-open-link" i18n-aria-label="garden-hivemind-open-label" aria-label="Åpne Hivemind i nettleseren" href="/hivemind/">Åpne i nettleseren</a>
+                        <a i18n-key="project-link" i18n-aria-label="garden-hivemind-github-label" aria-label="Se kildekoden til Hivemind på GitHub" href="https://github.com/jwlei/jwlei.github.io/tree/master/hivemind" target="_blank" rel="noopener noreferrer">Se prosjekt</a>
+                    </div>
+                </div>
+            </dialog>
+            <dialog class="garden-dialog" id="garden-breachline-dialog" aria-labelledby="garden-breachline-title">
+                <div class="garden-dialog-body">
+                    <button type="button" class="garden-close icon-close" i18n-aria-label="garden-close" aria-label="Lukk"><span aria-hidden="true">×</span></button>
+                    <div class="project-image project-image-breachline">
+                        <img src="/media/projects/breachline-logo.svg" alt="" width="320" height="220" loading="lazy" />
+                    </div>
+                    <p class="project-platform" i18n-key="garden-breachline-platform">Nettapp · JavaScript · Canvas</p>
+                    <h3 id="garden-breachline-title">Breachline</h3>
+                    <p i18n-key="garden-breachline-desc">Skriv det perfekte filmhacket i ditt eget tempo. Hver tast skriver koden for deg i venstre halvdel. Trykk Enter når en fase er ferdig, og se den kjøre i høyre halvdel: radarsveip, portskanning, en brannmur som faller, passord som knekkes, kameraer på repeat, filer som dekrypteres og sendes ut, og til slutt et hvelv som åpner seg.</p>
+                    <div class="project-links">
+                        <a class="project-play-link" i18n-key="project-open-link" i18n-aria-label="garden-breachline-open-label" aria-label="Åpne Breachline i nettleseren" href="/breachline/">Åpne i nettleseren</a>
+                        <a i18n-key="project-link" i18n-aria-label="garden-breachline-github-label" aria-label="Se kildekoden til Breachline på GitHub" href="https://github.com/jwlei/jwlei.github.io/tree/master/breachline" target="_blank" rel="noopener noreferrer">Se prosjekt</a>
+                    </div>
+                </div>
+            </dialog>
         </div>
     </section>
     </main>

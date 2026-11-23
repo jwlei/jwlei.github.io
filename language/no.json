@@ -11,12 +11,10 @@
   "profiles": "Profiler",
   "new-tab": "(åpnes i ny fane)",
   "projects": "Prosjekter",
-
   "name": "Joachim Leiros",
   "job-title": "Dataingeniør",
   "education-credential": "B.Sc. i informasjonsteknologi",
   "dl-portfolio": "Last ned CV",
-
   "carousel-label": "Prosjektglimt",
   "carousel-role": "karusell",
   "carousel-slide-role": "lysbilde",
@@ -38,7 +36,6 @@
   "project-video-unavailable": "Nettleseren din støtter ikke WebM-video.",
   "employer-5": "Hansen Technologies",
   "employer-5-job": "Senior prosjektkonsulent",
-
   "project-link": "Se prosjekt",
   "project-play-link": "Spill i nettleseren",
   "project-nexus-link": "Nexus Mods",
@@ -60,11 +57,9 @@
   "project-immersivehud-reception": "Nexus Mods: 15 anbefalinger · 598 nedlastinger. Spillere setter pris på dynamisk HUD og takker for at modifikasjonen fortsatt vedlikeholdes.",
   "project-2": "Detektering og varsling av hjortevilt ved veibane ved bruk av dyplæring",
   "project-2-desc": "Utvikling av en dyplæringsmodell og et Python-program for presis gjenkjenning og varsling av hjortevilt nær offentlige veier i sanntid.",
-
   "project-1": "EZBuild",
   "project-1-desc": "En Valheim-mod for enklere bygging med pipette for bygging og ressursinnsamling, automatisk valg av verktøy, interaksjon mens du bygger og hurtigtaster for hammer/reparasjon.",
   "project-ezbuild-reception": "Nexus Mods: 57 anbefalinger · 1,7k nedlastinger. Spillere setter pris på nyttige byggeverktøy og forbedringer av spillopplevelsen.",
-
   "project-open-link": "Åpne i nettleseren",
   "project-markitdown-platform": "Nettapp · Python · Pyodide · WebAssembly",
   "project-markitdown-desc": "En nettleserversjon av Microsofts MarkItDown som gjør PDF, Word, PowerPoint, Excel og mer om til Markdown. Python kjører i nettleseren via WebAssembly, så filene lastes aldri opp.",
@@ -74,13 +69,26 @@
   "project-gen-center-github-label": "Se kildekoden til gen-center på GitHub",
   "project-local-llm-host-desc": "En selvhostet chat for lokale språkmodeller. Legg GGUF-modeller i en mappe og chat med dem fra PC-en eller mobilen, hvor som helst via Tailscale. llama.cpp laster en modell ved første melding og frigjør den når den ikke er i bruk; samtalene lagres på serveren og deles mellom enheter, med strømmede Markdown-svar, bilder til modeller som kan se, redigering og nye svar, og en måler for kontekstvinduet. Den kan starte i bakgrunnen uten vindu når du logger på Windows, og ingenting forlater ditt eget skjermkort.",
   "project-local-llm-host-github-label": "Se kildekoden til local-llm-host på GitHub",
-
-  "funzone": "Funzone",
-  "funzone-intro": "Ting som rett og slett er gøy å leke med, hostet her på siden.",
-  "funzone-deepfield-platform": "Nettapp · TypeScript · Three.js · WebGL",
-  "funzone-deepfield-desc": "Utforsk det observerbare universet i nettleseren. Fly fra Solsystemet til kanten av det kosmiske nettet, med 2,8 millioner ekte stjerner, 6 400 eksoplaneter, 284 000 asteroider og kometer, 44 000 galakser og sanntids strålesporede sorte hull. Spol tiden, land på planeter og planlegg romferder.",
-  "funzone-deepfield-credit": "Basert på",
-  "funzone-deepfield-credit-by": "av BigBrains (AGPL-3.0).",
-  "funzone-deepfield-open-label": "Åpne Deep Field i nettleseren",
-  "funzone-deepfield-github-label": "Se kildekoden til Deep Field på GitHub"
+  "garden-deepfield-platform": "Nettapp · TypeScript · Three.js · WebGL",
+  "garden-deepfield-desc": "Utforsk det observerbare universet i nettleseren. Fly fra Solsystemet til kanten av det kosmiske nettet, med 2,8 millioner ekte stjerner, 6 400 eksoplaneter, 284 000 asteroider og kometer, 44 000 galakser og sanntids strålesporede sorte hull. Spol tiden, land på planeter og planlegg romferder.",
+  "garden-deepfield-credit": "Basert på",
+  "garden-deepfield-credit-by": "av BigBrains (AGPL-3.0).",
+  "garden-deepfield-open-label": "Åpne Deep Field i nettleseren",
+  "garden-deepfield-github-label": "Se kildekoden til Deep Field på GitHub",
+  "garden-hivemind-platform": "Nettapp · JavaScript · Canvas",
+  "garden-hivemind-desc": "En interaktiv fullskjermsimulering av KI-agenter og nevrale nett i arbeid. Agentene tenker, sender meldinger, legger planer, stemmer seg fram til enighet og varsler trender før markedet ser dem. Gi dem et mål, dra agenter sammen så de begynner å snakke, prioriter oppgaver, utløs avstemninger, rekrutter nye agenter og zoom inn på det som skjer.",
+  "garden-hivemind-open-label": "Åpne Hivemind i nettleseren",
+  "garden-hivemind-github-label": "Se kildekoden til Hivemind på GitHub",
+  "garden": "Digital hage",
+  "garden-intro": "Små eksperimenter som vokser fram i det åpne. Trykk på et merke for å lese mer.",
+  "garden-read-more": "Les mer",
+  "garden-close": "Lukk",
+  "garden-growing": "Flere eksperimenter vokser fram her.",
+  "garden-breachline-platform": "Nettapp · JavaScript · Canvas",
+  "garden-breachline-desc": "Skriv det perfekte filmhacket i ditt eget tempo. Hver tast skriver koden for deg i venstre halvdel. Trykk Enter når en fase er ferdig, og se den kjøre i høyre halvdel: radarsveip, portskanning, en brannmur som faller, passord som knekkes, kameraer på repeat, filer som dekrypteres og sendes ut, og til slutt et hvelv som åpner seg.",
+  "garden-breachline-open-label": "Åpne Breachline i nettleseren",
+  "garden-breachline-github-label": "Se kildekoden til Breachline på GitHub",
+  "garden-deepfield-tag": "Univers-utforsker",
+  "garden-hivemind-tag": "KI-kollektiv",
+  "garden-breachline-tag": "Filmhacker-skriving"
 }

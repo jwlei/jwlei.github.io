@@ -11,12 +11,10 @@
   "profiles": "Profiles",
   "new-tab": "(opens in a new tab)",
   "projects": "Projects",
-
   "name": "Joachim Leiros",
   "job-title": "Software Engineer",
   "education-credential": "B.Sc. in Information Technology",
   "dl-portfolio": "Download CV",
-
   "carousel-label": "Project highlights",
   "carousel-role": "carousel",
   "carousel-slide-role": "slide",
@@ -38,7 +36,6 @@
   "project-video-unavailable": "Your browser does not support WebM video.",
   "employer-5": "Hansen Technologies",
   "employer-5-job": "Senior project consultant",
-
   "project-link": "View Project",
   "project-play-link": "Play in browser",
   "project-nexus-link": "Nexus Mods",
@@ -60,11 +57,9 @@
   "project-immersivehud-reception": "Nexus Mods: 15 endorsements · 598 downloads. Players praise the dynamic HUD and thank the author for continuing to maintain it.",
   "project-2": "Detection and warning of game in vicinity of roads using deep learning",
   "project-2-desc": "Development of a deep learning model and Python application for accurate real-time detection and warning of game close to public roads.",
-
   "project-1": "EZBuild",
   "project-1-desc": "A Valheim building quality-of-life mod with a pipette for building and resource gathering, automatic tool selection, interaction while building, and quick hammer/repair hotkeys.",
   "project-ezbuild-reception": "Nexus Mods: 57 endorsements · 1.7k downloads. Players praise its useful building shortcuts and quality-of-life improvements.",
-
   "project-open-link": "Open in browser",
   "project-markitdown-platform": "Web app · Python · Pyodide · WebAssembly",
   "project-markitdown-desc": "A browser port of Microsoft's MarkItDown that turns PDF, Word, PowerPoint, Excel and more into Markdown. Python runs in the browser through WebAssembly, so files are never uploaded.",
@@ -74,13 +69,26 @@
   "project-gen-center-github-label": "View the gen-center source code on GitHub",
   "project-local-llm-host-desc": "A self-hosted chat for local LLMs. Drop GGUF models in a folder and chat with them from your PC or phone, anywhere over Tailscale. llama.cpp loads a model on the first message and unloads it when idle; conversations are kept on the server and shared across devices, with streaming Markdown replies, images for vision models, edit and regenerate, and a context meter. It can start headless in the background when you sign in to Windows, and nothing leaves your own GPU.",
   "project-local-llm-host-github-label": "View the local-llm-host source code on GitHub",
-
-  "funzone": "Funzone",
-  "funzone-intro": "Things that are simply fun to play with, hosted right here on the site.",
-  "funzone-deepfield-platform": "Web app · TypeScript · Three.js · WebGL",
-  "funzone-deepfield-desc": "Explore the observable universe in your browser. Fly from the Solar System to the edge of the cosmic web, with 2.8 million real stars, 6,400 exoplanets, 284,000 asteroids and comets, 44,000 galaxies and real-time ray-traced black holes. Scrub through time, land on planets and plan space missions.",
-  "funzone-deepfield-credit": "Based on",
-  "funzone-deepfield-credit-by": "by BigBrains (AGPL-3.0).",
-  "funzone-deepfield-open-label": "Open Deep Field in this browser",
-  "funzone-deepfield-github-label": "View the Deep Field source code on GitHub"
+  "garden-deepfield-platform": "Web app · TypeScript · Three.js · WebGL",
+  "garden-deepfield-desc": "Explore the observable universe in your browser. Fly from the Solar System to the edge of the cosmic web, with 2.8 million real stars, 6,400 exoplanets, 284,000 asteroids and comets, 44,000 galaxies and real-time ray-traced black holes. Scrub through time, land on planets and plan space missions.",
+  "garden-deepfield-credit": "Based on",
+  "garden-deepfield-credit-by": "by BigBrains (AGPL-3.0).",
+  "garden-deepfield-open-label": "Open Deep Field in this browser",
+  "garden-deepfield-github-label": "View the Deep Field source code on GitHub",
+  "garden-hivemind-platform": "Web app · JavaScript · Canvas",
+  "garden-hivemind-desc": "An interactive full-screen simulation of AI agents and neural nets at work. The agents think, message each other, lay plans, vote their way to consensus and call trends before the market sees them. Give them an objective, drag agents together to start a conversation, prioritise tasks, call votes, recruit new agents and zoom in on the action.",
+  "garden-hivemind-open-label": "Open Hivemind in this browser",
+  "garden-hivemind-github-label": "View the Hivemind source code on GitHub",
+  "garden": "Digital garden",
+  "garden-intro": "Small experiments, growing in public. Tap a badge to read more.",
+  "garden-read-more": "Read more",
+  "garden-close": "Close",
+  "garden-growing": "More experiments are growing here.",
+  "garden-breachline-platform": "Web app · JavaScript · Canvas",
+  "garden-breachline-desc": "Type the perfect movie hack at your own pace. Every key writes the code for you on the left. Press Enter when a phase is written and watch it run on the right: radar sweeps, port scans, a firewall coming down, passwords cracking, cameras on a loop, files decrypting and leaving the building, and finally a vault swinging open.",
+  "garden-breachline-open-label": "Open Breachline in this browser",
+  "garden-breachline-github-label": "View the Breachline source code on GitHub",
+  "garden-deepfield-tag": "Universe explorer",
+  "garden-hivemind-tag": "AI collective",
+  "garden-breachline-tag": "Movie-hack typer"
 }
