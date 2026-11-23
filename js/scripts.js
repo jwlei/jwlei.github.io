@@ -294,6 +294,35 @@ document.querySelectorAll("[data-garden-open]").forEach(button => {
     });
 });
 
+// Empty plots: finish the last row of badges, or add one fading row when that row is full.
+// The count depends on how many columns the grid has (4 on desktop, 3 on phones), so it is done here, not in the HTML.
+const gardenGrid = document.querySelector(".garden-grid");
+const SPROUTS = [
+    '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="33" r="2.5" fill="currentColor"/></svg>',
+    '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 36h20M24 36V26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 28c-6 0-8-4-8-7 4 0 8 2 8 7zM24 26c5 0 7-3 7-6-4 0-7 2-7 6z" fill="currentColor"/></svg>',
+    '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 38h20M24 38V18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 30c-7 0-10-5-10-9 5 0 10 3 10 9zM24 24c6 0 9-4 9-8-5 0-9 3-9 8zM24 18c-3 0-5-3-5-6 3 0 5 2 5 6z" fill="currentColor"/></svg>'
+];
+let gardenColumns = 0;
+function plantGardenPlots() {
+    if (!gardenGrid) return;
+    const columns = getComputedStyle(gardenGrid).gridTemplateColumns.split(" ").filter(Boolean).length || 4;
+    if (columns === gardenColumns) return;
+    gardenColumns = columns;
+    gardenGrid.querySelectorAll(".garden-plot").forEach(plot => plot.remove());
+    const badges = gardenGrid.querySelectorAll(".garden-badge").length;
+    const rest = badges % columns;
+    const count = rest ? columns - rest : columns;
+    for (let i = 0; i < count; i++) {
+        const plot = document.createElement("li");
+        plot.className = rest ? "garden-plot" : "garden-plot fade";
+        plot.setAttribute("aria-hidden", "true");
+        plot.innerHTML = SPROUTS[(i + badges) % SPROUTS.length];
+        gardenGrid.appendChild(plot);
+    }
+}
+plantGardenPlots();
+window.addEventListener("resize", plantGardenPlots);
+
 document.querySelectorAll(".garden-dialog").forEach(dialog => {
     // a click on the backdrop lands on the dialog itself, not on its body
     dialog.addEventListener("click", event => {

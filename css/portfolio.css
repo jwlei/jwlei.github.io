@@ -592,11 +592,11 @@ section {
     margin-bottom: 42px;
 }
 
-/* ---------- Digital garden: a 4x4 field of badges that fits one screen ---------- */
+/* ---------- Digital garden: a small field of badges; empty plots fade out (filled in by scripts.js) ---------- */
 #garden {
     display: grid;
     grid-template-columns: 1fr;
-    justify-items: center;
+    justify-items: start;
     padding: clamp(20px, 3vw, 32px);
     gap: clamp(28px, 5vw, 64px);
     align-items: center;
@@ -618,11 +618,8 @@ section {
     position: absolute;
 }
 
-/* the grid is square, sized so the whole section stays inside the viewport */
-/* square grid sized so title + grid fit one screen: section 76px + box padding 64px + title ~70px */
 .garden-field {
-    width: min(980px, calc(100svh - 215px), 100%);
-    min-width: 300px;
+    width: min(490px, 100%);
 }
 
 .garden-grid {
@@ -737,6 +734,16 @@ section {
     place-items: center;
     border: 1px dashed rgba(139, 148, 158, 0.28);
     color: rgba(139, 148, 158, 0.38);
+    opacity: 0.55;
+    filter: blur(0.8px);
+}
+
+/* a whole row of empty plots under a full row: fades away downwards */
+.garden-plot.fade {
+    opacity: 0.4;
+    filter: blur(1.6px);
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%);
+    mask-image: linear-gradient(to bottom, #000, transparent 85%);
 }
 
 .garden-plot svg {
@@ -857,13 +864,9 @@ section {
 }
 
 @media (max-width: 600px) {
-    /* phones: three tiles per row, 15 tiles so the rows come out even */
+    /* phones: three tiles per row */
     .garden-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .garden-plot:last-child {
-        display: none;
     }
 }
 
