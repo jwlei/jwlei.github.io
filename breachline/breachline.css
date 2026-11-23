@@ -204,6 +204,15 @@ html, body {
     animation: breathe 1.6s ease-in-out infinite;
 }
 .run-hint[hidden] { display: none; }
+.run-hint.soft {
+    color: var(--amber);
+    background: rgba(2, 10, 5, 0.85);
+    border: 1px solid rgba(255, 176, 32, 0.6);
+    box-shadow: none;
+    animation: none;
+    font-size: 0.95rem;
+    opacity: 0.85;
+}
 .run-hint.nudge { animation: nudge 0.35s ease-in-out, breathe 1.6s ease-in-out 0.35s infinite; }
 @keyframes breathe { 50% { box-shadow: 0 0 40px rgba(255, 176, 32, 0.75); } }
 @keyframes nudge { 25% { transform: translateX(calc(-50% - 8px)); } 75% { transform: translateX(calc(-50% + 8px)); } }

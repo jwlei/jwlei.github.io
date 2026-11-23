@@ -284,7 +284,8 @@ print("  time to coffee:", ops.elapsed())
         });
         $('status').textContent = { typing: 'TYPING', ready: 'READY ⏎', running: 'RUNNING', done: 'DONE' }[run.state];
         $('status').className = 'st-' + run.state;
-        runBtn.hidden = run.state !== 'ready';
+        runBtn.hidden = run.state !== 'ready' && run.state !== 'typing';
+        runBtn.classList.toggle('soft', run.state === 'typing');
         runBtn.textContent = `⏎  Run phase ${run.typeIdx + 1}: ${STAGES[Math.min(run.typeIdx, STAGES.length - 1)].name.toLowerCase()}`;
     }
 
@@ -306,13 +307,15 @@ print("  time to coffee:", ops.elapsed())
         lineEl.textContent = text;
     }
 
-    function type(n) {
+    function type(n, auto) {
         if (!run || !overlay.hidden) return;
         if (run.state !== 'typing') { if (run.state === 'ready') nudge(); return; }
         if (!run.started) { run.started = performance.now(); $('hint').classList.add('gone'); }
-        run.keys++;
-        keyTimes.push(performance.now());
-        heat = Math.min(1, heat + 0.12);
+        if (!auto) {
+            run.keys++;
+            keyTimes.push(performance.now());
+        }
+        heat = Math.min(1, heat + (auto ? 0.04 : 0.12));
         const text = run.texts[run.typeIdx];
         for (let i = 0; i < n && run.pos < text.length; i++) {
             const ch = text[run.pos++];
@@ -428,8 +431,10 @@ print("  time to coffee:", ops.elapsed())
         else showOverlay(true, 'ACCESS DENIED', 'Credentials rejected. This attempt has been logged.', 'Carry on', null);
     }
 
+    // Enter works any time: whatever is left of the phase writes itself in a quick burst, then it runs.
     function enterOrType() {
-        if (run.state === 'ready') execute(); else type(cpk);
+        if (run.state === 'ready') execute();
+        else if (run.state === 'typing') run.autofill = true;
     }
 
     window.addEventListener('keydown', (e) => {
@@ -460,7 +465,7 @@ print("  time to coffee:", ops.elapsed())
         if (e.pointerType === 'mouse') { sink.focus({ preventScroll: true }); return; }
         type(cpk);
     });
-    runBtn.addEventListener('click', (e) => { e.currentTarget.blur(); execute(); });
+    runBtn.addEventListener('click', (e) => { e.currentTarget.blur(); enterOrType(); });
     $('btn-kbd').addEventListener('click', () => { sink.focus({ preventScroll: true }); });
     $('cpk').addEventListener('change', (e) => { cpk = Number(e.target.value); e.target.blur(); });
     const fsOK = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -902,6 +907,14 @@ print("  time to coffee:", ops.elapsed())
         time += dt;
         heat = Math.max(0, heat - dt * 0.9);
         document.documentElement.style.setProperty('--heat', heat.toFixed(2));
+        if (run && run.autofill) {
+            if (run.state === 'typing') {
+                const left = run.texts[run.typeIdx].length - run.pos;
+                type(Math.max(4, Math.ceil(left / 18)), true);
+            }
+            if (run.state === 'ready') { run.autofill = false; execute(); }
+            else if (run.state !== 'typing') run.autofill = false;
+        }
         if (run && run.exec) updateExec(dt);
 
         g.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -925,6 +938,7 @@ print("  time to coffee:", ops.elapsed())
             $('kps').textContent = (keyTimes.length / 2).toFixed(0);
             let txt = 'complete';
             if (run.exec) txt = `running ${Math.round(run.exec.p * 100)}%`;
+            else if (run.autofill) txt = 'writing the rest…';
             else if (run.state === 'typing') txt = `typing phase ${run.typeIdx + 1}: ${Math.round((run.pos / run.texts[run.typeIdx].length) * 100)}%`;
             else if (run.state === 'ready') txt = 'ready, press Enter';
             $('stage-pct').textContent = txt;
