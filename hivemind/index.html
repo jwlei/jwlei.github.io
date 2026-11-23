@@ -3,87 +3,53 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0c1320" />
-    <meta name="description" content="Hivemind: watch a team of AI agents work together on a goal. See who is doing what, what they say to each other, and what it costs." />
+    <meta name="theme-color" content="#0b0b10" />
+    <meta name="description" content="Hivemind: a simulated graph of AI agents on GPU pods solving hard engineering problems. Rearrange the nodes, switch their models and watch the costs." />
     <title>Hivemind · jleiros.com</title>
     <link rel="icon" type="image/svg+xml" href="/media/images/icons/favicon.svg" />
     <link rel="stylesheet" href="hivemind.css" />
 </head>
 <body>
-    <canvas id="sim" role="img" aria-label="A team of AI agents working together on a goal"></canvas>
+    <canvas id="sim" role="img" aria-label="A simulated graph of AI agents on GPU pods, wired to an orchestrator"></canvas>
 
     <header class="topbar" id="topbar">
-        <a class="back" href="/#garden-section">← jleiros.com</a>
-        <div class="brand"><span class="mark" aria-hidden="true"></span>Hivemind <small>AI team workspace</small></div>
-        <div class="spend-pill" title="What this session has cost in AI usage">
-            <span>API spend</span><b id="spend-top" class="num">$0.00</b>
-        </div>
+        <a class="back" href="/#garden-section" aria-label="Back to jleiros.com">←</a>
+        <span class="graph-line" id="graph-line"></span>
         <div class="controls">
-            <span id="clock" class="clock num"></span>
-            <button type="button" class="btn" id="btn-pause" title="Pause (Space)">Pause</button>
+            <button type="button" class="btn" id="btn-pause" title="Pause (Space)">pause</button>
             <button type="button" class="btn" id="btn-speed" title="Speed (1–4)">1×</button>
-            <button type="button" class="btn" id="btn-spawn" title="Add an agent (N)">+ Agent</button>
-            <button type="button" class="btn" id="btn-hud" title="Hide panels (H)">Hide panels</button>
-            <button type="button" class="btn" id="btn-full" title="Fullscreen (F)">Fullscreen</button>
-            <button type="button" class="btn icon" id="btn-help" title="How it works (?)" aria-label="How it works">?</button>
+            <button type="button" class="btn" id="btn-spawn" title="Add a node (N)">+ node</button>
+            <button type="button" class="btn" id="btn-full" title="Fullscreen (F)">fullscreen</button>
+            <button type="button" class="btn" id="btn-help" title="How it works (?)" aria-label="How it works">?</button>
         </div>
     </header>
 
-    <aside class="panel left" aria-label="Models and team chat">
-        <h2>Model fleet</h2>
-        <div id="fleet" class="fleet"></div>
-        <h2>Team chat</h2>
-        <ol id="log" class="log"></ol>
-    </aside>
-
-    <aside class="panel right" id="panel-right" aria-label="Costs and progress">
-        <h2>API costs</h2>
-        <div class="spend-card">
-            <span class="label">This session</span>
-            <b id="spend" class="num">$0.00</b>
-            <span id="spend-rate" class="sub">≈ $0 per hour</span>
-            <div class="budget"><i id="budget-bar"></i></div>
-            <span id="budget-label" class="sub"></span>
-        </div>
-        <h3>Spend over time</h3>
-        <canvas id="c-spend" class="chart"></canvas>
-        <h3>Spend by agent</h3>
-        <canvas id="c-agents" class="chart tall"></canvas>
-        <h3>Progress vs plan</h3>
-        <canvas id="c-progress" class="chart"></canvas>
-        <p class="legend"><i class="actual"></i>Actual <i class="planned"></i>Planned <span id="progress-label"></span></p>
-        <div class="metrics">
-            <div class="m"><span>Tasks done</span><b id="m-tasks" class="num">0</b></div>
-            <div class="m"><span>Messages / min</span><b id="m-msgs" class="num">0</b></div>
-            <div class="m"><span>Avg. response</span><b id="m-latency" class="num">0 s</b></div>
-            <div class="m"><span>Tokens used</span><b id="m-tokens" class="num">0</b></div>
-        </div>
-        <p class="note">Example prices per million tokens (in / out): large $15 / $75, standard $3 / $15, fast $0.80 / $4.</p>
-    </aside>
-
     <form id="cmd" class="cmd" autocomplete="off">
-        <label for="cmd-input" class="prompt">New goal</label>
-        <input id="cmd-input" maxlength="70" placeholder="Give the team a goal and press Enter" />
+        <label for="cmd-input" class="prompt"><span class="tag">command line</span><span class="path">~/hivemind $</span></label>
+        <input id="cmd-input" maxlength="90" spellcheck="false" autocapitalize="off" placeholder="type a goal, or: help · approve · spawn · model qa opus" />
     </form>
 
-    <div id="tip" class="tip" hidden></div>
+    <div id="model-menu" class="model-menu" hidden role="dialog" aria-label="Choose a model">
+        <div class="mm-title" id="mm-title"></div>
+        <div id="mm-list" class="mm-list"></div>
+    </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <div id="help" class="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
         <div class="help-box">
-            <h2 id="help-title">How it works</h2>
-            <p>A team of AI agents is working on a goal. The orchestrator in the middle hands out tasks, the agents talk to each other to get them done, and every message costs a little money.</p>
+            <h2 id="help-title">how it works</h2>
+            <p>A simulated team of AI agents, each a node running on its own GPU pod, works through a hard engineering goal. The orchestrator bus hands out work; layer 1 researches and designs, layer 2 builds, layer 3 verifies and ships. Every token costs money.</p>
             <dl>
-                <dt>Click an agent</dt><dd>Ask it what it is doing</dd>
-                <dt>Drag an agent onto another</dt><dd>Pair them up on a task (on touch: hold first)</dd>
-                <dt>Click the orchestrator</dt><dd>Ask everyone for a status update</dd>
-                <dt>Click a task</dt><dd>Make it the top priority</dd>
-                <dt>Type a goal</dt><dd>Give the team something new to work on</dd>
-                <dt>Scroll · pinch</dt><dd>Zoom; drag empty space to move around; 0 resets</dd>
-                <dt>N · 1–4 · Space</dt><dd>Add an agent · speed · pause</dd>
-                <dt>H · F</dt><dd>Hide the side panels · fullscreen</dd>
+                <dt>hover / tap a node</dt><dd>open it up: the neural net at work and the hardware under it</dd>
+                <dt>drag a node</dt><dd>drop it into any slot. Neighbours in a column form links: synergies speed work up, clashes slow it down</dd>
+                <dt>click a model tag</dt><dd>switch the node to Fable, Opus, Sonnet or Haiku. Cheaper models get more work sent back</dd>
+                <dt>human gate</dt><dd>before shipping, the run waits for you: click approve or type <code>approve</code></dd>
+                <dt>click the bus</dt><dd>ask every node for a status update</dd>
+                <dt>click a dispatch row</dt><dd>make that task the top priority</dd>
+                <dt>command line</dt><dd>type a goal, or <code>help</code>, <code>approve</code>, <code>spawn</code>, <code>pause</code>, <code>model &lt;node&gt; &lt;fable|opus|sonnet|haiku&gt;</code></dd>
+                <dt>scroll · pinch</dt><dd>zoom; drag empty space to pan; 0 resets</dd>
             </dl>
-            <button type="button" class="btn primary" id="help-close">Got it</button>
+            <button type="button" class="btn primary" id="help-close">got it</button>
         </div>
     </div>
 

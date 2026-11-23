@@ -1,6 +1,7 @@
-/* Hivemind: a team of AI agents working on a goal, shown the way an onlooker would see it.
-   Who is doing what, what they say to each other, how far along it is, and what it costs.
-   Plain canvas 2D, no dependencies. The scene uses "world" coordinates (1 unit = 1 CSS px at zoom 1). */
+/* Hivemind: a simulated graph of AI agents, each a node on its own GPU pod, working through a hard engineering goal.
+   Left: input nodes. Middle: the orchestrator bus. Right: agent nodes in three layer columns. Bottom: run log,
+   dispatch and costs, then the command line. Plain canvas 2D, no dependencies.
+   The graph uses "world" coordinates (1 unit = 1 CSS px at zoom 1); the header and bottom panels are screen space. */
 (() => {
     'use strict';
 
@@ -8,16 +9,15 @@
     const canvas = document.getElementById('sim');
     const ctx = canvas.getContext('2d');
     const $ = (id) => document.getElementById(id);
-    const SANS = 'Inter,"Segoe UI",system-ui,-apple-system,sans-serif';
-    const MONO = '"JetBrains Mono","Cascadia Code",Consolas,Menlo,monospace';
+    const MONO = '"JetBrains Mono","Cascadia Code","SF Mono",Consolas,Menlo,monospace';
     const TAU = Math.PI * 2;
     const SPEEDS = [0.5, 1, 2, 4];
     let speedIdx = 1;
     const ZMIN = 0.6, ZMAX = 2.5;
-    const MAX_AGENTS = 14;
+    const MAX_NODES = 15;
     const C = {
-        card: '#131d30', cardHot: '#18253e', line: '#22304a', track: '#1b2740',
-        text: '#dbe3ef', muted: '#8391a7', faint: '#5f6d84', accent: '#5b8def', ok: '#4cbf86', warn: '#e0a94a',
+        bg: '#0b0b10', node: '#14141c', nodeHot: '#1a1a25', line: '#2a2331', head: '#5e1f33', headHot: '#8a2a48',
+        crimson: '#b8325a', text: '#d8cfd6', dim: '#7d6f7a', faint: '#4d424c', yellow: '#f2c94c', green: '#7bd88f', red: '#ff5470',
     };
 
     const rand = (a, b) => a + Math.random() * (b - a);
@@ -37,258 +37,364 @@
         return `rgba(${c},${a})`;
     }
     const money = (v, d = 2) => '$' + v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const kfmt = (v) => (v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'k' : String(Math.round(v)));
+
+    // ---------------------------------------------------------------- models
+    // Prices are Anthropic list prices per million tokens (input / output). Hardware, speed and quality are simulated.
+    const MODELS = [
+        { id: 'fable', name: 'Claude Fable 5.2', short: 'fable 5.2', pin: 8, pout: 40, speed: 0.85, quality: 1, dot: '#c49bff',
+          note: 'most capable · slower · $8 / $40 per 1M tokens', gpus: 16, gpu: 'h200', kw: 21, tps: 2600 },
+        { id: 'opus', name: 'Claude Opus 5.5', short: 'opus 5.5', pin: 4, pout: 20, speed: 1, quality: 0.95, dot: '#f2c94c',
+          note: 'deep reasoning · $4 / $20 per 1M tokens', gpus: 8, gpu: 'h200', kw: 10.5, tps: 4200 },
+        { id: 'sonnet', name: 'Claude Sonnet 5.5', short: 'sonnet 5.5', pin: 2, pout: 10, speed: 1.25, quality: 0.86, dot: '#6fb3ff',
+          note: 'fast and capable · $2 / $10 per 1M tokens', gpus: 8, gpu: 'h100', kw: 8.2, tps: 7800 },
+        { id: 'haiku', name: 'Claude Haiku 5.5', short: 'haiku 5.5', pin: 0.1, pout: 0.5, speed: 1.7, quality: 0.68, dot: '#7bd88f',
+          note: 'fastest, cheapest · more rework · $0.10 / $0.50 per 1M tokens', gpus: 4, gpu: 'l40s', kw: 1.6, tps: 21000 },
+    ];
+    const modelById = Object.fromEntries(MODELS.map((m) => [m.id, m]));
+    const REGIONS = ['us-east-1', 'us-west-2', 'eu-west-1'];
 
     // ---------------------------------------------------------------- the team
-    // Fictional models with example prices per million tokens (input / output).
-    const MODELS = [
-        { id: 'large', name: 'Large model', note: 'careful reasoning', pin: 15, pout: 75, base: 2.4,
-          layers: [['Input', 3], ['Attention', 5], ['Attention', 5], ['Output', 3]] },
-        { id: 'standard', name: 'Standard model', note: 'everyday work', pin: 3, pout: 15, base: 0.9,
-          layers: [['Input', 3], ['Attention', 4], ['Output', 3]] },
-        { id: 'fast', name: 'Fast model', note: 'quick replies', pin: 0.8, pout: 4, base: 0.3,
-          layers: [['Input', 3], ['Attention', 3], ['Output', 2]] },
-    ];
-    for (const m of MODELS) Object.assign(m, { spend: 0, tokens: 0, bucket: 0, hist: [], reqTimes: [], act: 0, phase: 0 });
-    const modelById = Object.fromEntries(MODELS.map((m) => [m.id, m]));
-
     const ROLES = [
-        { name: 'Planner', color: '#e0a94a', model: 'large', job: 'Breaks the goal into steps',
-          idle: ['Watching the timeline', 'Checking who is free', 'Waiting for updates'] },
-        { name: 'Researcher', color: '#3fb5a5', model: 'standard', job: 'Finds and reads sources',
-          idle: ['Keeping an eye on the news', 'Waiting for the next task', 'Tidying up notes'] },
-        { name: 'Analyst', color: '#5b8def', model: 'large', job: 'Works out the numbers',
-          idle: ['Double-checking last week\'s figures', 'Waiting for data', 'Updating a spreadsheet'] },
-        { name: 'Writer', color: '#9b84e6', model: 'standard', job: 'Drafts and edits text',
-          idle: ['Collecting ideas for headlines', 'Waiting for research', 'Rereading the brief'] },
-        { name: 'Designer', color: '#e08fb5', model: 'standard', job: 'Makes the visuals',
-          idle: ['Sketching ideas', 'Waiting for the final text', 'Sorting the photo library'] },
-        { name: 'Developer', color: '#5fbf7f', model: 'standard', job: 'Builds and tests',
-          idle: ['Updating tools', 'Waiting for the design', 'Reviewing old code'] },
-        { name: 'Reviewer', color: '#e0707f', model: 'large', job: 'Checks quality and facts',
-          idle: ['Reading the style guide', 'Waiting for drafts', 'Checking earlier work'] },
-        { name: 'Assistant', color: '#e3925a', model: 'fast', job: 'Handles email and calendars',
-          idle: ['Sorting the inbox', 'Booking a meeting room', 'Waiting for the go-ahead'] },
-        { name: 'Archivist', color: '#57b4d9', model: 'fast', job: 'Remembers past projects',
-          idle: ['Filing finished work', 'Indexing old reports', 'Waiting for questions'] },
+        { name: 'Planner', key: 'planner', layer: 0, model: 'fable', job: 'breaks goals into milestones' },
+        { name: 'Researcher', key: 'researcher', layer: 0, model: 'opus', job: 'reads papers, docs and postmortems' },
+        { name: 'Architect', key: 'architect', layer: 0, model: 'opus', job: 'designs systems and interfaces' },
+        { name: 'ML engineer', key: 'ml_engineer', layer: 1, model: 'opus', job: 'trains and tunes models' },
+        { name: 'Data engineer', key: 'data_engineer', layer: 1, model: 'sonnet', job: 'builds pipelines and datasets' },
+        { name: 'Backend', key: 'backend', layer: 1, model: 'sonnet', job: 'writes services and APIs' },
+        { name: 'Frontend', key: 'frontend', layer: 1, model: 'sonnet', job: 'builds dashboards and UI' },
+        { name: 'Security', key: 'security', layer: 2, model: 'opus', job: 'threat models and audits' },
+        { name: 'QA', key: 'qa', layer: 2, model: 'haiku', job: 'tests at scale' },
+        { name: 'SRE', key: 'sre', layer: 2, model: 'sonnet', job: 'runs production and rollouts' },
     ];
     const EXTRA_ROLES = [
-        { name: 'Translator', color: '#a9c25f', model: 'fast', job: 'Translates text', idle: ['Waiting for text to translate', 'Building a word list'] },
-        { name: 'Legal', color: '#d6c062', model: 'large', job: 'Checks rules and contracts', idle: ['Reading the terms of service', 'Waiting for drafts'] },
-        { name: 'Marketer', color: '#c77fd0', model: 'standard', job: 'Plans how to reach people', idle: ['Looking at last campaign\'s results', 'Planning social posts'] },
-        { name: 'Support', color: '#6fa3e8', model: 'fast', job: 'Answers customer questions', idle: ['Writing FAQ answers', 'Reading support tickets'] },
-        { name: 'Data engineer', color: '#4fc1c9', model: 'standard', job: 'Moves and cleans data', idle: ['Cleaning a customer list', 'Checking data pipelines'] },
+        { name: 'Performance', key: 'performance', layer: 1, model: 'opus', job: 'profiles and optimises hot paths' },
+        { name: 'DBA', key: 'dba', layer: 1, model: 'sonnet', job: 'tunes databases and queries' },
+        { name: 'Red team', key: 'red_team', layer: 2, model: 'opus', job: 'attacks the system before others do' },
+        { name: 'Compliance', key: 'compliance', layer: 2, model: 'sonnet', job: 'maps work to regulations' },
+        { name: 'Tech writer', key: 'tech_writer', layer: 2, model: 'haiku', job: 'writes docs and runbooks' },
     ];
+    const COLUMNS = ['layer 1 · research & design', 'layer 2 · build', 'layer 3 · verify & ship'];
 
-    // The work. Each task has an owner, a teammate it asks for help, the steps you see it doing,
-    // the short exchange between them, and the result it reports back.
-    const TASKS = [
-        { phase: 0, name: 'Break the goal into steps', owner: 'Planner', helper: 'Archivist',
-          steps: ['Reading the goal carefully', 'Listing what needs to happen', 'Putting the steps in order', 'Choosing who does what'],
-          ask: 'Do we have notes from similar projects?', reply: 'Yes, two. Both ran late on design, so start that early.',
-          result: 'Plan ready: 12 tasks in 5 stages.' },
-        { phase: 0, name: 'Research the market', owner: 'Researcher', helper: 'Archivist',
-          steps: ['Searching news and reports', 'Reading 23 articles', 'Comparing customer reviews', 'Writing a one-page summary'],
-          ask: 'Have we done anything like this before?', reply: 'A similar launch in 2024. Offering a free first month doubled sign-ups.',
-          result: 'Demand is growing about 12% a year. Three main customer groups.' },
-        { phase: 1, name: 'Study the competitors', owner: 'Researcher', helper: 'Analyst',
-          steps: ['Finding the 5 biggest competitors', 'Collecting their prices', 'Reading what their customers say', 'Making a comparison table'],
-          ask: 'Can you sanity-check these prices?', reply: 'Two looked out of date. I updated them from their websites.',
-          result: 'Competitors charge between 129 and 249 kr a month.' },
-        { phase: 1, name: 'Estimate costs and price', owner: 'Analyst', helper: 'Reviewer',
-          steps: ['Collecting cost figures', 'Building a spreadsheet', 'Testing three price points', 'Picking the best price'],
-          ask: 'Could you check my spreadsheet formulas?', reply: 'One formula counted shipping twice. Fixed it.',
-          result: 'Suggested price 179 kr a month, with a 38% margin.' },
-        { phase: 1, name: 'Collect lessons learned', owner: 'Archivist', helper: 'Planner',
-          steps: ['Searching old project notes', 'Reading 6 project reviews', 'Picking out what went wrong', 'Writing a list of tips'],
-          ask: 'Which of these lessons matter most for us?', reply: 'The ones about deadlines and testing. Put those first.',
-          result: '4 lessons shared with the team.' },
-        { phase: 2, name: 'Write the announcement', owner: 'Writer', helper: 'Reviewer',
-          steps: ['Outlining the main message', 'Writing a first draft', 'Making it shorter and clearer', 'Adding a headline'],
-          ask: 'Is the tone right, or too salesy?', reply: 'A little salesy. Drop the exclamation marks and lead with the price.',
-          result: 'Announcement drafted, 220 words.' },
-        { phase: 2, name: 'Design the web page', owner: 'Designer', helper: 'Writer',
-          steps: ['Sketching three layouts', 'Choosing colours and fonts', 'Placing text and photos', 'Checking it on a phone'],
-          ask: 'Can I have the final headline?', reply: 'Sending it now, plus a shorter version for phones.',
-          result: 'Web page design is ready.' },
-        { phase: 2, name: 'Build the sign-up form', owner: 'Developer', helper: 'Designer',
-          steps: ['Setting up the form', 'Connecting it to payments', 'Adding a confirmation email', 'Running test sign-ups'],
-          ask: 'Which colour should the buttons be?', reply: 'Use the dark green from the web page.',
-          result: 'Sign-up form works. 20 test sign-ups went through.' },
-        { phase: 3, name: 'Fact-check and proofread', owner: 'Reviewer', helper: 'Researcher',
-          steps: ['Reading every page', 'Checking each number against its source', 'Fixing typos', 'Writing a short review note'],
-          ask: 'Where does the 12% growth figure come from?', reply: 'An industry report from March. I added the link.',
-          result: 'All facts checked, 7 typos fixed.' },
-        { phase: 3, name: 'Test on phones and laptops', owner: 'Developer', helper: 'Reviewer',
-          steps: ['Testing on iPhone and Android', 'Testing in three browsers', 'Fixing a layout problem', 'Testing everything again'],
-          ask: 'Can you try signing up on your phone too?', reply: 'It works, but the button hides behind the keyboard.',
-          result: '2 problems fixed. Works on everything we tried.' },
-        { phase: 4, name: 'Schedule the emails', owner: 'Assistant', helper: 'Writer',
-          steps: ['Building the mailing list', 'Setting up the email template', 'Choosing the best time to send', 'Scheduling the send'],
-          ask: 'Could you write a short subject line?', reply: 'How about: "Something new is starting today"?',
-          result: 'Emails scheduled for Tuesday 09:00, to 4,800 people.' },
-        { phase: 4, name: 'Write the final report', owner: 'Planner', helper: 'Analyst',
-          steps: ['Collecting everyone\'s results', 'Summing up what was done', 'Listing risks and next steps', 'Sending the report'],
-          ask: 'Can you add a cost summary?', reply: 'Added. We came in 8% under budget.',
-          result: 'Final report sent to the team.' },
+    // Neighbours in a column affect each other. Unlisted pairs get a small default boost.
+    const SYN_PAIRS = [
+        ['Architect', 'Backend', 18, 'shared design context'], ['ML engineer', 'Researcher', 20, 'papers into experiments'],
+        ['Data engineer', 'ML engineer', 22, 'features into training'], ['Backend', 'SRE', 12, 'shared telemetry'],
+        ['SRE', 'Security', 15, 'one incident channel'], ['Frontend', 'QA', 14, 'tests next to the UI'],
+        ['Architect', 'Planner', 10, 'plans match the design'], ['Backend', 'Data engineer', 12, 'schemas in lockstep'],
+        ['Backend', 'QA', 10, 'faster test loops'], ['DBA', 'Data engineer', 16, 'query plans tuned in place'],
+        ['Performance', 'Backend', 15, 'profiles on the same hosts'], ['Red team', 'Security', 18, 'attack and defend'],
+        ['QA', 'Security', -6, 'overlapping reviews'], ['Data engineer', 'Frontend', -5, 'schema churn'],
+        ['Researcher', 'SRE', -4, 'noisy neighbours'], ['Planner', 'QA', -3, 'too many status checks'],
+        ['Red team', 'QA', -7, 'duplicate test traffic'],
     ];
-    const STAGE_NAMES = ['Plan', 'Research', 'Create', 'Check', 'Launch'];
-    const GOALS = ['Launch a coffee subscription in Norway', 'Plan a company trip for 40 people', 'Open a pop-up shop in Bergen',
-        'Prepare the quarterly board report', 'Start a newsletter for small businesses', 'Launch a bike repair app'];
-    const HELP_REPLIES = ['Yes please, take a look at the draft.', 'Thanks! Could you check the numbers?', 'Sure, start with the second half.',
-        'That would help. I\'ll send you what I have.'];
+    const SYN = new Map(SYN_PAIRS.map(([a, b, pct, why]) => [[a, b].sort().join('|'), { pct, why }]));
+    const SYN_LINES = ['same rack now, streaming results straight to you', 'same fabric, no more waiting on the network',
+        'co-located, sending my context over directly', 'our KV caches can share prefixes now'];
+    const CLASH_LINES = ['we keep evicting each other\'s cache here', 'crowded, my latency just doubled', 'we\'re duplicating work now'];
+    const HELP_REPLIES = ['yes please, start with the edge cases', 'thanks, double-check the numbers?', 'that helps, sending my notes',
+        'sure, take the second half'];
+
+    // ---------------------------------------------------------------- goals
+    // [stage, task, owner, helper, steps, question, answer, result]
+    const GOALS = [
+        { title: 'Migrate a 40 TB Postgres cluster to multi-region with zero downtime', tasks: [
+            [0, 'Scope the migration', 'Planner', 'Architect', ['reading the current topology', 'listing 212 dependent services', 'ranking the risky steps', 'writing the cutover plan'],
+                'can the plan avoid a write freeze entirely?', 'yes, logical replication plus dual writes for 48 h', 'cutover plan: 6 phases, no write freeze'],
+            [1, 'Benchmark replication', 'Researcher', 'Data engineer', ['comparing logical and physical replication', 'reading 14 postmortems', 'running cross-region lag tests', 'summarising trade-offs'],
+                'what replication lag did you see at peak?', 'p99 lag 180 ms at 42k writes/s', 'logical replication keeps lag under 200 ms'],
+            [1, 'Design the topology', 'Architect', 'Backend', ['choosing primary regions', 'designing conflict resolution', 'planning connection routing', 'drawing the failover path'],
+                'can services live with sticky-region reads?', 'all but billing; billing needs a quorum read', '3 regions, quorum reads for billing only'],
+            [2, 'Build replication', 'Data engineer', 'SRE', ['creating publications for 1,800 tables', 'backfilling 40 TB', 'verifying row checksums', 'wiring lag alerts'],
+                'what alert threshold do you want on lag?', 'page at 2 s, warn at 500 ms', 'backfill done, checksums match on 1,800 tables'],
+            [2, 'Add dual writes', 'Backend', 'Architect', ['adding a write-through layer', 'making writes idempotent', 'handling partial failures', 'shipping behind a flag'],
+                'how do we settle a dual-write conflict?', 'last writer wins, hybrid logical clocks', 'dual writes live for 5% of traffic'],
+            [3, 'Chaos-test failover', 'QA', 'SRE', ['killing the primary region', 'measuring recovery time', 'checking for lost writes', 'repeating 50 times'],
+                'can you throttle the cross-region link?', 'done: 40% packet loss on the EU link', 'failover in 11 s, zero lost writes in 50 runs'],
+            [3, 'Audit encryption', 'Security', 'Data engineer', ['checking TLS between regions', 'rotating replication credentials', 'reviewing replica access', 'writing up findings'],
+                'are the replication slots on rotated keys?', 'yes, rotated 20 minutes ago', 'no critical findings, 2 low-risk fixes merged'],
+            [4, 'Run the cutover', 'SRE', 'Backend', ['raising dual writes to 100%', 'moving reads region by region', 'watching the error budget', 'retiring the old primary'],
+                'ready to switch billing to quorum reads?', 'ready, the flag is on', 'cutover complete with zero downtime'],
+            [4, 'Write the postmortem', 'Planner', 'Researcher', ['collecting the timeline', 'summarising what went well', 'listing follow-ups', 'publishing the doc'],
+                'can you pull the lag graphs into the doc?', 'added, annotated at each phase', 'postmortem published, 7 follow-ups'],
+        ] },
+        { title: 'Cut LLM inference p99 latency by 50% at the same cost', tasks: [
+            [0, 'Set the latency budget', 'Planner', 'SRE', ['reading 30 days of traces', 'breaking p99 into stages', 'setting a target per stage', 'agreeing on guardrails'],
+                'where does most of the p99 go today?', 'queueing: 61% of it, mostly at the batcher', 'target: p99 from 2.4 s to 1.2 s'],
+            [1, 'Survey speculative decoding', 'Researcher', 'ML engineer', ['reading 9 recent papers', 'comparing draft-model setups', 'estimating acceptance rates', 'writing a shortlist'],
+                'which draft size fits next to the KV cache?', 'a 1B draft fits with room to spare', 'speculative decoding could save 35-45%'],
+            [1, 'Profile the serving stack', 'ML engineer', 'Backend', ['capturing GPU kernel timelines', 'finding idle gaps', 'measuring KV-cache misses', 'ranking the hot spots'],
+                'can you add request ids to the batcher logs?', 'shipped, traces line up end to end now', 'hot spot: batcher waits 180 ms for full batches'],
+            [2, 'Rewrite the batcher', 'Backend', 'ML engineer', ['switching to continuous batching', 'adding priority lanes', 'making preemption safe', 'load-testing at 3x peak'],
+                'is it safe to preempt mid-sequence?', 'yes, if the KV pages stay pinned', 'continuous batching cuts queueing by 70%'],
+            [2, 'Train the draft model', 'ML engineer', 'Data engineer', ['distilling from production traffic', 'training on 64 GPUs', 'measuring acceptance rate', 'quantising to 8-bit'],
+                'can I get a fresh sample of last week\'s prompts?', 'sent 2M prompts, personal data scrubbed', 'draft model accepted on 74% of tokens'],
+            [2, 'Ship the latency dashboard', 'Frontend', 'SRE', ['adding per-stage latency charts', 'showing the speculation hit rate', 'linking alerts', 'publishing it'],
+                'which percentiles should the charts show?', 'p50, p95 and p99, per region', 'dashboard live for every on-call engineer'],
+            [3, 'Check output quality', 'QA', 'ML engineer', ['running 12k eval prompts', 'comparing against the baseline', 'checking edge cases', 'signing off'],
+                'are outputs identical with speculation on?', 'yes, rejection sampling keeps them identical', 'no quality change across 12k evals'],
+            [3, 'Canary in one region', 'SRE', 'Backend', ['routing 5% of traffic', 'watching p99 and errors', 'scaling to 25%', 'comparing cost per token'],
+                'error rate is flat, okay to go to 25%?', 'go, rollback is one flag away', 'canary p99 1.1 s, cost per token unchanged'],
+            [4, 'Roll out globally', 'Planner', 'SRE', ['planning the region order', 'rolling out region by region', 'confirming the target', 'writing the summary'],
+                'any region we should hold back?', 'hold ap-south until its GPU upgrade on Friday', 'p99 down 54% globally at the same cost'],
+        ] },
+        { title: 'Ship SOC 2 Type II and EU data residency', tasks: [
+            [0, 'Map the controls', 'Planner', 'Security', ['reading 64 SOC 2 controls', 'mapping them to our systems', 'finding the gaps', 'assigning owners'],
+                'which controls are we weakest on?', 'access reviews and vendor management', '64 controls mapped, 11 gaps found'],
+            [1, 'Study EU residency rules', 'Researcher', 'Architect', ['reading GDPR transfer rules', 'checking sub-processor contracts', 'listing data that must stay in the EU', 'summarising obligations'],
+                'do support tickets count as personal data?', 'yes, they contain names and emails', '9 data stores must stay in the EU'],
+            [1, 'Design the EU data plane', 'Architect', 'Data engineer', ['splitting storage by region', 'routing users to their home region', 'designing per-region keys', 'reviewing the design'],
+                'can analytics run on EU data without moving it?', 'yes, with in-region aggregation only', 'EU data plane design approved'],
+            [2, 'Partition data by region', 'Data engineer', 'Backend', ['tagging 1.2B rows by region', 'moving the EU rows', 'verifying nothing leaked', 'deleting copies outside the EU'],
+                'which services still read EU rows from the US?', 'only search indexing, fixing it now', '1.2B rows partitioned, zero EU rows outside'],
+            [2, 'Add audit logs', 'Backend', 'Security', ['logging every admin action', 'building quarterly access reviews', 'adding break-glass alerts', 'testing tamper-proofing'],
+                'should audit logs be write-once?', 'yes, object lock for 7 years', 'every admin action logged and reviewed'],
+            [3, 'Penetration test', 'Security', 'QA', ['scanning the external surface', 'testing tenant isolation', 'trying privilege escalation', 'writing the report'],
+                'can you reproduce the tenant-isolation finding?', 'reproduced; needs a leaked token first, low risk', '1 medium, 3 low findings, all fixed'],
+            [3, 'Collect audit evidence', 'QA', 'SRE', ['gathering logs and screenshots', 'matching evidence to controls', 'filling the gaps', 'packaging for the auditor'],
+                'can you export 90 days of change approvals?', 'exported 4,210 changes, all approved', 'evidence ready for 64 of 64 controls'],
+            [4, 'Turn on EU residency', 'SRE', 'Data engineer', ['routing EU sign-ups to the EU', 'migrating existing EU customers', 'watching error rates', 'confirming with legal'],
+                'error rates okay after the routing change?', 'flat, 0.02% as before', 'EU residency live for 3,400 customers'],
+            [4, 'Hand over to the auditor', 'Planner', 'Researcher', ['scheduling the audit window', 'walking through each control', 'answering follow-ups', 'receiving the report'],
+                'do we have the vendor list the auditor wants?', 'yes, 37 vendors with their own SOC 2 reports', 'audit passed with no exceptions'],
+        ] },
+        { title: 'Build real-time fraud detection at 1M events per second', tasks: [
+            [0, 'Define detection goals', 'Planner', 'ML engineer', ['reading last year\'s fraud cases', 'setting precision and recall targets', 'defining the latency budget', 'writing the spec'],
+                'what false-positive rate can we live with?', 'under 0.1%, or support gets swamped', 'catch 92% of fraud within 50 ms'],
+            [1, 'Study fraud patterns', 'Researcher', 'Data engineer', ['clustering 2.3M past transactions', 'finding new attack patterns', 'reading industry reports', 'summarising signals'],
+                'can I see device fingerprints for the cluster?', 'sent; 70% share 3 device models', '14 strong fraud signals found'],
+            [1, 'Design the stream pipeline', 'Architect', 'Backend', ['choosing the stream processor', 'designing the feature store', 'planning exactly-once delivery', 'sizing the cluster'],
+                'can the feature store answer in under 5 ms?', 'with an in-memory tier, p99 is 3 ms', '48 partitions, 3 ms feature lookups'],
+            [2, 'Build real-time features', 'Data engineer', 'ML engineer', ['writing 120 streaming features', 'backfilling 2 years of history', 'checking online/offline match', 'publishing the feature set'],
+                'do online and offline values match?', '99.97%, fixing a time-zone bug in the rest', '120 features live, 99.99% consistent'],
+            [2, 'Train the detector', 'ML engineer', 'Data engineer', ['training gradient-boosted trees', 'training a graph model', 'blending the two', 'calibrating scores'],
+                'can I get labels from the last two weeks?', 'sent 1.4M new labels', 'catches 94% of fraud at 0.08% false positives'],
+            [2, 'Wire into payments', 'Backend', 'SRE', ['adding a scoring call to checkout', 'adding a fail-open fallback', 'handling timeouts', 'load-testing at 1M events/s'],
+                'what happens if scoring times out?', 'fail open and queue for async review', 'scoring adds 11 ms to checkout at 1M events/s'],
+            [3, 'Replay last month', 'QA', 'ML engineer', ['replaying 2.6B events', 'comparing decisions to outcomes', 'checking for drift', 'signing off'],
+                'any drift on weekend traffic?', 'slightly, recalibrated the weekend scores', 'replay: 93.8% caught, 0.07% false positives'],
+            [3, 'Red-team the model', 'Security', 'ML engineer', ['crafting adversarial transactions', 'probing for feature gaming', 'testing rate-limit evasion', 'writing fixes'],
+                'can it be fooled by splitting payments?', 'it could; added a velocity feature', '2 evasion tricks found and closed'],
+            [4, 'Go live', 'SRE', 'Backend', ['shadow mode for 48 hours', 'blocking at 10%', 'scaling to 100%', 'setting up on-call alerts'],
+                'shadow results look good, switch to 10%?', 'switched, watching chargebacks', 'blocking fraud live at 1M events/s'],
+        ] },
+    ];
+    const GENERIC = [
+        [0, 'Break into milestones', 'Planner', 'Architect', ['reading the goal', 'splitting it into milestones', 'estimating effort', 'assigning owners'],
+            'is this realistic in one quarter?', 'yes, if we cut the stretch goals', '5 milestones, owners assigned'],
+        [1, 'Research prior art', 'Researcher', 'ML engineer', ['searching papers and repos', 'reading 18 design docs', 'comparing approaches', 'writing a summary'],
+            'has anyone solved this at our scale?', 'two companies; both built on an event log', '3 viable approaches, 1 recommended'],
+        [1, 'Design the system', 'Architect', 'Backend', ['sketching the components', 'defining the APIs', 'planning for failure', 'reviewing the design'],
+            'can existing services take the new load?', 'most can; auth needs to scale out first', 'design approved, 2 open questions'],
+        [2, 'Build the core service', 'Backend', 'Architect', ['scaffolding the service', 'writing the core logic', 'adding retries and timeouts', 'writing tests'],
+            'synchronous or event-driven?', 'event-driven, it decouples the slow parts', 'core service built, 412 tests passing'],
+        [2, 'Build the data pipeline', 'Data engineer', 'ML engineer', ['defining the schemas', 'backfilling history', 'adding data quality checks', 'publishing the datasets'],
+            'which fields do you need first?', 'timestamps, user ids and the payload', 'pipeline live, 99.98% of rows pass checks'],
+        [3, 'Load-test at scale', 'QA', 'SRE', ['writing load scenarios', 'ramping to 3x peak', 'finding the bottleneck', 're-testing after the fix'],
+            'can I have a full-size staging cluster?', 'provisioned: 64 nodes, same as production', 'holds 3x peak with p99 under 200 ms'],
+        [3, 'Security review', 'Security', 'Backend', ['threat modelling', 'reviewing auth and secrets', 'scanning dependencies', 'writing findings'],
+            'where are the service credentials stored?', 'in the vault, rotated every 24 hours', 'no critical issues, 3 fixes merged'],
+        [4, 'Roll out gradually', 'SRE', 'Backend', ['shipping to 1% of users', 'watching the error budget', 'ramping to 100%', 'setting up alerts'],
+            'error budget healthy, ramp to 50%?', 'go ahead', 'fully rolled out, no incidents'],
+        [4, 'Report the results', 'Planner', 'Researcher', ['collecting metrics', 'comparing against the goal', 'listing follow-ups', 'sharing the report'],
+            'can you add before/after charts?', 'added on the first page', 'report shared: goal met'],
+    ];
+    const STAGES = ['scope', 'research', 'build', 'verify', 'ship'];
+    const snake = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 
     // ---------------------------------------------------------------- state
     let W = 0, H = 0, DPR = 1;
     const L = { s: 1 };
     let t = 0;
     let paused = false;
-    let hudOff = false;
-    let panelsOn = false;
     const cam = { x: 0, y: 0, z: 1 };
-    const mouse = { sx: -1e4, sy: -1e4 };
-    const stats = { spend: 0, monthBase: 412.8, budget: 2000, tokens: 0, msgTimes: [], tasksDone: 0, bucket: 0, hist: [], spendHist: [], lastSec: 0 };
+    const mouse = { sx: -1e4, sy: -1e4, type: 'mouse' };
+    const stats = { spend: 0, monthBase: 18420, budget: 50000, tokens: 0, msgTimes: [], tasksDone: 0, bucket: 0,
+        hist: [], perSec: [], util: [], lastSec: 0, runs: [], runNo: 0 };
     const timers = [];
     const packets = [];
-    const links = new Map();
+    const runLog = [];
     let plan = null;
     let planSeq = 0;
     let goalIdx = randi(0, GOALS.length - 1);
-    let hovered = null; // { kind: 'agent' | 'task' | 'hub', obj }
+    let hovered = null;
+    let selected = null;
+    let autoFocus = null;
     let gesture = null;
-    let bgCanvas = null;
+    let synergy = [];
+    let committed = new Set();
+    const ui = { approve: null, dispatchRows: [] };
 
-    const sans = (px, w = '') => `${w} ${Math.round(px * L.s)}px ${SANS}`;
-    const mono = (px, w = '') => `${w} ${Math.round(px * L.s)}px ${MONO}`;
+    const font = (px, w = '') => `${w} ${Math.round(px * L.s * (L.f || 1) * 10) / 10}px ${MONO}`;
+    const fontS = (px, w = '') => `${w} ${Math.round(px * L.s * 10) / 10}px ${MONO}`;
     const toWorld = (sx, sy) => ({ x: (sx - cam.x) / cam.z, y: (sy - cam.y) / cam.z });
-    const toScreen = (wx, wy) => ({ x: wx * cam.z + cam.x, y: wy * cam.z + cam.y });
     function after(sec, fn) { timers.push({ at: t + sec, fn }); }
 
-    function makeAgent(role, i) {
+    let podSeq = 0;
+    function makeNode(role) {
+        const region = REGIONS[podSeq++ % REGIONS.length];
         return {
-            ...role, i, x: NaN, y: NaN, hx: 0, hy: 0, flash: 0, act: 0, status: pick(role.idle), shown: 99,
-            task: null, helping: null, helpUntil: 0, nextIdle: rand(10, 24), spend: 0, tokIn: 0, tokOut: 0, sent: 0,
-            drag: null, bubble: null, talkUntil: 0,
-            mini: [3, 4, 2].map((n) => Array.from({ length: n }, () => ({ a: 0, ph: rand(0, TAU), f: rand(1, 2.2) }))),
+            ...role, x: 0, y: 0, ty: 0, exp: 0, flash: 0, act: 0, status: 'idle', task: null, helping: null, helpUntil: 0,
+            nextIdle: rand(8, 18), spend: 0, tokIn: 0, tokOut: 0, sent: 0, said: null, talkUntil: 0,
+            loadingUntil: 0, loadingFrom: 0, loadingModel: null, seed: rand(0, 100), chip: null, rect: null,
+            podId: `pod-${region.slice(0, 2)}${String(randi(1, 48)).padStart(2, '0')}`, region, rack: randi(3, 40),
+            gpu: Array.from({ length: 16 }, () => rand(5, 15)),
+            wire: Array.from({ length: 4 }, () => Array.from({ length: 9 }, () => [randi(0, 11), randi(0, 11)])),
         };
     }
-    const agents = ROLES.map(makeAgent);
-    const byName = Object.fromEntries(agents.map((a) => [a.name, a]));
-    const hub = { name: 'Orchestrator', isHub: true, color: C.accent, model: 'large', job: 'Hands out tasks and keeps track',
-        x: 0, y: 0, flash: 0, status: 'Waiting for a goal', shown: 99, spend: 0, tokIn: 0, tokOut: 0, sent: 0,
-        bubble: null, talkUntil: 0, shownProgress: 0 };
+    const nodes = ROLES.map(makeNode);
+    const byName = Object.fromEntries(nodes.map((a) => [a.name, a]));
+    const cols = [0, 1, 2].map((c) => nodes.filter((a) => a.layer === c));
+    const hub = Object.assign(makeNode({ name: 'Orchestrator', key: 'orchestrator', layer: -1, model: 'fable', job: 'hands out work and tracks the goal' }),
+        { isHub: true, shownProgress: 0, status: 'waiting for a goal' });
+    const all = () => [hub, ...nodes];
+    const colOf = (a) => cols.findIndex((c) => c.includes(a));
 
-    function setStatus(a, text) {
-        if (a.status === text) return;
-        a.status = text;
-        a.shown = 0;
-    }
-
-    // Every message and every second of work uses tokens on the agent's model, which costs money.
     function charge(a, tin, tout) {
         const m = modelById[a.model];
         const cost = (tin * m.pin + tout * m.pout) / 1e6;
         a.spend += cost;
         a.tokIn += tin;
         a.tokOut += tout;
-        m.spend += cost;
-        m.tokens += tin + tout;
-        m.bucket += cost;
         stats.spend += cost;
         stats.tokens += tin + tout;
         stats.bucket += cost;
     }
-    function request(a) {
-        const m = modelById[a.model];
-        m.reqTimes.push(t);
-        m.act = Math.min(1, m.act + 0.4);
+
+    function focusOn(a, secs) {
+        if (a.isHub) return;
+        if (autoFocus && autoFocus.until > t && autoFocus.node !== a) return;
+        autoFocus = { node: a, until: t + secs };
     }
 
     // ---------------------------------------------------------------- talking
-    function linkKey(a, b) { return a.name < b.name ? a.name + '|' + b.name : b.name + '|' + a.name; }
-    function touchLink(a, b) {
-        const k = linkKey(a, b);
-        const l = links.get(k);
-        if (l) l.s = 1; else links.set(k, { a, b, s: 1 });
+    function log(who, color, text) {
+        const d = new Date();
+        runLog.push({ ts: `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`, who, color, text });
+        if (runLog.length > 60) runLog.shift();
     }
-
-    // One agent says something to another: a speech bubble, a dot travelling between them, a line in the chat.
-    // An agent finishes one sentence before starting the next, so everything stays readable.
     function say(from, to, text, onArrive) {
         if (from === to) { if (onArrive) onArrive(); return; }
-        if (from.talkUntil > t) { after(from.talkUntil - t + 0.3, () => say(from, to, text, onArrive)); return; }
-        const dur = 2.6;
-        from.talkUntil = t + dur + 1.6;
-        from.bubble = { text, to, t0: t, until: t + dur + 4, lines: null, lw: 0 };
+        if (from.talkUntil > t) { after(from.talkUntil - t + 0.2, () => say(from, to, text, onArrive)); return; }
+        const near = synergy.some((l) => (l.a === from && l.b === to) || (l.a === to && l.b === from));
+        const dur = near ? 0.9 : 1.6;
+        from.talkUntil = t + dur + 0.9;
+        from.said = { to, text, until: t + dur + 3.5 };
         from.flash = 1;
         from.sent++;
-        packets.push({ from, to, k: 0, dur, color: from.color, onArrive });
-        touchLink(from, to);
-        charge(from, randi(2000, 12000), randi(80, 600));
-        request(from);
+        packets.push({ from, to, k: 0, dur, onArrive, you: false });
+        charge(from, randi(3000, 14000), randi(80, 500));
         stats.msgTimes.push(t);
-        chat(from, to, text);
+        log(`${from.key}→${to.key}`, from.isHub ? C.yellow : C.crimson, text);
+    }
+    function sys(text, you) { log(you ? 'you' : 'sys', you ? C.yellow : C.dim, text); }
+
+    let toastTimer = 0;
+    function toast(text) {
+        const el = $('toast');
+        el.textContent = text;
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), 3600);
     }
 
     // ---------------------------------------------------------------- plans
-    function newPlan(goal) {
-        for (const a of agents) { a.task = null; a.helping = null; }
-        const tasks = TASKS.map((d) => ({
-            ...d, owner: byName[d.owner], helper: byName[d.helper], deps: [], idx: 0, count: 0, progress: 0,
-            state: 'pending', dur: rand(26, 40), asked: false, boost: 1, rect: null, label: '', lw: 0,
+    function newPlan(goalTitle, defs) {
+        for (const a of nodes) { a.task = null; a.helping = null; }
+        const tasks = defs.filter((d) => byName[d[2]] && byName[d[3]]).map(([phase, name, owner, helper, steps, ask, reply, result]) => ({
+            phase, name, key: snake(name), owner: byName[owner], helper: byName[helper], steps, ask, reply, result,
+            deps: [], progress: 0, state: 'pending', dur: rand(16, 26), asked: false, deep: false, reworked: false, boost: 1,
         }));
-        for (let s = 0; s < STAGE_NAMES.length; s++) {
+        for (let s = 0; s < STAGES.length; s++) {
             const st = tasks.filter((x) => x.phase === s);
-            st.forEach((x, k) => { x.idx = k; x.count = st.length; x.deps = tasks.filter((y) => y.phase === s - 1); });
+            st.forEach((x) => { x.deps = tasks.filter((y) => y.phase === s - 1); });
         }
-        // the schedule a cautious project manager would promise
-        const plannedDur = 6 + STAGE_NAMES.reduce((sum, _, s) => sum + Math.max(...tasks.filter((x) => x.phase === s).map((x) => x.dur)) * 1.25 + 5, 0);
-        plan = { seq: ++planSeq, goal, tasks, born: t, doneAt: 0, done: 0, plannedDur, hist: [[0, 0]] };
-        setStatus(hub, 'Planning the work');
-        sysChat(`New goal: ${goal}`);
-        toast(`New goal: ${goal}`);
-        say(hub, byName.Planner, `New goal: "${goal}". Can you break it into steps?`);
+        const plannedDur = 5 + STAGES.reduce((sum, _, s) => {
+            const st = tasks.filter((x) => x.phase === s);
+            return sum + (st.length ? Math.max(...st.map((x) => x.dur)) * 1.3 + 4 : 0);
+        }, 0);
+        stats.runNo++;
+        plan = { seq: ++planSeq, goal: goalTitle, tasks, born: t, doneAt: 0, done: 0, plannedDur, gate: 'closed', gateAt: 0 };
+        hub.status = 'planning';
+        sys(`goal accepted: ${goalTitle}`);
+        toast(`new goal: ${goalTitle}`);
+        say(hub, byName.Planner, `new goal "${goalTitle}", break it into milestones`);
     }
-
     function nextGoal() {
         goalIdx = (goalIdx + 1) % GOALS.length;
-        newPlan(GOALS[goalIdx]);
+        newPlan(GOALS[goalIdx].title, GOALS[goalIdx].tasks);
+    }
+
+    function synergyBonus(a) {
+        let s = 0;
+        for (const l of synergy) if (l.a === a || l.b === a) s += l.pct;
+        return clamp(s, -30, 60) / 100;
+    }
+
+    // a human approves the ship stage; if nobody does, policy approves it after a while
+    function approve(byYou) {
+        if (!plan || plan.gate !== 'waiting') { if (byYou) toast('nothing is waiting for approval'); return; }
+        plan.gate = 'open';
+        if (byYou) sys('you approved the ship stage', true);
+        else sys('no answer at the human gate: auto-approved by policy');
+        toast(byYou ? 'approved: shipping' : 'auto-approved by policy');
+        say(hub, byName.SRE, 'approval received, go ahead and ship');
     }
 
     function updatePlan(dt) {
         if (!plan) return;
         const current = plan;
-        const ready = t - plan.born > 5;
+        const ready = t - plan.born > 3;
         let done = 0, active = 0;
         for (const task of plan.tasks) {
             const o = task.owner;
-            if (task.state === 'pending' && ready && task.deps.every((d) => d.state === 'done')) {
+            const depsDone = task.deps.every((d) => d.state === 'done');
+            if (task.state === 'pending' && ready && depsDone && task.phase === 4 && plan.gate === 'closed') {
+                plan.gate = 'waiting';
+                plan.gateAt = t;
+                sys('human gate: the ship stage needs your approval');
+                toast('human gate: approve the ship stage (click approve or type "approve")');
+            }
+            if (task.state === 'pending' && ready && depsDone && (task.phase < 4 || plan.gate === 'open')) {
                 task.state = 'assigning';
-                say(hub, o, `Please ${task.name.charAt(0).toLowerCase() + task.name.slice(1)}.`, () => {
+                say(hub, o, `take "${task.key}"`, () => {
                     if (plan !== current) return;
                     task.state = 'active';
                     if (!o.task) o.task = task;
+                    focusOn(o, 3.5);
                 });
             } else if (task.state === 'active') {
                 active++;
+                if (o.loadingUntil > t) continue;
+                const m = modelById[o.model];
                 const helped = task.helper.helping === task && t < task.helper.helpUntil;
-                task.progress = Math.min(1, task.progress + (dt / task.dur) * task.boost * (helped ? 1.25 : 1));
+                const rate = (m.speed * task.boost * (1 + synergyBonus(o)) * (helped ? 1.2 : 1)) / task.dur;
+                task.progress = Math.min(1, task.progress + dt * rate);
                 if (!o.task) o.task = task;
-                if (o.task === task) setStatus(o, task.steps[Math.min(task.steps.length - 1, Math.floor(task.progress * task.steps.length))] + '…');
-                charge(o, 380 * dt, 22 * dt);
-                if (!task.asked && task.progress > 0.4) {
+                if (o.task === task) o.status = task.steps[Math.min(task.steps.length - 1, Math.floor(task.progress * task.steps.length))];
+                charge(o, 2600 * dt, 55 * dt);
+                if (!task.deep && task.progress > 0.6) { task.deep = true; focusOn(o, 3); }
+                if (!task.asked && task.progress > 0.35) {
                     task.asked = true;
                     const h = task.helper;
                     say(o, h, task.ask, () => {
                         h.helping = task;
-                        h.helpUntil = t + 9;
-                        setStatus(h, `Helping ${o.name}`);
-                        after(2.2, () => say(h, o, task.reply));
+                        h.helpUntil = t + 8;
+                        h.status = `helping ${o.key}`;
+                        after(1.4, () => say(h, o, task.reply));
                     });
                 }
                 if (task.progress >= 1) {
+                    const reviewer = o === byName.QA ? byName.Security : byName.QA;
+                    if (!task.reworked && reviewer && Math.random() < (1 - m.quality) * 0.9) {
+                        task.reworked = true;
+                        task.progress = 0.62;
+                        say(reviewer, o, `found problems in ${task.key}, sending it back`, () => after(0.8, () => say(o, reviewer, 'on it')));
+                        continue;
+                    }
                     task.state = 'done';
                     if (o.task === task) o.task = plan.tasks.find((x) => x.state === 'active' && x.owner === o) || null;
-                    say(o, hub, `Done: ${task.result}`, () => {
+                    say(o, hub, `done: ${task.result}`, () => {
                         if (plan !== current) return;
                         stats.tasksDone++;
                         hub.flash = 1;
@@ -298,101 +404,116 @@
             if (task.state === 'done') done++;
         }
         plan.done = done;
-        if (!plan.doneAt) setStatus(hub, active ? `Coordinating ${active} task${active > 1 ? 's' : ''}` : t - plan.born < 6 ? 'Planning the work' : 'Waiting for results');
+        if (plan.gate === 'waiting' && t - plan.gateAt > 18) approve(false);
+        if (!plan.doneAt) hub.status = plan.gate === 'waiting' ? 'waiting at the human gate' : active ? `coordinating ${active} task${active > 1 ? 's' : ''}` : 'planning';
         if (done === plan.tasks.length && !plan.doneAt) {
             plan.doneAt = t;
-            setStatus(hub, 'Goal complete');
-            const ahead = plan.plannedDur - (t - plan.born);
-            sysChat(`Goal complete: ${plan.goal}. ${ahead > 0 ? `${fmtDur(ahead)} ahead of plan.` : 'Right on time.'}`);
-            toast(`Goal complete: ${plan.goal}`);
+            hub.status = 'goal complete';
+            const took = t - plan.born;
+            const ahead = plan.plannedDur - took;
+            stats.runs.push({ took, ahead });
+            sys(`goal complete in ${fmtDur(took)}${ahead > 0 ? `, ${fmtDur(ahead)} ahead of plan` : ''}`);
+            toast(`goal complete: ${plan.goal}`);
             const seq = plan.seq;
-            after(10, () => { if (plan && plan.seq === seq) nextGoal(); });
+            after(8, () => { if (plan && plan.seq === seq) nextGoal(); });
         }
+    }
+    function fmtDur(sec) {
+        const v = Math.max(0, Math.round(sec));
+        return `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')}`;
     }
 
     // ---------------------------------------------------------------- interactions
-    function askAgent(a) {
+    function askNode(a) {
         a.flash = 1;
-        if (a.task) {
-            const pct = Math.round(a.task.progress * 100);
-            say(a, hub, `I'm on "${a.task.name}". ${a.status.replace('…', '')}, about ${pct}% done.`);
-        } else if (a.helping && t < a.helpUntil) {
-            say(a, hub, `I'm helping ${a.helping.owner.name} with "${a.helping.name}".`);
-        } else {
+        if (a.loadingUntil > t) say(a, hub, `loading ${modelById[a.loadingModel].short} weights, back in a moment`);
+        else if (a.task) say(a, hub, `${a.task.key}: ${a.status}, ${Math.round(a.task.progress * 100)}% done`);
+        else if (a.helping && t < a.helpUntil) say(a, hub, `helping ${a.helping.owner.key} with ${a.helping.key}`);
+        else {
             const next = plan && plan.tasks.find((x) => x.owner === a && x.state === 'pending');
-            say(a, hub, next ? `Nothing right now. Next up for me: "${next.name}".` : 'Nothing right now. Happy to help anyone.');
+            say(a, hub, next ? `free, next up: ${next.key}` : 'free, happy to help anyone');
         }
-        sysChat(`You asked ${a.name} for an update`, true);
     }
-
     function statusRound() {
-        sysChat('You asked everyone for a status update', true);
+        sys('you asked every node for a status update', true);
         hub.flash = 1;
-        say(hub, agents[0], 'Quick status round, everyone: where are you at?');
-        const busy = agents.filter((a) => a.task);
-        busy.slice(0, 5).forEach((a, i) => after(3 + i * 2.5, () => askAgentQuiet(a)));
-        if (!busy.length) after(3, () => say(byName.Planner, hub, 'All quiet. We are between tasks.'));
+        nodes.filter((a) => a.task).slice(0, 5).forEach((a, i) => after(0.6 + i * 1.4, () => {
+            if (a.task) say(a, hub, `${a.task.key}: ${Math.round(a.task.progress * 100)}%`);
+        }));
     }
-    function askAgentQuiet(a) {
-        if (a.task) say(a, hub, `${a.task.name}: ${Math.round(a.task.progress * 100)}% done.`);
-    }
-
-    function pairUp(a, b) {
-        const task = a.task || b.task;
-        sysChat(`You paired ${a.name} with ${b.name}`, true);
-        if (!task) { say(a, b, 'We\'re both free. Let\'s look at what\'s coming next.'); return; }
-        const owner = task.owner === a ? a : b, other = owner === a ? b : a;
-        say(other, owner, `I've been asked to help with "${task.name}". Where can I start?`, () => {
-            other.helping = task;
-            other.helpUntil = t + 14;
-            setStatus(other, `Helping ${owner.name}`);
-            task.boost = Math.min(1.8, task.boost + 0.25);
-            after(2, () => say(owner, other, pick(HELP_REPLIES)));
-        });
-    }
-
     function prioritise(task) {
-        if (task.state === 'done') { toast(`"${task.name}" is already done`); return; }
+        if (task.state === 'done') { toast(`${task.key} is already done`); return; }
         task.boost = Math.min(2, task.boost + 0.6);
-        sysChat(`You made "${task.name}" the top priority`, true);
-        say(hub, task.owner, `"${task.name}" is now top priority. Please focus on it.`, () => {
-            if (task.state === 'active') task.owner.task = task;
-        });
+        sys(`you made ${task.key} the top priority`, true);
+        say(hub, task.owner, `${task.key} is now top priority`, () => { if (task.state === 'active') task.owner.task = task; });
     }
-
     function idleChat(a) {
         if (!plan) return;
         const active = plan.tasks.filter((x) => x.state === 'active' && x.owner !== a);
-        if (active.length && Math.random() < 0.55) {
+        if (active.length && Math.random() < 0.6) {
             const task = pick(active);
-            say(a, task.owner, `I'm free. Want help with "${task.name}"?`, () => after(2, () => say(task.owner, a, pick(HELP_REPLIES), () => {
+            say(a, task.owner, `free, want help with ${task.key}?`, () => after(1.2, () => say(task.owner, a, pick(HELP_REPLIES), () => {
                 a.helping = task;
-                a.helpUntil = t + 12;
-                setStatus(a, `Helping ${task.owner.name}`);
-                task.boost = Math.min(1.6, task.boost + 0.15);
+                a.helpUntil = t + 10;
+                a.status = `helping ${task.owner.key}`;
+                task.boost = Math.min(1.6, task.boost + 0.12);
             })));
-        } else {
-            setStatus(a, pick(a.idle));
-        }
+        } else a.status = pick(['idle', 'warming the KV cache', 'reading the codebase', 'watching dashboards']);
+    }
+    function switchModel(a, id) {
+        if (a.model === id && !a.loadingUntil) return;
+        const m = modelById[id];
+        a.loadingModel = id;
+        a.loadingFrom = t;
+        a.loadingUntil = t + 2.4;
+        a.status = `loading ${m.short} weights`;
+        sys(`you moved ${a.key} to ${m.name}`, true);
+        autoFocus = { node: a, until: t + 4 };
+    }
+    function spawnNode() {
+        const role = EXTRA_ROLES.find((r) => !byName[r.name]);
+        if (!role || nodes.length >= MAX_NODES) { toast(`the graph is full (${nodes.length} nodes)`); return; }
+        const a = makeNode(role);
+        nodes.push(a);
+        byName[a.name] = a;
+        cols[role.layer].push(a);
+        layout();
+        a.y = a.ty;
+        sys(`you added ${a.key} on ${modelById[a.model].name}`, true);
+        toast(`${a.key} online · ${modelById[a.model].name}`);
+        focusOn(a, 4);
+        commitSynergy();
+        after(1, () => say(hub, a, `welcome ${a.key}, jump in where someone needs a hand`));
     }
 
-    function spawnAgent() {
-        const role = EXTRA_ROLES.find((r) => !byName[r.name]);
-        if (!role || agents.length >= MAX_AGENTS) { toast(`The team is full (${agents.length} agents)`); return; }
-        const a = makeAgent(role, agents.length);
-        a.x = L.cx;
-        a.y = L.cy;
-        a.nextIdle = 6;
-        agents.push(a);
-        byName[a.name] = a;
-        sizeCards();
-        sysChat(`You added ${a.name} to the team`, true);
-        toast(`${a.name} joined the team · ${a.job}`);
-        after(1, () => say(hub, a, `Welcome, ${a.name}. Jump in wherever someone needs a hand.`));
+    // ---------------------------------------------------------------- synergy: neighbours in a column
+    function computeSynergy() {
+        synergy = [];
+        for (const col of cols) {
+            for (let i = 0; i < col.length - 1; i++) {
+                const a = col[i], b = col[i + 1];
+                if (gesture && gesture.type === 'node' && gesture.moved && (gesture.node === a || gesture.node === b)) continue;
+                const key = [a.name, b.name].sort().join('|');
+                const info = SYN.get(key) || { pct: 4, why: 'shared KV cache' };
+                synergy.push({ a, b, key, pct: info.pct, why: info.why });
+            }
+        }
+    }
+    function commitSynergy() {
+        computeSynergy();
+        const now = new Set(synergy.map((l) => l.key));
+        for (const l of synergy) {
+            if (committed.has(l.key)) continue;
+            sys(`${l.a.key} + ${l.b.key}: ${l.pct > 0 ? '+' : ''}${l.pct}% (${l.why})`);
+            say(l.a, l.b, pick(l.pct > 0 ? SYN_LINES : CLASH_LINES));
+        }
+        for (const k of committed) if (!now.has(k)) sys(`${k.split('|').map((n) => (byName[n] ? byName[n].key : n)).join(' + ')}: link lost`);
+        committed = now;
     }
 
     // ---------------------------------------------------------------- layout
-    function layout() {
+    const INPUTS = ['brief', 'constraints', 'budget', 'cluster', 'models', 'prior_runs'];
+    function layout(snap = true) {
         DPR = Math.min(window.devicePixelRatio || 1, 2);
         W = window.innerWidth;
         H = window.innerHeight;
@@ -400,74 +521,80 @@
         canvas.height = Math.round(H * DPR);
         canvas.style.width = W + 'px';
         canvas.style.height = H + 'px';
-
         L.s = (parseFloat(getComputedStyle(document.documentElement).fontSize) || 11) / 11;
-        const panel = $('panel-right');
-        panelsOn = !hudOff && panel.offsetWidth > 0;
-        const side = panelsOn ? W - panel.getBoundingClientRect().left + 12 * L.s : 0;
-        L.compact = W < 760;
-        L.left = side;
-        L.right = W - side;
-        const availW = L.right - L.left;
-        L.cx = W / 2;
-        L.planTop = ($('topbar').offsetHeight || 52) + 34 * L.s;
-        L.planH = L.compact ? 84 : clamp(H * 0.15, 96, 130 * L.s);
-        const halfPlan = Math.min(availW * 0.47, 520 * L.s);
-        L.planL = L.cx - halfPlan;
-        L.planR = L.cx + halfPlan;
-        const cmdTop = $('cmd').getBoundingClientRect().top || H - 70;
-        // provisional card size, refined by sizeCards once the ring is known
-        const ch0 = (L.compact ? 40 : 66) * L.s;
-        const cw0 = (L.compact ? 92 : 172) * L.s;
-        const ringTop = L.planTop + L.planH + 20 * L.s + ch0 / 2 + 8;
-        const ringBottom = cmdTop - 16 - ch0 / 2;
-        L.ry = Math.max(80, (ringBottom - ringTop) / 2);
-        L.cy = ringTop + L.ry;
-        L.rx = Math.max(110, Math.min(availW * 0.5 - cw0 / 2 - 16 * L.s, L.ry * 2.2));
-        L.coreR = clamp(Math.min(L.rx, L.ry) * 0.3, 34, 92 * L.s);
-        hub.x = L.cx;
-        hub.y = L.cy;
-        sizeCards();
+        const s = L.s;
+        L.portrait = W < 760;
+        const top = ($('topbar').offsetHeight || 34) + 8;
+        const cmdTop = $('cmd').getBoundingClientRect().top || H - 40;
+        L.bpH = L.portrait ? Math.min(170, H * 0.24) : clamp(H * 0.2, 150, 230 * s);
+        L.bpY = cmdTop - 6 - L.bpH;
+        L.gx = 10;
+        L.gy = top;
+        L.gw = W - 20;
+        L.gh = L.bpY - 10 - top;
 
-        bgCanvas = document.createElement('canvas');
-        bgCanvas.width = Math.round(W * DPR);
-        bgCanvas.height = Math.round(H * DPR);
-        const g = bgCanvas.getContext('2d');
-        g.setTransform(DPR, 0, 0, DPR, 0, 0);
-        const grd = g.createLinearGradient(0, 0, 0, H);
-        grd.addColorStop(0, '#0c1320');
-        grd.addColorStop(1, '#0a101b');
-        g.fillStyle = grd;
-        g.fillRect(0, 0, W, H);
-        g.fillStyle = 'rgba(131,145,167,0.09)';
-        const step = 26 * L.s;
-        for (let y = step / 2; y < H; y += step) for (let x = step / 2; x < W; x += step) g.fillRect(x, y, 1.2, 1.2);
+        if (!L.portrait) {
+            L.icW = clamp(L.gw * 0.16, 150, 250 * s);
+            L.busX = L.gx + L.icW + L.gw * 0.055;
+            L.busW = 16 * s;
+            L.gridX = L.busX + L.busW + L.gw * 0.045;
+        } else {
+            L.icW = 0;
+            L.busX = L.gx + 2;
+            L.busW = 10;
+            L.gridX = L.busX + L.busW + 14;
+        }
+        L.gridW = L.gx + L.gw - L.gridX;
+        L.colW = L.gridW / 3;
+        L.nodeW = L.colW - (L.portrait ? 6 : 16 * s);
+        L.colTop = L.gy + 16 * s;
 
-        for (const a of agents) { homeOf(a); if (Number.isNaN(a.x)) { a.x = a.hx; a.y = a.hy; } }
+        // node metrics; shrink rows if the tallest column would not fit
+        L.f = 1;
+        const rows = L.portrait ? 3 : 5;
+        for (let i = 0; i < 6; i++) {
+            L.rowH = (L.portrait ? 10.5 : 12) * s * L.f;
+            L.headH = (L.portrait ? 13 : 15) * s * L.f;
+            L.gap = (L.portrait ? 14 : 18) * s * L.f;
+            L.nodeH = L.headH + rows * L.rowH + 6 * s * L.f;
+            L.expH = clamp(L.nodeW * 0.5, 60, 140 * s) * L.f;
+            const n = Math.max(...cols.map((c) => c.length));
+            const need = n * L.nodeH + (n - 1) * L.gap + L.expH;
+            const avail = L.gy + L.gh - L.colTop;
+            if (need <= avail) break;
+            L.f *= Math.max(0.6, avail / need);
+        }
+        L.rows = rows;
+        reflow(snap !== false);
         clampCam();
-        for (const id of ['c-spend', 'c-agents', 'c-progress']) sizeCanvas($(id));
-        for (const m of MODELS) if (m.cv) sizeCanvas(m.cv);
+        computeSynergy();
     }
 
-    // Cards shrink when the ring gets crowded so neighbours never overlap.
-    function sizeCards() {
-        const n = agents.length;
-        const perim = Math.PI * (3 * (L.rx + L.ry) - Math.sqrt((3 * L.rx + L.ry) * (L.rx + 3 * L.ry)));
-        L.cardW = clamp((perim / n) * 0.78, L.compact ? 70 : 104, (L.compact ? 104 : 182) * L.s);
-        L.cardH = clamp(L.cardW * 0.4, L.compact ? 34 : 50, 70 * L.s);
-        L.tiny = L.cardW < 120;
-    }
-
-    function homeOf(a) {
-        const ang = -Math.PI / 2 + (a.i * TAU) / agents.length;
-        a.hx = L.cx + Math.cos(ang) * L.rx;
-        a.hy = L.cy + Math.sin(ang) * L.ry;
+    // stack nodes in their columns; an expanded node pushes the ones below it down
+    function reflow(snap) {
+        const drag = gesture && gesture.type === 'node' && gesture.moved ? gesture : null;
+        cols.forEach((col, c) => {
+            const x = L.gridX + L.colW * c + L.colW / 2;
+            let y = L.colTop;
+            let slot = 0;
+            for (const a of col) {
+                if (drag && drag.node === a) continue;
+                if (drag && drag.col === c && drag.idx === slot) { drag.slotY = y; y += L.nodeH + L.gap; }
+                a.x = x;
+                a.ty = y;
+                if (snap) a.y = y;
+                y += L.nodeH + a.exp * L.expH + L.gap;
+                slot++;
+            }
+            if (drag && drag.col === c && drag.idx >= slot) drag.slotY = y;
+        });
     }
 
     function clampCam() {
         cam.z = clamp(cam.z, ZMIN, ZMAX);
-        cam.x = clamp(cam.x, W * 0.1 - L.cx * cam.z, W * 0.9 - L.cx * cam.z);
-        cam.y = clamp(cam.y, H * 0.1 - L.cy * cam.z, H * 0.9 - L.cy * cam.z);
+        const cx = W / 2, cy = L.gy + L.gh / 2;
+        cam.x = clamp(cam.x, W * 0.1 - cx * cam.z, W * 0.9 - cx * cam.z);
+        cam.y = clamp(cam.y, H * 0.05 - cy * cam.z, H * 0.95 - cy * cam.z);
     }
     function zoomAt(sx, sy, z) {
         const w = toWorld(sx, sy);
@@ -479,40 +606,37 @@
     function resetView() { cam.x = 0; cam.y = 0; cam.z = 1; }
 
     // ---------------------------------------------------------------- update
-    function moveAgents(raw) {
-        for (const a of agents) {
-            homeOf(a);
-            const tx = a.drag ? a.drag.x : a.hx, ty = a.drag ? a.drag.y : a.hy;
-            const k = Math.min(1, raw * (a.drag ? 18 : 3));
-            a.x += (tx - a.x) * k;
-            a.y += (ty - a.y) * k;
-        }
-    }
-
     function update(dt) {
         for (let i = timers.length - 1; i >= 0; i--) {
             if (timers[i].at <= t) { const fn = timers[i].fn; timers.splice(i, 1); fn(); }
         }
-        for (const a of [...agents, hub]) {
-            a.flash = Math.max(0, a.flash - dt * 0.8);
-            a.shown = Math.min(a.status.length, a.shown + dt * 30);
-        }
-        for (const a of agents) {
+        for (const a of all()) {
+            a.flash = Math.max(0, a.flash - dt * 0.9);
+            if (a.loadingUntil && t >= a.loadingUntil) {
+                a.model = a.loadingModel;
+                a.loadingUntil = 0;
+                a.flash = 1;
+                a.status = a.task ? a.task.steps[0] : 'idle';
+                sys(`${a.key} now runs ${modelById[a.model].name}`);
+            }
             const helpingNow = a.helping && t < a.helpUntil;
             if (a.helping && !helpingNow) a.helping = null;
-            const working = !!a.task || helpingNow;
-            a.act = lerp(a.act, working ? 1 : 0.12, Math.min(1, dt * 1.5));
-            for (const layer of a.mini) for (const m of layer) {
-                const target = a.act * (0.5 + 0.5 * Math.sin(t * m.f * 2 + m.ph));
-                m.a += (target - m.a) * Math.min(1, dt * 4);
+            const working = a.isHub ? !!plan && !plan.doneAt : !!a.task || helpingNow || a.loadingUntil > t;
+            a.act = lerp(a.act, working ? 1 : 0.1, Math.min(1, dt * 1.5));
+            const m = modelById[a.model];
+            for (let k = 0; k < m.gpus; k++) {
+                const target = a.loadingUntil > t ? 35 + 30 * Math.sin(t * 9 + k) : 6 + a.act * (72 + 18 * Math.sin(t * 1.7 + k * 1.3 + a.seed));
+                a.gpu[k] += (target - a.gpu[k]) * Math.min(1, dt * 3);
             }
-            if (helpingNow) charge(a, 200 * dt, 12 * dt);
+            if (a.isHub) continue;
+            if (helpingNow) charge(a, 1200 * dt, 25 * dt);
             if (!working) {
-                if (a.status.endsWith('…') || a.status.startsWith('Helping')) setStatus(a, pick(a.idle));
+                if (a.status.startsWith('helping') || (plan && plan.tasks.some((x) => x.steps.includes(a.status)))) a.status = 'idle';
                 a.nextIdle -= dt;
-                if (a.nextIdle <= 0) { a.nextIdle = rand(16, 30); idleChat(a); }
+                if (a.nextIdle <= 0) { a.nextIdle = rand(12, 22); idleChat(a); }
             }
         }
+        if (hub.act > 0.5) charge(hub, 600 * dt, 12 * dt);
         for (let i = packets.length - 1; i >= 0; i--) {
             const p = packets[i];
             p.k += dt / p.dur;
@@ -522,748 +646,617 @@
                 if (p.onArrive) p.onArrive();
             }
         }
-        for (const [k, l] of links) { l.s -= dt * 0.05; if (l.s <= 0) links.delete(k); }
-        for (const m of MODELS) {
-            m.act = Math.max(0, m.act - dt * 0.35);
-            m.phase += dt * (0.6 + m.act * 2.2);
-        }
         updatePlan(dt);
-
-        // once a second: cost buckets, spend history, progress history
         if (t - stats.lastSec >= 1) {
             stats.lastSec = t;
             stats.hist.push(stats.bucket);
+            stats.perSec.push(stats.bucket);
             stats.bucket = 0;
             if (stats.hist.length > 60) stats.hist.shift();
-            stats.spendHist.push(stats.spend);
-            if (stats.spendHist.length > 180) stats.spendHist.shift();
-            for (const m of MODELS) {
-                m.hist.push(m.bucket);
-                m.bucket = 0;
-                if (m.hist.length > 60) m.hist.shift();
-            }
-            if (plan && !plan.doneAt) plan.hist.push([t - plan.born, plan.done / plan.tasks.length]);
+            if (stats.perSec.length > 40) stats.perSec.shift();
+            const util = all().reduce((s2, a) => s2 + a.act, 0) / all().length;
+            stats.util.push(0.55 + util * 0.35 + rand(-0.03, 0.03));
+            if (stats.util.length > 40) stats.util.shift();
         }
+    }
+
+    // expansion follows hover, selection and the node most recently doing something interesting
+    function animate(raw) {
+        const focus = focusNode();
+        for (const a of nodes) {
+            const target = a === focus && !(gesture && gesture.type === 'node' && gesture.moved) ? 1 : 0;
+            a.exp += (target - a.exp) * Math.min(1, raw * 7);
+            if (a.exp < 0.002) a.exp = 0;
+        }
+        reflow(false);
+        for (const a of nodes) {
+            if (gesture && gesture.type === 'node' && gesture.moved && gesture.node === a) continue;
+            a.y += (a.ty - a.y) * Math.min(1, raw * 10);
+        }
+    }
+    function focusNode() {
+        if (hovered && (hovered.kind === 'node' || hovered.kind === 'chip') && !hovered.obj.isHub) return hovered.obj;
+        if (selected) return selected;
+        if (autoFocus && autoFocus.until > t) return autoFocus.node;
+        return null;
+    }
+
+    // ---------------------------------------------------------------- draw helpers
+    function fitText(text, maxW) {
+        if (maxW <= 4) return '';
+        if (ctx.measureText(text).width <= maxW) return text;
+        let s = text;
+        while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+        return s + '…';
+    }
+    function box(x, y, w, h, fill, stroke) {
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, y, w, h);
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1); }
+    }
+    function nodeH(a) { return L.nodeH + a.exp * L.expH; }
+    function bez(x1, y1, x2, y2) {
+        const mx = (x1 + x2) / 2;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.bezierCurveTo(mx, y1, mx, y2, x2, y2);
+    }
+    function bezPt(x1, y1, x2, y2, k) {
+        const mx = (x1 + x2) / 2, u = 1 - k;
+        return {
+            x: u * u * u * x1 + 3 * u * u * k * mx + 3 * u * k * k * mx + k * k * k * x2,
+            y: u * u * u * y1 + 3 * u * u * k * y1 + 3 * u * k * k * y2 + k * k * k * y2,
+        };
+    }
+    function busY(frac) { return L.colTop + frac * (L.gy + L.gh - L.colTop); }
+    function anchor(a, side) {
+        if (a.isHub) return { x: L.busX + L.busW, y: busY(0.5) };
+        const x = side === 'left' ? a.x - L.nodeW / 2 : a.x + L.nodeW / 2;
+        return { x, y: a.y + L.headH / 2 };
     }
 
     // ---------------------------------------------------------------- draw
+    let inputRects = [];
+    let particles = [];
     function draw() {
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-        ctx.globalAlpha = 1;
-        ctx.drawImage(bgCanvas, 0, 0, W, H);
+        ctx.fillStyle = C.bg;
+        ctx.fillRect(0, 0, W, H);
         ctx.setTransform(DPR * cam.z, 0, 0, DPR * cam.z, DPR * cam.x, DPR * cam.y);
-        drawLinks();
-        drawPlan();
+        drawColumnLabels();
+        if (!L.portrait) drawInputs();
+        drawBusWires();
+        drawBus();
         drawPackets();
-        drawHub();
-        drawDrag();
-        for (const a of agents) drawAgent(a);
-        for (const a of [...agents, hub]) drawBubble(a);
-    }
-
-    function rr(x, y, w, h, r) {
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
-        else ctx.rect(x, y, w, h);
-    }
-
-    function fitText(text, maxW) {
-        if (ctx.measureText(text).width <= maxW) return text;
-        let s = text;
-        while (s.length > 2 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
-        return s + '…';
-    }
-
-    function wrap(text, maxW, maxLines) {
-        const words = text.split(' ');
-        const lines = [];
-        let line = '';
-        for (const w of words) {
-            const test = line ? line + ' ' + w : w;
-            if (ctx.measureText(test).width > maxW && line) {
-                lines.push(line);
-                line = w;
-                if (lines.length === maxLines) break;
-            } else line = test;
+        drawSynergy();
+        const focus = focusNode();
+        for (const a of nodes) if (!(gesture && gesture.type === 'node' && gesture.moved && gesture.node === a)) drawNode(a, a === focus);
+        if (gesture && gesture.type === 'node' && gesture.moved) {
+            const g = gesture;
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = C.yellow;
+            ctx.strokeRect(L.gridX + L.colW * g.col + (L.colW - L.nodeW) / 2 + 0.5, (g.slotY || L.colTop) + 0.5, L.nodeW - 1, L.nodeH - 1);
+            ctx.setLineDash([]);
+            drawNode(g.node, true, true);
         }
-        if (lines.length < maxLines && line) lines.push(line);
-        else if (lines.length === maxLines && line && !lines.includes(line)) lines[maxLines - 1] = fitText(lines[maxLines - 1] + ' ' + line, maxW);
-        return lines;
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        drawBottom();
     }
 
-    function edgePoint(a, b) {
-        // where the line from a's centre towards b leaves a's card (or the hub's circle)
-        const dx = b.x - a.x, dy = b.y - a.y;
-        const d = Math.hypot(dx, dy) || 1;
-        if (a.isHub) { const r = L.coreR * 1.1; return { x: a.x + (dx / d) * r, y: a.y + (dy / d) * r }; }
-        const hw = L.cardW / 2, hh = L.cardH / 2;
-        const k = Math.min(hw / Math.abs(dx || 1e-6), hh / Math.abs(dy || 1e-6));
-        return { x: a.x + dx * k, y: a.y + dy * k };
-    }
-
-    function drawLinks() {
-        ctx.lineWidth = 1;
-        for (const l of links.values()) {
-            ctx.strokeStyle = rgba(l.a.isHub ? l.b.color : l.a.color, 0.04 + 0.14 * l.s);
-            ctx.beginPath();
-            ctx.moveTo(l.a.x, l.a.y);
-            ctx.lineTo(l.b.x, l.b.y);
-            ctx.stroke();
-        }
-    }
-
-    function taskPos(task) {
-        const colW = (L.planR - L.planL) / STAGE_NAMES.length;
-        const bodyTop = L.planTop + 18 * L.s;
-        const bodyH = L.planH - 22 * L.s;
-        return { x: L.planL + colW * (task.phase + 0.5), y: bodyTop + bodyH * ((task.idx + 0.5) / task.count) };
-    }
-
-    function drawPlan() {
-        if (!plan) return;
-        const s = L.s;
-        const x0 = L.planL - 14 * s, x1 = L.planR + 14 * s, y0 = L.planTop - 30 * s, y1 = L.planTop + L.planH + 8 * s;
-        ctx.fillStyle = 'rgba(17,26,42,0.92)';
-        rr(x0, y0, x1 - x0, y1 - y0, 10);
-        ctx.fill();
-        ctx.strokeStyle = C.line;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.textBaseline = 'middle';
-        ctx.font = sans(L.compact ? 10 : 12);
-        ctx.textAlign = 'right';
-        ctx.fillStyle = C.muted;
-        const status = plan.doneAt ? 'All done ✓' : `${plan.done} of ${plan.tasks.length} tasks done`;
-        ctx.fillText(status, x1 - 12 * s, y0 + 15 * s);
-        const sw = ctx.measureText(status).width + 30 * s;
+    function drawColumnLabels() {
+        ctx.font = font(8.5);
         ctx.textAlign = 'left';
-        ctx.font = sans(L.compact ? 10 : 12, '600');
-        ctx.fillStyle = C.text;
-        ctx.fillText(fitText('Goal: ' + plan.goal, x1 - x0 - sw - 12 * s), x0 + 12 * s, y0 + 15 * s);
-
-        const colW = (L.planR - L.planL) / STAGE_NAMES.length;
-        const nw = Math.min(176 * s, colW - 14 * s);
-        const nh = (L.compact ? 16 : 22) * s;
-        const showText = nw >= 60;
-
-        // stage labels
-        ctx.font = sans(L.compact ? 8 : 9.5);
-        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.fillStyle = C.faint;
-        if (!L.compact) STAGE_NAMES.forEach((n, k) => ctx.fillText(n, L.planL + colW * (k + 0.5), L.planTop + 6 * s));
+        COLUMNS.forEach((label, c) => {
+            const x = L.gridX + L.colW * c + (L.colW - L.nodeW) / 2;
+            ctx.fillText(fitText(label, L.nodeW), x, L.gy + 6 * L.s);
+        });
+        if (!L.portrait) ctx.fillText('inputs', L.gx, L.gy + 6 * L.s);
+        ctx.textBaseline = 'alphabetic';
+    }
 
-        ctx.lineWidth = 1;
-        for (const task of plan.tasks) {
-            const p = taskPos(task);
-            for (const d of task.deps) {
-                const q = taskPos(d);
-                const sx = q.x + nw / 2, ex = p.x - nw / 2;
-                ctx.strokeStyle = d.state === 'done' ? rgba(C.ok, 0.4) : 'rgba(131,145,167,0.18)';
-                ctx.beginPath();
-                ctx.moveTo(sx, q.y);
-                ctx.bezierCurveTo(sx + 14, q.y, ex - 14, p.y, ex, p.y);
-                ctx.stroke();
-            }
+    // left column: the inputs the run works from, each with a little bar chart
+    function inputRows(key) {
+        const month = stats.monthBase + stats.spend;
+        const rate = stats.hist.reduce((a, b) => a + b, 0) * (3600 / Math.max(1, stats.hist.length)) * SPEEDS[speedIdx];
+        switch (key) {
+            case 'brief': return [['goal', plan ? plan.goal : '-'], ['owner', 'you'], ['mode', 'autonomous'], ['stage', plan ? `${STAGES[Math.min(4, Math.max(0, ...plan.tasks.filter((x) => x.state !== 'pending').map((x) => x.phase), 0))]} ${plan.done}/${plan.tasks.length}` : '-']];
+            case 'constraints': return [['downtime', '0 s'], ['data', 'public + scrubbed'], ['human gate', 'before ship'], ['max spend', '$400 / run']];
+            case 'budget': return [['spent', money(stats.spend)], ['rate', money(rate, 0) + '/h'], ['month', `$${kfmt(month)} / $${kfmt(stats.budget)}`], ['cap', 'ok']];
+            case 'cluster': return [['gpus', '2,048'], ['util', Math.round((stats.util[stats.util.length - 1] || 0.6) * 100) + '%'], ['power', ((stats.util[stats.util.length - 1] || 0.6) * 4).toFixed(2) + ' MW'], ['team', `${all().length} pods`]];
+            case 'models': return MODELS.map((m) => [m.short, `$${m.pin}/$${m.pout} ·${all().filter((a) => a.model === m.id).length}`]);
+            default: return [['runs', String(Math.max(0, stats.runNo - 1))], ['avg', stats.runs.length ? fmtDur(stats.runs.reduce((a, r) => a + r.took, 0) / stats.runs.length) : '-'],
+                ['ahead', stats.runs.length ? fmtDur(stats.runs.reduce((a, r) => a + r.ahead, 0) / stats.runs.length) : '-'], ['last', stats.runs.length ? 'ok' : '-']];
         }
-
-        ctx.font = sans(L.compact ? 8.5 : 10.5);
-        for (const task of plan.tasks) {
-            const p = taskPos(task);
-            const c = task.owner.color;
-            const x = p.x - nw / 2, y = p.y - nh / 2;
-            task.rect = { x, y, w: nw, h: nh };
-            const hot = hovered && hovered.obj === task;
-            rr(x, y, nw, nh, 5);
-            ctx.fillStyle = hot ? C.cardHot : C.card;
-            ctx.fill();
-            if (task.progress > 0) {
-                ctx.save();
-                rr(x, y, nw, nh, 5);
-                ctx.clip();
-                ctx.fillStyle = task.state === 'done' ? rgba(C.ok, 0.18) : rgba(c, 0.22);
-                ctx.fillRect(x, y, nw * task.progress, nh);
-                ctx.restore();
-            }
-            rr(x + 0.5, y + 0.5, nw - 1, nh - 1, 5);
-            ctx.strokeStyle = task.state === 'done' ? rgba(C.ok, 0.7) : task.state === 'pending' ? C.line : rgba(c, hot ? 1 : 0.75);
-            ctx.lineWidth = hot ? 1.6 : 1;
-            ctx.stroke();
-            if (showText) {
-                if (task.lw !== nw) { task.label = fitText(task.name, nw - 26 * s); task.lw = nw; }
+    }
+    function inputSpark(key) {
+        if (key === 'budget') return stats.perSec;
+        if (key === 'cluster') return stats.util;
+        if (key === 'prior_runs') return stats.runs.map((r) => r.took).slice(-20);
+        if (key === 'models') return all().map((a) => a.spend);
+        if (key === 'brief') return plan ? plan.tasks.map((x) => x.progress) : [];
+        return [0.4, 0.6, 0.5, 0.7, 0.3, 0.8, 0.5, 0.6];
+    }
+    function drawInputs() {
+        const s = L.s;
+        const x = L.gx, w = L.icW;
+        const rowH = 11 * s, headH = 14 * s, sparkH = 16 * s;
+        const nodeHt = headH + 4 * rowH + sparkH + 10 * s;
+        const avail = L.gy + L.gh - L.colTop;
+        const n = Math.min(INPUTS.length, Math.max(2, Math.floor((avail + 10 * s) / (nodeHt + 10 * s))));
+        const gap = n > 1 ? (avail - n * nodeHt) / (n - 1) : 0;
+        inputRects = [];
+        for (let i = 0; i < n; i++) {
+            const key = INPUTS[i];
+            const y = L.colTop + i * (nodeHt + Math.min(gap, 40 * s));
+            inputRects.push({ key, x, y, w, h: nodeHt });
+            box(x, y, w, nodeHt, C.node, C.line);
+            box(x, y, w, headH, C.head);
+            ctx.font = font(8.5, '600');
+            ctx.fillStyle = C.text;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(key, x + 6 * s, y + headH / 2);
+            ctx.font = font(8);
+            inputRows(key).slice(0, 4).forEach(([k, v], r) => {
+                const yy = y + headH + rowH * (r + 0.6);
+                ctx.fillStyle = C.dim;
                 ctx.textAlign = 'left';
-                ctx.fillStyle = task.state === 'pending' ? C.faint : C.text;
-                ctx.fillText((task.state === 'done' ? '✓ ' : '') + task.label, x + 8 * s, p.y + 0.5);
-                if (task.boost > 1.4 && task.state !== 'done') {
-                    ctx.textAlign = 'right';
-                    ctx.fillStyle = C.warn;
-                    ctx.fillText('!', x + nw - 7 * s, p.y + 0.5);
-                }
+                ctx.fillText(k, x + 6 * s, yy);
+                ctx.fillStyle = C.text;
+                ctx.textAlign = 'right';
+                ctx.fillText(fitText(v, w - 60 * s), x + w - 6 * s, yy);
+                ctx.fillStyle = C.crimson;
+                ctx.fillRect(x + w - 1, yy - 1.5, 3, 3);
+            });
+            const data = inputSpark(key);
+            const max = Math.max(1e-9, ...data);
+            const sx = x + 6 * s, sy = y + nodeHt - 5 * s, sw = w - 12 * s;
+            const bars = 32;
+            for (let k = 0; k < bars; k++) {
+                const v = data.length ? data[Math.floor((k / bars) * data.length)] / max : 0.3 + 0.3 * Math.sin(k + t);
+                const hh = Math.max(1, v * sparkH * 0.9);
+                ctx.fillStyle = rgba(C.crimson, 0.45 + 0.5 * v);
+                ctx.fillRect(sx + (k * sw) / bars, sy - hh, sw / bars - 1, hh);
             }
         }
         ctx.textBaseline = 'alphabetic';
+    }
+
+    // the wire bundle: inputs into the bus, the bus out to every node
+    function drawBusWires() {
+        const s = L.s;
+        const bx = L.busX, bw = L.busW;
+        ctx.lineWidth = 0.7;
+        if (!L.portrait) {
+            if (!particles.length) particles = Array.from({ length: 260 }, () => ({ w: randi(0, 23), k: Math.random(), v: rand(0.05, 0.25), j: rand(-6, 6) }));
+            const wires = [];
+            inputRects.forEach((r, i) => {
+                for (let k = 0; k < 4; k++) {
+                    const y1 = r.y + 14 * s + 11 * s * (k + 0.6);
+                    const y2 = busY(((i * 4 + k) * 0.37 + 0.05) % 1);
+                    wires.push([r.x + r.w + 1, y1, bx, y2]);
+                }
+            });
+            ctx.strokeStyle = 'rgba(184,50,90,0.18)';
+            for (const [x1, y1, x2, y2] of wires) { bez(x1, y1, x2, y2); ctx.stroke(); }
+            ctx.fillStyle = 'rgba(216,207,214,0.45)';
+            for (const p of particles) {
+                const wv = wires[p.w % wires.length];
+                if (!wv) break;
+                p.k = (p.k + p.v / 60) % 1;
+                const q = bezPt(wv[0], wv[1], wv[2], wv[3], p.k);
+                ctx.fillRect(q.x + p.j * Math.sin(p.k * 3), q.y + p.j * 0.6, 1.2, 1.2);
+            }
+        }
+        for (const a of nodes) {
+            const left = anchor(a, 'left');
+            const hot = a.task || (a.helping && t < a.helpUntil);
+            const gateHot = plan && plan.gate === 'waiting' && plan.tasks.some((x) => x.phase === 4 && x.owner === a);
+            for (let k = 0; k < 3; k++) {
+                const y1 = busY(((a.seed * 0.17 + k * 0.29) % 1));
+                ctx.strokeStyle = gateHot ? rgba(C.yellow, 0.5) : hot ? rgba(C.crimson, 0.45) : 'rgba(184,50,90,0.14)';
+                ctx.lineWidth = hot && k === 0 ? 1.2 : 0.7;
+                bez(bx + bw, y1, left.x - 3, left.y + k * L.rowH);
+                ctx.stroke();
+            }
+        }
+    }
+
+    function drawBus() {
+        const s = L.s;
+        const x = L.busX, w = L.busW, y0 = L.colTop - 10 * s, y1 = L.gy + L.gh;
+        const hot = hovered && hovered.kind === 'hub';
+        box(x, y0, w, y1 - y0, '#101017', hot ? C.crimson : C.line);
+        // two columns of port squares, lit by traffic
+        const n = Math.floor((y1 - y0 - 8) / (6 * s));
+        for (let i = 0; i < n; i++) {
+            for (let c = 0; c < 2; c++) {
+                const v = 0.5 + 0.5 * Math.sin(t * 2.3 + i * 0.7 + c * 2);
+                ctx.fillStyle = rgba(v > 0.85 && hub.act > 0.5 ? C.crimson : '#d8cfd6', 0.12 + 0.35 * v * hub.act);
+                ctx.fillRect(x + 3 + c * (w / 2 - 2), y0 + 5 + i * 6 * s, w / 2 - 5, 3 * s);
+            }
+        }
+        // label and model chip above the bus
+        ctx.font = font(8, '600');
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = C.yellow;
+        const label = L.portrait ? '' : `orchestrator · ${modelById[hub.model].short} · ${Math.round(hub.shownProgress * 100)}%`;
+        ctx.fillText(label, x - 2, y0 - 2);
+        ctx.textBaseline = 'alphabetic';
+        const target = plan ? (plan.done + plan.tasks.filter((q) => q.state === 'active').reduce((sum, q) => sum + q.progress, 0)) / plan.tasks.length : 0;
+        hub.shownProgress = lerp(hub.shownProgress, target, 0.05);
+        // progress fill along the bus edge
+        ctx.fillStyle = rgba(C.yellow, 0.8);
+        ctx.fillRect(x + w - 2, y1 - (y1 - y0) * hub.shownProgress, 2, (y1 - y0) * hub.shownProgress);
+        hub.rect = { x: x - 4, y: y0, w: w + 8, h: y1 - y0 };
     }
 
     function drawPackets() {
         for (const p of packets) {
-            const a = edgePoint(p.from, p.to), b = edgePoint(p.to, p.from);
+            const a = p.from.isHub ? anchor(p.from) : anchor(p.from, p.to.isHub || p.to.x < p.from.x ? 'left' : 'right');
+            const b = p.to.isHub ? anchor(p.to) : anchor(p.to, p.from.isHub || p.from.x < p.to.x ? 'left' : 'right');
+            if (Math.abs(a.x - b.x) < 4) { a.x = p.from.x + L.nodeW / 2; b.x = p.to.x + L.nodeW / 2; }
             const e = ease(p.k);
-            ctx.strokeStyle = rgba(p.color, 0.35);
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(lerp(a.x, b.x, e), lerp(a.y, b.y, e));
+            const c = p.from.isHub ? C.yellow : C.crimson;
+            ctx.strokeStyle = rgba(c, 0.55);
+            ctx.lineWidth = 1.2;
+            bez(a.x, a.y, b.x, b.y);
             ctx.stroke();
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(lerp(a.x, b.x, e), lerp(a.y, b.y, e), 3.2 * L.s, 0, TAU);
-            ctx.fill();
+            const q = bezPt(a.x, a.y, b.x, b.y, e);
+            ctx.fillStyle = c;
+            ctx.fillRect(q.x - 3, q.y - 2, 6, 4);
         }
     }
 
-    function drawHub() {
-        const { cx, cy } = L;
-        const R = L.coreR, lw = R * 0.16, s = L.s;
-        const target = plan ? plan.done / plan.tasks.length + (plan.tasks.filter((x) => x.state === 'active').reduce((sum, x) => sum + x.progress, 0) / plan.tasks.length) : 0;
-        hub.shownProgress = lerp(hub.shownProgress, target, 0.05);
-        const hot = hovered && hovered.kind === 'hub';
-        ctx.fillStyle = hot ? C.cardHot : C.card;
-        ctx.beginPath();
-        ctx.arc(cx, cy, R + lw, 0, TAU);
-        ctx.fill();
-        ctx.strokeStyle = rgba(C.accent, 0.25 + 0.5 * Math.max(hub.flash, hot ? 1 : 0));
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.lineWidth = lw;
-        ctx.strokeStyle = C.track;
-        ctx.beginPath();
-        ctx.arc(cx, cy, R, 0, TAU);
-        ctx.stroke();
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = plan && plan.doneAt ? C.ok : C.accent;
-        ctx.beginPath();
-        ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + TAU * Math.max(0.001, Math.min(1, hub.shownProgress)));
-        ctx.stroke();
-        ctx.lineCap = 'butt';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = C.text;
-        ctx.font = `600 ${Math.round(R * 0.42)}px ${SANS}`;
-        ctx.fillText(Math.round(hub.shownProgress * 100) + '%', cx, cy + R * 0.12);
-        ctx.font = sans(9.5);
-        ctx.fillStyle = C.muted;
-        ctx.fillText('of goal done', cx, cy + R * 0.42);
-        ctx.font = sans(12, '600');
-        ctx.fillStyle = C.text;
-        ctx.fillText('Orchestrator', cx, cy + R + lw + 18 * s);
-        ctx.font = sans(10.5);
-        ctx.fillStyle = C.muted;
-        ctx.fillText(hub.status.slice(0, Math.ceil(hub.shown)), cx, cy + R + lw + 33 * s);
-    }
-
-    function dropTarget(a) {
-        if (!a || !a.drag) return null;
-        let best = null, bd = (L.cardW * 0.7) ** 2;
-        for (const b of agents) {
-            if (b === a) continue;
-            const d = (b.x - a.x) ** 2 + (b.y - a.y) ** 2;
-            if (d < bd) { bd = d; best = b; }
-        }
-        return best;
-    }
-
-    function drawDrag() {
-        if (!gesture || gesture.type !== 'agent' || !gesture.moved) return;
-        const a = gesture.agent;
-        const b = dropTarget(a);
-        ctx.textAlign = 'center';
-        ctx.font = sans(11, '600');
-        if (b) {
-            rr(b.x - L.cardW / 2 - 6, b.y - L.cardH / 2 - 6, L.cardW + 12, L.cardH + 12, 10);
-            ctx.strokeStyle = rgba(b.color, 0.9);
+    function drawSynergy() {
+        const s = L.s;
+        for (const l of synergy) {
+            const top = l.a.y < l.b.y ? l.a : l.b, bot = top === l.a ? l.b : l.a;
+            const y1 = top.y + nodeH(top), y2 = bot.y;
+            const c = l.pct > 0 ? C.green : C.red;
+            const x = top.x;
+            ctx.strokeStyle = rgba(c, 0.8);
             ctx.lineWidth = 2;
-            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            ctx.moveTo(x - L.nodeW * 0.3, y1);
+            ctx.lineTo(x - L.nodeW * 0.3, y2);
+            ctx.moveTo(x + L.nodeW * 0.3, y1);
+            ctx.lineTo(x + L.nodeW * 0.3, y2);
             ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.fillStyle = C.text;
-            ctx.fillText(`Let go to pair ${a.name} with ${b.name}`, b.x, b.y - L.cardH / 2 - 14 * L.s);
-        } else {
-            ctx.fillStyle = C.muted;
-            ctx.fillText('Drop on a teammate to pair them up', a.x, a.y - L.cardH / 2 - 12 * L.s);
+            ctx.font = font(8, '600');
+            const label = `${l.pct > 0 ? '+' : ''}${l.pct}% ${L.portrait ? '' : l.why}`.trim();
+            const txt = fitText(label, L.nodeW * 0.55);
+            const tw = ctx.measureText(txt).width + 8 * s;
+            const my = (y1 + y2) / 2;
+            box(x - tw / 2, my - 6 * s, tw, 12 * s, l.pct > 0 ? '#11261a' : '#2c1118', c);
+            ctx.fillStyle = c;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(txt, x, my + 0.5);
+            ctx.textBaseline = 'alphabetic';
         }
     }
 
-    function drawAgent(a) {
-        const w = L.cardW, h = L.cardH, s = L.s;
-        const x0 = a.x - w / 2, y0 = a.y - h / 2;
-        const hot = (hovered && hovered.obj === a) || !!a.drag;
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        rr(x0 + 1, y0 + 3, w, h, 8);
-        ctx.fill();
-        rr(x0, y0, w, h, 8);
-        ctx.fillStyle = hot ? C.cardHot : C.card;
-        ctx.fill();
-        ctx.strokeStyle = rgba(a.color, 0.28 + 0.55 * Math.max(a.flash * 0.7, hot ? 1 : 0));
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.fillStyle = a.color;
-        ctx.fillRect(x0, y0 + 7, 3, h - 14);
-
-        ctx.textBaseline = 'middle';
-        const nameY = y0 + (L.tiny ? h * 0.32 : 15 * s);
+    function drawChip(a, rx, cy, maxW) {
+        const m = modelById[a.loadingUntil > t ? a.loadingModel : a.model];
+        const s = L.s;
+        ctx.font = font(7.5, '600');
+        const label = fitText(m.short + ' ▾', maxW - 6 * s);
+        const w = ctx.measureText(label).width + 8 * s, h = L.headH - 4 * s;
+        box(rx - w, cy - h / 2, w, h, '#0b0b10', rgba(m.dot, 0.7));
+        ctx.fillStyle = m.dot;
         ctx.textAlign = 'left';
-        ctx.font = sans(L.tiny ? 9.5 : 11.5, '600');
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, rx - w + 4 * s, cy + 0.5);
+        return { x: rx - w, y: cy - h / 2, w, h };
+    }
+
+    function drawNode(a, focused, floating) {
+        const s = L.s, w = L.nodeW, h = nodeH(a);
+        const x0 = a.x - w / 2, y0 = a.y;
+        a.rect = { x: x0, y: y0, w, h };
+        const m = modelById[a.model];
+        const gateHot = plan && plan.gate === 'waiting' && plan.tasks.some((x) => x.phase === 4 && x.owner === a);
+        if (floating) box(x0 + 4, y0 + 6, w, h, 'rgba(0,0,0,0.5)');
+        box(x0, y0, w, h, focused ? C.nodeHot : C.node, gateHot ? C.yellow : focused ? C.crimson : rgba(C.crimson, 0.25 + 0.5 * a.flash * 0.6));
+        box(x0, y0, w, L.headH, gateHot ? '#6b5718' : focused || a.flash > 0.3 ? C.headHot : C.head);
+        a.chip = drawChip(a, x0 + w - 3 * s, y0 + L.headH / 2, w * 0.5);
+        ctx.font = font(8.5, '600');
         ctx.fillStyle = C.text;
-        ctx.fillText(fitText(a.name, w - 18 * s), x0 + 10 * s, nameY);
-        if (!L.tiny) {
-            ctx.textAlign = 'right';
-            ctx.font = sans(9);
-            ctx.fillStyle = C.faint;
-            ctx.fillText(modelById[a.model].name.replace(' model', ''), x0 + w - 9 * s, nameY);
-        }
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fitText(a.key, a.chip.x - x0 - 8 * s), x0 + 5 * s, y0 + L.headH / 2 + 0.5);
 
-        // a small boxed neural net that is busy when the agent is
-        const bh = L.tiny ? h * 0.42 : h - 30 * s;
-        const bw = Math.min(bh * 1.4, w * 0.3);
-        const bx = x0 + 10 * s, by = L.tiny ? y0 + h * 0.5 : y0 + 23 * s;
-        rr(bx, by, bw, bh, 3);
-        ctx.fillStyle = '#0e1626';
-        ctx.fill();
-        ctx.strokeStyle = C.line;
-        ctx.stroke();
-        const cols = a.mini.length;
-        const pos = a.mini.map((layer, li) => layer.map((_, j) => ({
-            x: bx + bw * (0.18 + (0.64 * li) / (cols - 1)),
-            y: by + bh * (layer.length === 1 ? 0.5 : 0.2 + (0.6 * j) / (layer.length - 1)),
-        })));
-        ctx.lineWidth = 0.6;
-        for (let li = 0; li < cols - 1; li++) {
-            for (let i = 0; i < pos[li].length; i++) for (let j = 0; j < pos[li + 1].length; j++) {
-                ctx.strokeStyle = rgba(a.color, 0.1 + 0.35 * (a.mini[li][i].a + a.mini[li + 1][j].a) / 2);
-                ctx.beginPath();
-                ctx.moveTo(pos[li][i].x, pos[li][i].y);
-                ctx.lineTo(pos[li + 1][j].x, pos[li + 1][j].y);
-                ctx.stroke();
-            }
-        }
-        const nr = Math.max(1.2, bh / 14);
-        for (let li = 0; li < cols; li++) for (let i = 0; i < pos[li].length; i++) {
-            ctx.fillStyle = rgba(a.color, 0.3 + 0.7 * a.mini[li][i].a);
-            ctx.beginPath();
-            ctx.arc(pos[li][i].x, pos[li][i].y, nr, 0, TAU);
-            ctx.fill();
-        }
-
-        if (!L.tiny) {
-            const tx = bx + bw + 8 * s, tw = x0 + w - 9 * s - tx;
+        // key / value rows, with port ticks on both edges
+        const rows = [];
+        const loading = a.loadingUntil > t;
+        const said = a.said && a.said.until > t ? a.said : null;
+        if (!L.portrait) rows.push(['task', loading ? 'swapping model' : a.task ? a.task.key : a.helping ? `help:${a.helping.key}` : 'idle']);
+        rows.push(['step', a.status]);
+        rows.push(['prog', null]);
+        if (!L.portrait) rows.push(['gpu', null]);
+        rows.push(said ? ['says', `→${said.to.key}: ${said.text}`] : ['cost', `${money(a.spend)} · ${kfmt(a.tokIn + a.tokOut)} tok`]);
+        ctx.font = font(8);
+        rows.slice(0, L.rows).forEach(([k, v], r) => {
+            const yy = y0 + L.headH + L.rowH * (r + 0.6);
+            ctx.fillStyle = C.crimson;
+            ctx.fillRect(x0 - 2, yy - 1.5, 3, 3);
+            ctx.fillRect(x0 + w - 1, yy - 1.5, 3, 3);
+            ctx.fillStyle = C.dim;
             ctx.textAlign = 'left';
-            ctx.font = sans(10);
-            ctx.fillStyle = a.task || a.helping ? C.text : C.muted;
-            ctx.fillText(fitText(a.status.slice(0, Math.ceil(a.shown)), tw), tx, by + bh * 0.3);
-            // progress bar for the task, or a quiet bar when idle
-            const barY = by + bh - 4 * s;
-            rr(tx, barY, tw, 4 * s, 2);
-            ctx.fillStyle = C.track;
-            ctx.fill();
-            if (a.task) {
-                rr(tx, barY, Math.max(4 * s, tw * a.task.progress), 4 * s, 2);
-                ctx.fillStyle = a.color;
-                ctx.fill();
+            ctx.fillText(k, x0 + 5 * s, yy);
+            const vx = x0 + 34 * s * L.f, vw = x0 + w - 5 * s - vx;
+            if (k === 'prog') {
+                const p = loading ? (t - a.loadingFrom) / (a.loadingUntil - a.loadingFrom) : a.task ? a.task.progress : 0;
+                const ticks = Math.max(8, Math.floor(vw / (4 * s)));
+                for (let i = 0; i < ticks - 6; i++) {
+                    ctx.fillStyle = i / (ticks - 6) < p ? (loading ? m.dot : C.crimson) : '#2a2331';
+                    ctx.fillRect(vx + i * 4 * s, yy - 3 * s, 2.5 * s, 6 * s);
+                }
+                ctx.fillStyle = C.text;
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(p * 100) + '%', x0 + w - 5 * s, yy);
+            } else if (k === 'gpu') {
+                const n = m.gpus;
+                const gw = Math.min(vw * 0.55, n * 5 * s);
+                const bw = gw / n - 1;
+                for (let i = 0; i < n; i++) {
+                    const u = clamp(a.gpu[i] / 100, 0.05, 1);
+                    ctx.fillStyle = rgba(u > 0.8 ? C.yellow : C.crimson, 0.4 + 0.6 * u);
+                    ctx.fillRect(vx + i * (bw + 1), yy + 4 * s - 8 * s * u, bw, 8 * s * u);
+                }
+                ctx.fillStyle = C.text;
+                ctx.textAlign = 'right';
+                const util = a.gpu.slice(0, n).reduce((x, y) => x + y, 0) / n;
+                ctx.fillText(`${n}×${m.gpu} ${Math.round(util)}%`, x0 + w - 5 * s, yy);
+            } else {
+                ctx.fillStyle = k === 'says' ? C.yellow : C.text;
+                ctx.textAlign = 'right';
+                ctx.fillText(fitText(v, vw), x0 + w - 5 * s, yy);
             }
-        }
+        });
+        if (a.exp > 0.05) drawInside(a, x0 + 4 * s, y0 + L.nodeH - 2 * s, w - 8 * s, a.exp * L.expH - 4 * s);
         ctx.textBaseline = 'alphabetic';
     }
 
-    // Speech bubbles sit on the side of the card that faces the middle, so they don't cover the plan.
-    function drawBubble(a) {
-        const b = a.bubble;
-        if (!b || t > b.until) return;
-        const s = L.s;
-        const alpha = Math.min(1, (t - b.t0) / 0.4, (b.until - t) / 0.6);
-        if (alpha <= 0) return;
-        ctx.font = sans(10.5);
-        const maxW = Math.min(250 * s, Math.max(140, L.rx * 0.75));
-        if (b.lw !== maxW) { b.lines = wrap(b.text, maxW - 20 * s, 3); b.lw = maxW; }
-        const lh = 14 * s;
-        const bw = Math.min(maxW, Math.max(...b.lines.map((l) => ctx.measureText(l).width)) + 20 * s, maxW);
-        const bh = b.lines.length * lh + 26 * s;
-        let x, y;
-        if (a.isHub) {
-            x = a.x - bw / 2;
-            y = a.y - L.coreR * 1.2 - bh - 8 * s;
-        } else {
-            const dx = L.cx - a.x, dy = L.cy - a.y;
-            if (Math.abs(dy) > Math.abs(dx) * 0.45) {
-                x = a.x - bw / 2;
-                y = dy > 0 ? a.y + L.cardH / 2 + 8 * s : a.y - L.cardH / 2 - bh - 8 * s;
-            } else {
-                y = a.y - bh / 2;
-                x = dx > 0 ? a.x + L.cardW / 2 + 10 * s : a.x - L.cardW / 2 - bw - 10 * s;
+    // Inside an open node: a rotating wireframe of layers on the left, an attention heatmap on the right.
+    // An illustration, not the real architecture of any model.
+    function drawInside(a, x, y, w, h) {
+        if (h < 12) return;
+        const s = L.s, m = modelById[a.model], act = 0.25 + 0.75 * a.act;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
+        box(x, y, w, h, '#0d0d13', C.line);
+        const split = L.portrait ? w : w * 0.56;
+        // wireframe
+        const cx = x + split / 2, cy = y + h / 2, R = Math.min(split * 0.42, h * 0.75);
+        const th = t * 0.5 + a.seed, cosT = Math.cos(th), sinT = Math.sin(th), tilt = 0.45;
+        const planes = 4, grid = [4, 3];
+        const pts = [];
+        for (let p = 0; p < planes; p++) {
+            pts[p] = [];
+            const z = (p - (planes - 1) / 2) * R * 0.55;
+            for (let i = 0; i < grid[0]; i++) for (let j = 0; j < grid[1]; j++) {
+                const X = (i / (grid[0] - 1) - 0.5) * R * 1.2, Y = (j / (grid[1] - 1) - 0.5) * R * 0.7;
+                const x1 = X * cosT + z * sinT, z1 = -X * sinT + z * cosT;
+                const y1 = Y * Math.cos(tilt) - z1 * Math.sin(tilt), z2 = Y * Math.sin(tilt) + z1 * Math.cos(tilt);
+                const f = 2.4 * R / (2.4 * R + z2);
+                pts[p].push({ x: cx + x1 * f, y: cy + y1 * f, d: f });
             }
         }
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        rr(x + 1, y + 3, bw, bh, 8);
-        ctx.fill();
-        rr(x, y, bw, bh, 8);
-        ctx.fillStyle = '#1a2640';
-        ctx.fill();
-        ctx.strokeStyle = rgba(a.color, 0.6);
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        ctx.lineWidth = 0.6;
+        for (let p = 0; p < planes; p++) {
+            const c = pts[p];
+            const corners = [c[0], c[grid[1] - 1], c[c.length - 1], c[c.length - grid[1]]];
+            ctx.strokeStyle = rgba(C.crimson, 0.5);
+            ctx.beginPath();
+            corners.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)));
+            ctx.closePath();
+            ctx.stroke();
+            if (p < planes - 1) {
+                for (const [i, j] of a.wire[p]) {
+                    const q1 = c[i % c.length], q2 = pts[p + 1][j % c.length];
+                    const v = 0.5 + 0.5 * Math.sin(t * 3 - p + i);
+                    ctx.strokeStyle = rgba(v > 0.85 ? C.yellow : C.crimson, (0.1 + 0.4 * v) * act);
+                    ctx.beginPath(); ctx.moveTo(q1.x, q1.y); ctx.lineTo(q2.x, q2.y); ctx.stroke();
+                }
+            }
+            for (const q of c) {
+                ctx.fillStyle = rgba(C.text, 0.3 + 0.5 * act * q.d);
+                ctx.fillRect(q.x - 1, q.y - 1, 2, 2);
+            }
+        }
+        // attention heatmap
+        if (!L.portrait) {
+            const hx = x + split + 6 * s, hw = w - split - 12 * s, hy = y + 6 * s, hh = h - 22 * s;
+            const nc = 10, nr = 7, cw = hw / nc, chh = hh / nr;
+            for (let i = 0; i < nc; i++) for (let j = 0; j < nr; j++) {
+                const v = (0.5 + 0.5 * Math.sin(t * (1 + (i % 3) * 0.4) + i * 0.9 + j * 1.7 + a.seed)) * act;
+                ctx.fillStyle = rgba(v > 0.8 ? '#ff7a9a' : C.crimson, 0.08 + 0.85 * v);
+                ctx.fillRect(hx + i * cw + 1, hy + j * chh + 1, cw - 2, chh - 2);
+            }
+            ctx.font = font(7);
+            ctx.fillStyle = C.dim;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            const tps = a.loadingUntil > t ? 'loading weights' : `${kfmt(m.tps * (0.15 + 0.85 * a.act))} tok/s`;
+            ctx.fillText(fitText(`attention · ${a.podId} · ${tps}`, hw), hx, y + h - 8 * s);
+        }
+        ctx.font = font(7);
+        ctx.fillStyle = C.faint;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
-        ctx.font = sans(9.5, '600');
-        ctx.fillStyle = a.color;
-        ctx.fillText(`${a.name} → ${b.to.name}`, x + 10 * s, y + 7 * s);
-        ctx.font = sans(10.5);
-        ctx.fillStyle = C.text;
-        b.lines.forEach((l, i) => ctx.fillText(l, x + 10 * s, y + 21 * s + i * lh));
+        ctx.fillText('layers · illustration', x + 4 * s, y + 3 * s);
+        ctx.restore();
+    }
+
+    // ---------------------------------------------------------------- bottom panels (screen space)
+    function panel(x, y, w, h, title) {
+        box(x, y, w, h, '#101017', C.line);
+        ctx.font = fontS(8, '600');
+        ctx.fillStyle = C.dim;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(title, x + 8 * L.s, y + 9 * L.s);
+    }
+    function drawBottom() {
+        const s = L.s, y = L.bpY, h = L.bpH;
+        const gap = 8;
+        const widths = L.portrait ? [0.56, 0, 0.44] : [0.36, 0.34, 0.3];
+        let x = 10;
+        const total = W - 20 - gap * (L.portrait ? 1 : 2);
+        const [lw, dw, ow] = widths.map((f) => f * total);
+        drawLog(x, y, lw, h);
+        x += lw + gap;
+        if (!L.portrait) { drawDispatch(x, y, dw, h); x += dw + gap; }
+        drawOutput(x, y, ow, h);
         ctx.textBaseline = 'alphabetic';
-        ctx.globalAlpha = 1;
     }
-
-    // ---------------------------------------------------------------- side panels
-    function sizeCanvas(cv) {
-        const r = cv.getBoundingClientRect();
-        if (!r.width) return;
-        cv.width = Math.round(r.width * DPR);
-        cv.height = Math.round(r.height * DPR);
-    }
-    function chartCtx(cv) {
-        const w = cv.width / DPR, h = cv.height / DPR;
-        if (!w) return null;
-        const g = cv.getContext('2d');
-        g.setTransform(DPR, 0, 0, DPR, 0, 0);
-        g.clearRect(0, 0, w, h);
-        return { g, w, h };
-    }
-
-    function drawSpendChart() {
-        const c = chartCtx($('c-spend'));
-        if (!c) return;
-        const { g, w, h } = c;
-        const data = stats.spendHist;
-        const pad = { l: 10, r: 52, t: 10, b: 18 };
-        const max = Math.max(0.01, ...data) * 1.15;
-        const X = (i) => pad.l + (i / 179) * (w - pad.l - pad.r);
-        const Y = (v) => h - pad.b - (v / max) * (h - pad.t - pad.b);
-        g.strokeStyle = 'rgba(131,145,167,0.15)';
-        g.fillStyle = C.faint;
-        g.font = `${Math.round(9 * L.s)}px ${MONO}`;
-        g.textAlign = 'left';
-        for (let k = 0; k <= 2; k++) {
-            const v = (max * k) / 2;
-            g.beginPath(); g.moveTo(pad.l, Y(v)); g.lineTo(w - pad.r, Y(v)); g.stroke();
-            g.fillText(money(v), w - pad.r + 6, Y(v) + 3);
-        }
-        g.font = `${Math.round(9 * L.s)}px ${SANS}`;
-        g.fillText('3 min ago', pad.l, h - 5);
-        g.textAlign = 'right';
-        g.fillText('now', w - pad.r, h - 5);
-        if (data.length < 2) return;
-        const off = 180 - data.length;
-        g.beginPath();
-        data.forEach((v, i) => (i ? g.lineTo(X(i + off), Y(v)) : g.moveTo(X(i + off), Y(v))));
-        g.strokeStyle = C.accent;
-        g.lineWidth = 1.6;
-        g.stroke();
-        g.lineTo(X(179), h - pad.b);
-        g.lineTo(X(off), h - pad.b);
-        g.closePath();
-        g.fillStyle = 'rgba(91,141,239,0.12)';
-        g.fill();
-    }
-
-    function drawAgentBars() {
-        const c = chartCtx($('c-agents'));
-        if (!c) return;
-        const { g, w, h } = c;
-        const rows = [...agents, hub].sort((a, b) => b.spend - a.spend).slice(0, 8);
-        const max = Math.max(0.0001, rows[0].spend);
-        const rowH = (h - 12) / 8;
-        const labelW = 82 * L.s, valueW = 54 * L.s;
-        g.font = `${Math.round(9.5 * L.s)}px ${SANS}`;
-        g.textBaseline = 'middle';
-        rows.forEach((a, i) => {
-            const y = 6 + i * rowH + rowH / 2;
-            g.textAlign = 'left';
-            g.fillStyle = C.text;
-            g.fillText(a.name, 10, y);
-            const bw = (w - labelW - valueW - 20) * (a.spend / max);
-            g.fillStyle = C.track;
-            g.fillRect(10 + labelW, y - 4, w - labelW - valueW - 20, 8);
-            g.fillStyle = a.color;
-            g.fillRect(10 + labelW, y - 4, Math.max(1, bw), 8);
-            g.textAlign = 'right';
-            g.fillStyle = C.muted;
-            g.font = `${Math.round(9 * L.s)}px ${MONO}`;
-            g.fillText(money(a.spend), w - 8, y);
-            g.font = `${Math.round(9.5 * L.s)}px ${SANS}`;
+    function drawLog(x, y, w, h) {
+        const s = L.s;
+        panel(x, y, w, h, 'run log');
+        const lh = 11.5 * s, top = y + 20 * s;
+        const n = Math.floor((h - 24 * s) / lh);
+        const lines = runLog.slice(-n);
+        ctx.font = fontS(8);
+        ctx.textBaseline = 'middle';
+        lines.forEach((l, i) => {
+            const yy = top + i * lh + lh / 2;
+            ctx.fillStyle = C.faint;
+            ctx.textAlign = 'left';
+            ctx.fillText(l.ts, x + 8 * s, yy);
+            ctx.fillStyle = l.color;
+            const who = fitText(l.who, (L.portrait ? 70 : 120) * s);
+            ctx.fillText(who, x + 42 * s, yy);
+            ctx.fillStyle = C.text;
+            const tx = x + 42 * s + (L.portrait ? 74 : 124) * s;
+            ctx.fillText(fitText(l.text, x + w - 8 * s - tx), tx, yy);
         });
     }
-
-    function fmtDur(sec) {
-        const s = Math.max(0, Math.round(sec));
-        return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    function drawDispatch(x, y, w, h) {
+        const s = L.s;
+        panel(x, y, w, h, 'dispatch');
+        ui.dispatchRows = [];
+        if (!plan) return;
+        const order = { active: 0, assigning: 1, pending: 2, done: 3 };
+        const list = plan.tasks.map((task, i) => ({ task, i })).sort((a, b) => order[a.task.state] - order[b.task.state] || a.i - b.i);
+        const lh = 12 * s, top = y + 20 * s;
+        const n = Math.max(1, Math.floor((h - 38 * s) / lh));
+        ctx.font = fontS(8);
+        ctx.textBaseline = 'middle';
+        list.slice(0, n).forEach(({ task, i }, r) => {
+            const yy = top + r * lh + lh / 2;
+            ui.dispatchRows.push({ task, x, y: yy - lh / 2, w, h: lh });
+            const hot = hovered && hovered.kind === 'row' && hovered.obj === task;
+            if (hot) box(x + 2, yy - lh / 2, w - 4, lh, '#1a1a25');
+            ctx.fillStyle = C.faint;
+            ctx.textAlign = 'left';
+            ctx.fillText(`#${i + 1}`, x + 8 * s, yy);
+            ctx.fillStyle = task.state === 'pending' ? C.dim : C.text;
+            ctx.fillText(fitText(task.key, w * 0.34), x + 30 * s, yy);
+            const bx = x + w * 0.45, bw = w * 0.36, ticks = Math.floor(bw / (4 * s));
+            for (let k = 0; k < ticks; k++) {
+                ctx.fillStyle = k / ticks < task.progress ? (task.state === 'done' ? C.dim : C.crimson) : '#241f2a';
+                ctx.fillRect(bx + k * 4 * s, yy - 2.5 * s, 2.5 * s, 5 * s);
+            }
+            const label = task.state === 'done' ? 'done' : task.state === 'active' ? (task.boost > 1.4 ? 'run ▲' : 'run') : task.phase === 4 && plan.gate !== 'open' ? 'gate' : 'queued';
+            ctx.fillStyle = label === 'gate' ? C.yellow : task.state === 'active' ? C.crimson : C.dim;
+            ctx.textAlign = 'right';
+            ctx.fillText(label, x + w - 8 * s, yy);
+        });
+        const activeN = plan.tasks.filter((q) => q.state === 'active').length;
+        ctx.fillStyle = C.faint;
+        ctx.textAlign = 'left';
+        ctx.fillText(`parallel ${activeN} · scheduler online · click a row to prioritise`, x + 8 * s, y + h - 9 * s);
     }
-
-    function drawProgressChart() {
-        const c = chartCtx($('c-progress'));
-        if (!c || !plan) return;
-        const { g, w, h } = c;
-        const pad = { l: 34, r: 10, t: 10, b: 18 };
-        const span = plan.plannedDur * 1.05;
-        const X = (sec) => pad.l + (sec / span) * (w - pad.l - pad.r);
-        const Y = (v) => h - pad.b - v * (h - pad.t - pad.b);
-        g.strokeStyle = 'rgba(131,145,167,0.15)';
-        g.fillStyle = C.faint;
-        g.font = `${Math.round(9 * L.s)}px ${MONO}`;
-        g.textAlign = 'right';
-        for (const v of [0, 0.5, 1]) {
-            g.beginPath(); g.moveTo(pad.l, Y(v)); g.lineTo(w - pad.r, Y(v)); g.stroke();
-            g.fillText(Math.round(v * 100) + '%', pad.l - 5, Y(v) + 3);
+    function drawOutput(x, y, w, h) {
+        const s = L.s;
+        panel(x, y, w, h, plan && plan.gate === 'waiting' ? 'output / human gate' : 'output / costs');
+        const rate = stats.hist.reduce((a, b) => a + b, 0) * (3600 / Math.max(1, stats.hist.length)) * SPEEDS[speedIdx];
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.font = fontS(L.portrait ? 20 : 24, '700');
+        ctx.fillStyle = C.text;
+        ctx.fillText(money(stats.spend), x + 8 * s, y + (L.portrait ? 44 : 50) * s);
+        ctx.font = fontS(8);
+        ctx.fillStyle = C.dim;
+        const lines = [
+            `≈ ${money(rate, 0)}/h at this pace · ${kfmt(stats.tokens)} tokens`,
+            `month ${money(stats.monthBase + stats.spend, 0)} of ${money(stats.budget, 0)}`,
+            plan ? `${plan.done}/${plan.tasks.length} tasks · ${plan.doneAt ? 'complete' : fmtDur(t - plan.born) + ' elapsed'}` : '',
+        ];
+        lines.forEach((l, i) => ctx.fillText(fitText(l, w - 16 * s), x + 8 * s, y + (L.portrait ? 58 : 66) * s + i * 12 * s));
+        ui.approve = null;
+        if (plan && plan.gate === 'waiting') {
+            const left = Math.max(0, 18 - (t - plan.gateAt));
+            const bw = Math.min(w - 16 * s, 220 * s), bh = 18 * s;
+            const bx = x + 8 * s, by = y + h - bh - 8 * s;
+            const pulse = 0.6 + 0.4 * Math.sin(t * 4);
+            box(bx, by, bw, bh, rgba(C.yellow, 0.15 + 0.15 * pulse), C.yellow);
+            ctx.font = fontS(8.5, '700');
+            ctx.fillStyle = C.yellow;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(fitText(`[ approve ship ] auto in ${Math.ceil(left)}s`, bw - 10 * s), bx + 6 * s, by + bh / 2);
+            ui.approve = { x: bx, y: by, w: bw, h: bh };
         }
-        g.font = `${Math.round(9 * L.s)}px ${SANS}`;
-        g.textAlign = 'left';
-        g.fillText('start', pad.l, h - 5);
-        g.textAlign = 'right';
-        g.fillText(`planned finish ${fmtDur(plan.plannedDur)}`, w - pad.r, h - 5);
-        g.setLineDash([4, 4]);
-        g.strokeStyle = C.muted;
-        g.lineWidth = 1.2;
-        g.beginPath(); g.moveTo(X(0), Y(0)); g.lineTo(X(plan.plannedDur), Y(1)); g.stroke();
-        g.setLineDash([]);
-        const pts = plan.hist.slice();
-        const elapsed = (plan.doneAt || t) - plan.born;
-        pts.push([elapsed, plan.done / plan.tasks.length]);
-        g.strokeStyle = C.ok;
-        g.lineWidth = 2;
-        g.beginPath();
-        pts.forEach(([sec, v], i) => (i ? g.lineTo(X(Math.min(sec, span)), Y(v)) : g.moveTo(X(sec), Y(v))));
-        g.stroke();
-        const actual = plan.done / plan.tasks.length;
-        const ahead = plan.plannedDur * actual - elapsed;
-        $('progress-label').textContent = plan.doneAt
-            ? `Finished in ${fmtDur(elapsed)}, ${ahead > 0 ? fmtDur(ahead) + ' ahead of plan' : 'on plan'}`
-            : actual === 0 ? 'Just getting started' : ahead >= 0 ? `About ${fmtDur(ahead)} ahead of plan` : `About ${fmtDur(-ahead)} behind plan`;
     }
 
-    // The model fleet: each model drawn as a boxed neural net, busier the more it is being used.
-    function buildFleet() {
-        const el = $('fleet');
-        el.innerHTML = '';
+    // ---------------------------------------------------------------- model menu
+    const menuEl = $('model-menu');
+    function openModelMenu(a, sx, sy) {
+        $('mm-title').textContent = `model for ${a.key} (${a.podId}, ${a.region})`;
+        const list = $('mm-list');
+        list.innerHTML = '';
         for (const m of MODELS) {
-            const card = document.createElement('div');
-            card.className = 'model';
-            const head = document.createElement('div');
-            head.className = 'model-head';
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'mm-item' + (a.model === m.id ? ' current' : '');
+            const dot = document.createElement('span');
+            dot.className = 'dot';
+            dot.style.background = m.dot;
             const name = document.createElement('b');
             name.textContent = m.name;
             const note = document.createElement('small');
-            note.textContent = m.note;
-            head.append(name, note);
-            m.cv = document.createElement('canvas');
-            const st = document.createElement('div');
-            st.className = 'model-stats';
-            m.stEls = ['Response', 'Requests/min', 'Cost/hour'].map((label) => {
-                const span = document.createElement('span');
-                const b = document.createElement('b');
-                b.className = 'num';
-                span.append(label + ' ', b);
-                st.append(span);
-                return b;
-            });
-            card.append(head, m.cv, st);
-            el.append(card);
+            note.textContent = `${m.note} · ${m.gpus}× ${m.gpu.toUpperCase()} pod`;
+            b.append(dot, name, note);
+            b.addEventListener('click', () => { closeModelMenu(); switchModel(a, m.id); });
+            list.append(b);
         }
+        menuEl.hidden = false;
+        const mw = menuEl.offsetWidth || 240, mh = menuEl.offsetHeight || 240;
+        menuEl.style.left = clamp(sx - mw / 2, 8, W - mw - 8) + 'px';
+        menuEl.style.top = clamp(sy + 10, 40, H - mh - 8) + 'px';
     }
-
-    function drawFleet() {
-        for (const m of MODELS) {
-            const c = chartCtx(m.cv);
-            if (!c) continue;
-            const { g, w, h } = c;
-            const n = m.layers.length;
-            const colW = (w - 16) / n;
-            const boxW = Math.min(colW * 0.62, 64 * L.s);
-            const boxH = h - 20;
-            const pos = m.layers.map(([, k], li) => {
-                const bx = 8 + colW * li + (colW - boxW) / 2;
-                return Array.from({ length: k }, (_, j) => ({ x: bx + boxW / 2, y: 6 + boxH * ((j + 0.5) / k), bx }));
-            });
-            g.lineWidth = 0.6;
-            for (let li = 0; li < n - 1; li++) {
-                for (const p of pos[li]) for (const q of pos[li + 1]) {
-                    g.strokeStyle = `rgba(91,141,239,${0.08 + 0.2 * m.act})`;
-                    g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); g.stroke();
-                }
-            }
-            m.layers.forEach(([label], li) => {
-                const bx = pos[li][0].bx;
-                g.fillStyle = '#0e1626';
-                g.strokeStyle = C.line;
-                g.beginPath();
-                if (g.roundRect) g.roundRect(bx, 2, boxW, boxH + 8, 5); else g.rect(bx, 2, boxW, boxH + 8);
-                g.fill();
-                g.stroke();
-                pos[li].forEach((p, j) => {
-                    const wave = 0.5 + 0.5 * Math.sin(m.phase * 2.2 - li * 1.1 + j * 0.9);
-                    const a = 0.15 + 0.85 * wave * (0.2 + 0.8 * m.act);
-                    g.fillStyle = `rgba(91,141,239,${a})`;
-                    g.beginPath();
-                    g.arc(p.x, p.y, Math.min(5, boxH / (m.layers[li][1] * 3.2)), 0, TAU);
-                    g.fill();
-                });
-                g.fillStyle = C.faint;
-                g.font = `${Math.round(8.5 * L.s)}px ${SANS}`;
-                g.textAlign = 'center';
-                g.fillText(label, bx + boxW / 2, h - 1);
-            });
-        }
-    }
-
-    // ---------------------------------------------------------------- DOM HUD
-    const logEl = $('log');
-    const tip = $('tip');
-    const toastEl = $('toast');
-    const cmdForm = $('cmd');
-    const cmdInput = $('cmd-input');
-    const helpEl = $('help');
-
-    function clock() {
-        const d = new Date();
-        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    }
-    function el(tag, cls, text, color) {
-        const e = document.createElement(tag);
-        if (cls) e.className = cls;
-        if (text !== undefined) e.textContent = text;
-        if (color) e.style.color = color;
-        return e;
-    }
-    function pushLog(li) {
-        logEl.appendChild(li);
-        while (logEl.children.length > 40) logEl.removeChild(logEl.firstChild);
-    }
-    function chat(from, to, text) {
-        const li = el('li');
-        const who = el('span', 'who');
-        who.append(el('b', '', from.name, from.color), el('span', '', '→'), el('span', '', to.name), el('span', 'ts num', clock()));
-        li.append(who, el('span', 'text', text));
-        pushLog(li);
-    }
-    function sysChat(text, fromYou) {
-        const li = el('li', fromYou ? 'sys you' : 'sys');
-        const who = el('span', 'who');
-        who.append(el('b', '', fromYou ? 'You' : 'Workspace'), el('span', 'ts num', clock()));
-        li.append(who, el('span', 'text', text));
-        pushLog(li);
-    }
-
-    let toastTimer = 0;
-    function toast(text) {
-        toastEl.textContent = text;
-        toastEl.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4200);
-    }
-
-    let hudNext = 0;
-    function updateHud(raw) {
-        hudNext -= raw;
-        if (hudNext > 0) return;
-        hudNext = 0.25;
-        const rate = stats.hist.reduce((a, b) => a + b, 0) * (3600 / Math.max(1, stats.hist.length)) * SPEEDS[speedIdx];
-        $('spend-top').textContent = money(stats.spend);
-        $('spend').textContent = money(stats.spend);
-        $('spend-rate').textContent = `≈ ${money(rate, 0)} per hour at this pace`;
-        const month = stats.monthBase + stats.spend;
-        $('budget-bar').style.width = Math.min(100, (month / stats.budget) * 100) + '%';
-        $('budget-label').textContent = `This month: ${money(month)} of ${money(stats.budget, 0)} budget`;
-        stats.msgTimes = stats.msgTimes.filter((x) => x > t - 60);
-        $('m-tasks').textContent = stats.tasksDone;
-        $('m-msgs').textContent = Math.round((stats.msgTimes.length * 60) / Math.min(60, Math.max(10, t)));
-        const lat = MODELS.reduce((sum, m) => sum + m.base * (1 + 0.25 * m.act), 0) / MODELS.length;
-        $('m-latency').textContent = lat.toFixed(1) + ' s';
-        $('m-tokens').textContent = Math.round(stats.tokens).toLocaleString('en-US');
-        for (const m of MODELS) {
-            if (!m.stEls) continue;
-            m.reqTimes = m.reqTimes.filter((x) => x > t - 60);
-            const mrate = m.hist.reduce((a, b) => a + b, 0) * (3600 / Math.max(1, m.hist.length)) * SPEEDS[speedIdx];
-            m.stEls[0].textContent = (m.base * (1 + 0.25 * m.act)).toFixed(1) + ' s';
-            m.stEls[1].textContent = String(Math.round((m.reqTimes.length * 60) / Math.min(60, Math.max(10, t))));
-            m.stEls[2].textContent = money(mrate, 2);
-        }
-        const zoom = Math.abs(cam.z - 1) > 0.02 ? ` · ${cam.z.toFixed(1)}× zoom` : '';
-        $('clock').textContent = clock() + zoom;
-        fillTip();
-    }
-
-    let tipFor = null;
-    function fillTip() {
-        tipFor = hovered ? hovered.obj : null;
-        if (!hovered || (gesture && gesture.moved)) { tip.hidden = true; return; }
-        tip.hidden = false;
-        tip.innerHTML = '';
-        const row = (label, value) => { const d = el('div', 'row'); d.append(el('span', '', label), el('span', 'num', value)); return d; };
-        if (hovered.kind === 'agent' || hovered.kind === 'hub') {
-            const a = hovered.obj;
-            tip.style.setProperty('--tip', a.color);
-            tip.append(el('div', 't-name', a.name), el('div', 't-role', a.job),
-                row('Doing', a.status), row('Model', modelById[a.model].name),
-                row('Messages sent', String(a.sent)), row('Tokens used', Math.round(a.tokIn + a.tokOut).toLocaleString('en-US')),
-                row('Cost so far', money(a.spend)),
-                el('div', 't-hint', a.isHub ? 'Click to ask everyone for an update' : 'Click to ask for an update · drag onto a teammate to pair up'));
-            if (a.task) tip.insertBefore(row('Task', `${a.task.name} (${Math.round(a.task.progress * 100)}%)`), tip.children[3]);
-        } else {
-            const k = hovered.obj;
-            tip.style.setProperty('--tip', k.owner.color);
-            const state = { pending: 'Waiting', assigning: 'Being handed out', active: 'In progress', done: 'Done' }[k.state];
-            tip.append(el('div', 't-name', k.name), el('div', 't-role', `${STAGE_NAMES[k.phase]} stage · ${k.owner.name}, with help from ${k.helper.name}`),
-                row('Status', state), row('Progress', Math.round(k.progress * 100) + '%'),
-                el('div', 't-hint', k.state === 'done' ? k.result : 'Click to make this the top priority'));
-        }
-        placeTip();
-    }
-    function placeTip() {
-        if (!hovered || tip.hidden) return;
-        const o = hovered.obj;
-        let wx, wy, gap;
-        if (hovered.kind === 'task') { if (!o.rect) return; wx = o.rect.x + o.rect.w / 2; wy = o.rect.y + o.rect.h; gap = 0; }
-        else if (hovered.kind === 'hub') { wx = L.cx + L.coreR * 1.2; wy = L.cy; gap = 10; }
-        else { wx = o.x + L.cardW / 2; wy = o.y; gap = 10; }
-        const p = toScreen(wx, wy);
-        const tw = tip.offsetWidth || 240, th = tip.offsetHeight || 160;
-        let x = hovered.kind === 'task' ? p.x - tw / 2 : p.x + gap;
-        if (x + tw > W - 8) x = toScreen(hovered.kind === 'agent' ? o.x - L.cardW / 2 : wx, wy).x - gap - tw;
-        tip.style.left = clamp(x, 8, W - tw - 8) + 'px';
-        tip.style.top = clamp(hovered.kind === 'task' ? p.y + 8 : p.y - th / 2, 60, H - th - 8) + 'px';
-    }
+    function closeModelMenu() { menuEl.hidden = true; }
+    document.addEventListener('pointerdown', (e) => { if (!menuEl.hidden && !menuEl.contains(e.target)) closeModelMenu(); }, true);
 
     // ---------------------------------------------------------------- input
-    function findAgent(wx, wy) {
-        for (let i = agents.length - 1; i >= 0; i--) {
-            const a = agents[i];
-            if (Math.abs(a.x - wx) <= L.cardW / 2 + 4 && Math.abs(a.y - wy) <= L.cardH / 2 + 4) return a;
-        }
-        return null;
-    }
-    function findTask(wx, wy) {
-        if (!plan) return null;
-        for (const k of plan.tasks) {
-            const r = k.rect;
-            if (r && wx >= r.x - 3 && wx <= r.x + r.w + 3 && wy >= r.y - 3 && wy <= r.y + r.h + 3) return k;
-        }
-        return null;
-    }
+    const inRect = (r, x, y, m = 0) => r && x >= r.x - m && x <= r.x + r.w + m && y >= r.y - m && y <= r.y + r.h + m;
     function hitTest(sx, sy) {
+        if (inRect(ui.approve, sx, sy, 2)) return { kind: 'approve' };
+        for (const r of ui.dispatchRows) if (inRect(r, sx, sy)) return { kind: 'row', obj: r.task };
+        if (sy >= L.bpY) return { kind: 'panel' };
         const w = toWorld(sx, sy);
-        const a = findAgent(w.x, w.y);
-        if (a) return { kind: 'agent', obj: a };
-        const k = findTask(w.x, w.y);
-        if (k) return { kind: 'task', obj: k };
-        if ((w.x - L.cx) ** 2 + (w.y - L.cy) ** 2 < (L.coreR * 1.25) ** 2) return { kind: 'hub', obj: hub };
+        for (let i = nodes.length - 1; i >= 0; i--) {
+            const a = nodes[i];
+            if (inRect(a.chip, w.x, w.y, 3)) return { kind: 'chip', obj: a };
+            if (inRect(a.rect, w.x, w.y)) return { kind: 'node', obj: a };
+        }
+        if (inRect(hub.rect, w.x, w.y, 4)) return { kind: 'hub', obj: hub };
         return null;
+    }
+    // where a dragged node would land: column by x, slot by y
+    function dropSlot(wx, wy) {
+        const col = clamp(Math.floor((wx - L.gridX) / L.colW), 0, 2);
+        const list = cols[col].filter((a) => a !== gesture.node);
+        let idx = list.length;
+        for (let i = 0; i < list.length; i++) if (wy < list[i].ty + L.nodeH / 2) { idx = i; break; }
+        return { col, idx };
     }
 
     const pointers = new Map();
@@ -1271,97 +1264,108 @@
         const [p1, p2] = [...pointers.values()];
         return { d: Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2 };
     }
-
     canvas.addEventListener('pointerdown', (e) => {
         if (e.button > 0) return;
         try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* not supported */ }
         pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         mouse.sx = e.clientX;
         mouse.sy = e.clientY;
+        mouse.type = e.pointerType;
         if (pointers.size === 2) {
-            if (gesture && gesture.type === 'agent') gesture.agent.drag = null;
+            if (gesture && gesture.type === 'node') cancelDrag();
             const s = pinchState();
             gesture = { type: 'pinch', d0: s.d, z0: cam.z, wx: (s.mx - cam.x) / cam.z, wy: (s.my - cam.y) / cam.z, moved: true };
             return;
         }
         if (pointers.size > 2) return;
         const hit = hitTest(e.clientX, e.clientY);
-        const touch = e.pointerType !== 'mouse';
-        const onAgent = hit && hit.kind === 'agent';
-        // a mouse grabs an agent at once; a finger has to hold still first, so swiping still moves the view
-        gesture = { type: onAgent ? (touch ? 'press' : 'agent') : 'pan', hit, agent: onAgent ? hit.obj : null, touch,
-            sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, camx: cam.x, camy: cam.y, moved: false, t0: performance.now() };
+        const w = toWorld(e.clientX, e.clientY);
+        const isNode = hit && hit.kind === 'node';
+        gesture = { type: isNode ? 'node' : 'pan', hit, node: isNode ? hit.obj : null, touch: e.pointerType !== 'mouse',
+            sx: e.clientX, sy: e.clientY, camx: cam.x, camy: cam.y, moved: false,
+            ox: isNode ? hit.obj.x - w.x : 0, oy: isNode ? hit.obj.y - w.y : 0, col: 0, idx: 0, slotY: 0 };
     });
-
     canvas.addEventListener('pointermove', (e) => {
         mouse.sx = e.clientX;
         mouse.sy = e.clientY;
+        mouse.type = e.pointerType;
         wake();
         if (!pointers.has(e.pointerId)) return;
         pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-        if (!gesture) return;
-        if (gesture.type === 'pinch') {
+        const g = gesture;
+        if (!g) return;
+        if (g.type === 'pinch') {
             if (pointers.size < 2) return;
             const s = pinchState();
-            cam.z = clamp(gesture.z0 * (s.d / gesture.d0), ZMIN, ZMAX);
-            cam.x = s.mx - gesture.wx * cam.z;
-            cam.y = s.my - gesture.wy * cam.z;
+            cam.z = clamp(g.z0 * (s.d / g.d0), ZMIN, ZMAX);
+            cam.x = s.mx - g.wx * cam.z;
+            cam.y = s.my - g.wy * cam.z;
             clampCam();
             return;
         }
-        gesture.lx = e.clientX;
-        gesture.ly = e.clientY;
-        const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy;
-        if (!gesture.moved && dx * dx + dy * dy > (gesture.touch ? 100 : 36)) {
-            if (gesture.type === 'press') gesture.type = 'pan';
-            gesture.moved = true;
-            tip.hidden = true;
+        const dx = e.clientX - g.sx, dy = e.clientY - g.sy;
+        if (!g.moved && dx * dx + dy * dy > (g.touch ? 64 : 25)) {
+            g.moved = true;
+            if (g.type === 'node') { g.node.exp = 0; selected = null; }
         }
-        if (!gesture.moved) return;
-        if (gesture.type === 'agent') gesture.agent.drag = toWorld(e.clientX, e.clientY);
-        else {
-            cam.x = gesture.camx + dx;
-            cam.y = gesture.camy + dy;
+        if (!g.moved) return;
+        if (g.type === 'node') {
+            const w = toWorld(e.clientX, e.clientY);
+            g.node.x = w.x + g.ox;
+            g.node.y = w.y + g.oy;
+            Object.assign(g, dropSlot(g.node.x, g.node.y + L.nodeH / 2));
+            computeSynergy();
+        } else if (g.type === 'pan') {
+            cam.x = g.camx + dx;
+            cam.y = g.camy + dy;
             clampCam();
         }
     });
-
-    function pickUp(g) {
-        g.type = 'agent';
-        g.moved = true;
-        g.agent.drag = toWorld(g.lx, g.ly);
-        tip.hidden = true;
-        if (navigator.vibrate) navigator.vibrate(12);
+    function cancelDrag() {
+        gesture = null;
+        computeSynergy();
     }
-
+    function dropNode(g) {
+        const a = g.node;
+        const from = colOf(a);
+        cols[from].splice(cols[from].indexOf(a), 1);
+        cols[g.col].splice(Math.min(g.idx, cols[g.col].length), 0, a);
+        a.layer = g.col;
+        if (from !== g.col) sys(`you moved ${a.key} to ${COLUMNS[g.col]}`, true);
+        gesture = null;
+        layout(false);
+        commitSynergy();
+    }
     let lastTap = null;
     function pointerEnd(e, cancelled) {
         pointers.delete(e.pointerId);
         const g = gesture;
         if (!g) return;
         if (g.type === 'pinch') { if (pointers.size === 0) gesture = null; return; }
+        if (g.type === 'node' && g.moved) { if (cancelled) cancelDrag(); else dropNode(g); return; }
         gesture = null;
-        if (g.type === 'press') { if (!cancelled) askAgent(g.agent); return; }
-        if (g.type === 'agent') {
-            const a = g.agent;
-            const b = g.moved ? dropTarget(a) : null;
-            a.drag = null;
-            if (cancelled) return;
-            if (!g.moved) askAgent(a);
-            else if (b) pairUp(a, b);
+        if (cancelled || g.moved) return;
+        const hit = g.hit;
+        if (g.type === 'node') {
+            selected = selected === g.node ? null : g.node;
+            askNode(g.node);
             return;
         }
-        if (cancelled || g.moved) return;
-        if (g.hit && g.hit.kind === 'task') prioritise(g.hit.obj);
-        else if (g.hit && g.hit.kind === 'hub') statusRound();
-        else if (g.touch) {
-            // double tap on empty space zooms in, or back out
-            const now = performance.now();
-            if (lastTap && now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
-                lastTap = null;
-                if (cam.z > 1.4) resetView(); else zoomAt(e.clientX, e.clientY, 2);
-            } else lastTap = { t: now, x: e.clientX, y: e.clientY };
+        if (!hit) {
+            selected = null;
+            if (g.touch) {
+                const now = performance.now();
+                if (lastTap && now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
+                    lastTap = null;
+                    if (cam.z > 1.4) resetView(); else zoomAt(e.clientX, e.clientY, 2);
+                } else lastTap = { t: now, x: e.clientX, y: e.clientY };
+            }
+            return;
         }
+        if (hit.kind === 'chip') { openModelMenu(hit.obj, e.clientX, e.clientY); return; }
+        if (hit.kind === 'approve') { approve(true); return; }
+        if (hit.kind === 'row') { prioritise(hit.obj); return; }
+        if (hit.kind === 'hub') statusRound();
     }
     canvas.addEventListener('pointerup', (e) => pointerEnd(e, false));
     canvas.addEventListener('pointercancel', (e) => pointerEnd(e, true));
@@ -1374,33 +1378,48 @@
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('gesturestart', (e) => e.preventDefault());
 
-    cmdForm.addEventListener('submit', (e) => {
+    // ---------------------------------------------------------------- command line
+    const cmdInput = $('cmd-input');
+    $('cmd').addEventListener('submit', (e) => {
         e.preventDefault();
-        const text = cmdInput.value.trim().replace(/\s+/g, ' ');
-        if (!text) { cmdInput.placeholder = `Try: ${pick(GOALS)}`; return; }
+        const raw = cmdInput.value.trim().replace(/\s+/g, ' ');
         cmdInput.value = '';
+        if (!raw) return;
+        log('you', C.yellow, '$ ' + raw);
+        const [cmd, ...rest] = raw.split(' ');
+        const c = cmd.toLowerCase();
+        if (c === 'help') { toggleHelp(true); return; }
+        if (c === 'approve') { approve(true); return; }
+        if (c === 'spawn') { spawnNode(); return; }
+        if (c === 'pause') { setPaused(!paused); return; }
+        if (c === 'clear') { runLog.length = 0; return; }
+        if (c === 'model') {
+            const node = nodes.find((a) => a.key === (rest[0] || '').toLowerCase() || a.name.toLowerCase() === (rest[0] || '').toLowerCase());
+            const m = MODELS.find((x) => x.id === (rest[1] || '').toLowerCase());
+            if (!node || !m) { sys('usage: model <node> <fable|opus|sonnet|haiku>'); return; }
+            switchModel(node, m.id);
+            return;
+        }
+        const goal = c === 'run' ? rest.join(' ') : raw;
+        if (!goal) return;
         cmdInput.blur();
-        sysChat(`You set a new goal`, true);
-        newPlan(text.charAt(0).toUpperCase() + text.slice(1));
+        const preset = GOALS.find((g) => g.title.toLowerCase() === goal.toLowerCase());
+        if (preset) newPlan(preset.title, preset.tasks);
+        else newPlan(goal.charAt(0).toUpperCase() + goal.slice(1), GENERIC);
     });
 
-    function setPaused(v) { paused = v; $('btn-pause').textContent = paused ? 'Resume' : 'Pause'; }
+    // ---------------------------------------------------------------- controls
+    const helpEl = $('help');
+    function setPaused(v) { paused = v; $('btn-pause').textContent = paused ? 'resume' : 'pause'; }
     function setSpeed(i) {
         speedIdx = clamp(i, 0, SPEEDS.length - 1);
         $('btn-speed').textContent = SPEEDS[speedIdx] + '×';
         if (paused) setPaused(false);
     }
-    function setHud(off) {
-        hudOff = off;
-        document.body.classList.toggle('hud-off', off);
-        $('btn-hud').textContent = off ? 'Show panels' : 'Hide panels';
-        layout();
-    }
     function toggleHelp(show) {
         helpEl.hidden = !show;
         if (show) $('help-close').focus();
     }
-
     const fsSupported = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
     if (!fsSupported) document.documentElement.classList.add('no-fullscreen');
     const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
@@ -1410,37 +1429,35 @@
         else (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
     }
     function onFullscreen() {
-        $('btn-full').textContent = fsElement() ? 'Exit fullscreen' : 'Fullscreen';
+        $('btn-full').textContent = fsElement() ? 'exit full' : 'fullscreen';
         wake();
         layout();
     }
     document.addEventListener('fullscreenchange', onFullscreen);
     document.addEventListener('webkitfullscreenchange', onFullscreen);
-
     let idleTimer = 0;
     function wake() {
         document.body.classList.remove('idle');
         clearTimeout(idleTimer);
         if (!fsElement()) return;
         idleTimer = setTimeout(() => {
-            if (document.activeElement !== cmdInput && helpEl.hidden) document.body.classList.add('idle');
+            if (document.activeElement !== cmdInput && helpEl.hidden && menuEl.hidden) document.body.classList.add('idle');
         }, 3000);
     }
-
     $('btn-pause').addEventListener('click', () => setPaused(!paused));
     $('btn-speed').addEventListener('click', () => setSpeed((speedIdx + 1) % SPEEDS.length));
-    $('btn-spawn').addEventListener('click', spawnAgent);
-    $('btn-hud').addEventListener('click', () => setHud(!hudOff));
+    $('btn-spawn').addEventListener('click', spawnNode);
     $('btn-full').addEventListener('click', toggleFull);
     $('btn-help').addEventListener('click', () => toggleHelp(helpEl.hidden));
     $('help-close').addEventListener('click', () => toggleHelp(false));
     helpEl.addEventListener('click', (e) => { if (e.target === helpEl) toggleHelp(false); });
-
     window.addEventListener('keydown', (e) => {
         wake();
         if (e.key === 'Escape') {
-            if (!helpEl.hidden) toggleHelp(false);
+            if (!menuEl.hidden) closeModelMenu();
+            else if (!helpEl.hidden) toggleHelp(false);
             else if (document.activeElement === cmdInput) cmdInput.blur();
+            else selected = null;
             return;
         }
         if (e.target === cmdInput || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -1450,20 +1467,41 @@
         const k = e.key;
         if (e.code === 'Space') { e.preventDefault(); setPaused(!paused); }
         else if (k === '/' || k === 'Enter') { e.preventDefault(); cmdInput.focus(); }
-        else if (k === 'h' || k === 'H') setHud(!hudOff);
         else if (k === 'f' || k === 'F') { if (fsSupported) toggleFull(); }
-        else if (k === 'n' || k === 'N') spawnAgent();
+        else if (k === 'n' || k === 'N') spawnNode();
+        else if (k === 'a' || k === 'A') approve(true);
         else if (k === '?') toggleHelp(helpEl.hidden);
         else if (k >= '1' && k <= '4') setSpeed(Number(k) - 1);
         else if (k === '0') resetView();
         else if (k === '+' || k === '=') zoomAt(W / 2, H / 2, cam.z * 1.2);
         else if (k === '-' || k === '_') zoomAt(W / 2, H / 2, cam.z / 1.2);
     });
-    window.addEventListener('resize', layout);
+    window.addEventListener('resize', () => layout(true));
 
     // ---------------------------------------------------------------- loop
     let last = performance.now();
-    let chartsNext = 0;
+    let headNext = 0;
+    function updateHead(raw) {
+        headNext -= raw;
+        if (headNext > 0) return;
+        headNext = 0.5;
+        const edges = 24 + nodes.length * 3 + synergy.length + packets.length;
+        const run = plan ? fmtDur(t - plan.born) : '0:00';
+        const el = $('graph-line');
+        el.innerHTML = '';
+        const parts = L.portrait
+            ? [['hivemind', ''], [`${nodes.length + 1}`, 'nodes'], [money(stats.spend), '', true]]
+            : [['graph', 'hivemind-01'], ['nodes', String(nodes.length + 1 + INPUTS.length)], ['edges', String(edges)], ['workers', String(nodes.length)],
+                ['orchestrator', modelById[hub.model].short], ['run ' + stats.runNo, run], ['spend', money(stats.spend), true], ['zoom', cam.z.toFixed(1) + '×']];
+        parts.forEach(([k, v, isMoney], i) => {
+            if (i) { const sep = document.createElement('span'); sep.className = 'sep'; sep.textContent = '·'; el.append(sep); }
+            el.append(k + ' ');
+            const b = document.createElement('b');
+            if (isMoney) b.className = 'money';
+            b.textContent = v;
+            el.append(b);
+        });
+    }
     function frame(now) {
         const raw = Math.min(0.05, (now - last) / 1000);
         last = now;
@@ -1472,37 +1510,23 @@
             t += dt;
             update(dt);
         }
-        moveAgents(raw);
-        if (gesture && gesture.type === 'press' && performance.now() - gesture.t0 > 380) pickUp(gesture);
-        if (gesture && gesture.moved) canvas.style.cursor = gesture.type === 'agent' ? 'grabbing' : 'move';
-        else {
-            hovered = hitTest(mouse.sx, mouse.sy);
-            canvas.style.cursor = hovered ? 'pointer' : '';
-        }
-        if (hovered ? hovered.obj !== tipFor : tipFor) fillTip();
-        else placeTip();
+        if (!(gesture && gesture.moved)) hovered = mouse.type === 'mouse' ? hitTest(mouse.sx, mouse.sy) : null;
+        canvas.style.cursor = gesture && gesture.moved ? (gesture.type === 'node' ? 'grabbing' : 'move')
+            : !hovered || hovered.kind === 'panel' ? '' : hovered.kind === 'node' ? 'grab' : 'pointer';
+        animate(raw);
         draw();
-        chartsNext -= raw;
-        if (panelsOn && chartsNext <= 0) {
-            chartsNext = 1 / 15;
-            drawSpendChart();
-            drawAgentBars();
-            drawProgressChart();
-            drawFleet();
-        }
-        updateHud(raw);
+        updateHead(raw);
         requestAnimationFrame(frame);
     }
 
-    buildFleet();
     setSpeed(speedIdx);
-    cmdInput.placeholder = `Give the team a goal, e.g. "${pick(GOALS)}"`;
     layout();
-    sysChat('Workspace ready. 9 agents online.');
-    after(1, () => newPlan(GOALS[goalIdx]));
+    committed = new Set(synergy.map((l) => l.key));
+    sys(`cluster ready · ${all().length} pods online · ${synergy.length} links`);
+    after(1, () => newPlan(GOALS[goalIdx].title, GOALS[goalIdx].tasks));
     const coarse = window.matchMedia('(pointer: coarse)').matches;
     setTimeout(() => toast(coarse
-        ? 'Tap an agent to ask what it is doing · hold and drag to pair agents up · ? for more'
-        : 'Click an agent to ask what it is doing · drag one onto another to pair them up · ? for more'), 6000);
+        ? 'drag nodes between slots to change synergies · tap a node to open it · tap a model tag to switch'
+        : 'hover a node to open it · drag nodes into new slots · click a model tag to switch it'), 5000);
     requestAnimationFrame(frame);
 })();
