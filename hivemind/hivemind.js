@@ -66,25 +66,25 @@
 
     // ---------------------------------------------------------------- the team; viz = what you see inside the node
     const ROLES = [
-        { name: 'Planner', key: 'planner', layer: 0, model: 'fable', viz: 'gantt', job: 'breaks goals into milestones' },
-        { name: 'Researcher', key: 'researcher', layer: 0, model: 'opus', viz: 'docs', job: 'reads papers, docs and postmortems' },
-        { name: 'Architect', key: 'architect', layer: 0, model: 'opus', viz: 'boxes', job: 'designs systems and interfaces' },
-        { name: 'ML engineer', key: 'ml_engineer', layer: 1, model: 'opus', viz: 'net', job: 'trains and tunes models' },
-        { name: 'Data engineer', key: 'data_engineer', layer: 1, model: 'sonnet', viz: 'pipeline', job: 'builds pipelines and datasets' },
-        { name: 'Backend', key: 'backend', layer: 1, model: 'sonnet', viz: 'trace', job: 'writes services and APIs' },
-        { name: 'Frontend', key: 'frontend', layer: 1, model: 'sonnet', viz: 'ui', job: 'builds dashboards and UI' },
-        { name: 'Security', key: 'security', layer: 2, model: 'opus', viz: 'radar', job: 'threat models and audits' },
-        { name: 'QA', key: 'qa', layer: 2, model: 'haiku', viz: 'tests', job: 'tests at scale' },
-        { name: 'SRE', key: 'sre', layer: 3, model: 'sonnet', viz: 'latency', job: 'runs production' },
-        { name: 'Release', key: 'release', layer: 3, model: 'sonnet', viz: 'rollout', job: 'ships builds safely, region by region' },
-        { name: 'Platform', key: 'platform', layer: 3, model: 'haiku', viz: 'racks', job: 'keeps the GPU fleet healthy' },
+        { name: 'Planner', key: 'planner', layer: 0, model: 'fable', viz: 'beam', job: 'breaks goals into milestones' },
+        { name: 'Researcher', key: 'researcher', layer: 0, model: 'opus', viz: 'embed', job: 'reads papers, docs and postmortems' },
+        { name: 'Architect', key: 'architect', layer: 0, model: 'opus', viz: 'layers', job: 'designs systems and interfaces' },
+        { name: 'ML engineer', key: 'ml_engineer', layer: 1, model: 'opus', viz: 'descent', job: 'trains and tunes models' },
+        { name: 'Data engineer', key: 'data_engineer', layer: 1, model: 'sonnet', viz: 'tokens', job: 'builds pipelines and datasets' },
+        { name: 'Backend', key: 'backend', layer: 1, model: 'sonnet', viz: 'moe', job: 'writes services and APIs' },
+        { name: 'Frontend', key: 'frontend', layer: 1, model: 'sonnet', viz: 'sample', job: 'builds dashboards and UI' },
+        { name: 'Security', key: 'security', layer: 2, model: 'opus', viz: 'attn', job: 'threat models and audits' },
+        { name: 'QA', key: 'qa', layer: 2, model: 'haiku', viz: 'logits', job: 'tests at scale' },
+        { name: 'SRE', key: 'sre', layer: 3, model: 'sonnet', viz: 'allreduce', job: 'runs production' },
+        { name: 'Release', key: 'release', layer: 3, model: 'sonnet', viz: 'specdec', job: 'ships builds safely, region by region' },
+        { name: 'Platform', key: 'platform', layer: 3, model: 'haiku', viz: 'matmul', job: 'keeps the GPU fleet healthy' },
     ];
     const EXTRA_ROLES = [
-        { name: 'Performance', key: 'performance', layer: 1, model: 'opus', viz: 'trace', job: 'profiles and optimises hot paths' },
-        { name: 'DBA', key: 'dba', layer: 1, model: 'sonnet', viz: 'pipeline', job: 'tunes databases and queries' },
-        { name: 'Red team', key: 'red_team', layer: 2, model: 'opus', viz: 'radar', job: 'attacks the system before others do' },
-        { name: 'Compliance', key: 'compliance', layer: 2, model: 'sonnet', viz: 'checklist', job: 'maps work to regulations' },
-        { name: 'Tech writer', key: 'tech_writer', layer: 3, model: 'haiku', viz: 'docs', job: 'writes docs and runbooks' },
+        { name: 'Performance', key: 'performance', layer: 1, model: 'opus', viz: 'kvcache', job: 'profiles and optimises hot paths' },
+        { name: 'DBA', key: 'dba', layer: 1, model: 'sonnet', viz: 'kvcache', job: 'tunes databases and queries' },
+        { name: 'Red team', key: 'red_team', layer: 2, model: 'opus', viz: 'attn', job: 'attacks the system before others do' },
+        { name: 'Compliance', key: 'compliance', layer: 2, model: 'sonnet', viz: 'logits', job: 'maps work to regulations' },
+        { name: 'Tech writer', key: 'tech_writer', layer: 3, model: 'haiku', viz: 'tokens', job: 'writes docs and runbooks' },
     ];
     const COLUMNS = ['layer 1 · research & design', 'layer 2 · build', 'layer 3 · verify', 'layer 4 · deploy'];
     const NCOL = COLUMNS.length;
@@ -260,7 +260,7 @@
     const nodes = ROLES.map(makeNode);
     const byName = Object.fromEntries(nodes.map((a) => [a.name, a]));
     const cols = Array.from({ length: NCOL }, (_, c) => nodes.filter((a) => a.layer === c));
-    const hub = Object.assign(makeNode({ name: 'Orchestrator', key: 'orchestrator', layer: -1, model: 'fable', viz: 'gantt', job: 'hands out work and tracks the goal' }),
+    const hub = Object.assign(makeNode({ name: 'Orchestrator', key: 'orchestrator', layer: -1, model: 'fable', viz: 'beam', job: 'hands out work and tracks the goal' }),
         { isHub: true, shownProgress: 0, status: 'waiting for a goal' });
     const all = () => [hub, ...nodes];
     const colOf = (a) => cols.findIndex((c) => c.includes(a));
@@ -580,11 +580,11 @@
             L.gridX = L.busX + L.busW + L.gw * 0.035;
             L.colW = (L.gx + L.gw - L.gridX) / NCOL;
         } else {
-            // phones: readable columns wider than the screen; swipe empty space (or two fingers) to see layers 3 and 4
-            L.icW = 0;
-            L.busX = L.gx + 2;
+            // phones: readable columns wider than the screen; swipe empty space (or two fingers) to see the rest
+            L.icW = 170;
+            L.busX = L.gx + L.icW + 22;
             L.busW = 12;
-            L.gridX = L.busX + L.busW + 14;
+            L.gridX = L.busX + L.busW + 22;
             L.colW = Math.max(176, (L.gx + L.gw - L.gridX) / 2);
         }
         L.gridW = L.colW * NCOL;
@@ -787,7 +787,8 @@
         ctx.fillRect(0, 0, W, H);
         ctx.setTransform(DPR * cam.z, 0, 0, DPR * cam.z, DPR * cam.x, DPR * cam.y);
         drawColumnLabels();
-        if (!L.portrait) drawInputs();
+        drawInputs();
+        drawFlows();
         drawBusWires();
         drawBus();
         drawPackets();
@@ -816,7 +817,7 @@
             const x = L.gridX + L.colW * c + (L.colW - L.nodeW) / 2;
             ctx.fillText(fitText(label, L.nodeW), x, L.gy + 8 * L.s);
         });
-        if (!L.portrait) ctx.fillText('inputs', L.gx, L.gy + 8 * L.s);
+        ctx.fillText('inputs', L.gx, L.gy + 8 * L.s);
         ctx.textBaseline = 'alphabetic';
     }
 
@@ -897,7 +898,7 @@
         const bx = L.busX, bw = L.busW;
         const rk = redirectK();
         ctx.lineWidth = 0.8;
-        if (!L.portrait) {
+        {
             if (!particles.length) particles = Array.from({ length: 220 }, () => ({ w: randi(0, 19), k: Math.random(), v: rand(0.05, 0.25), j: rand(-6, 6) }));
             const wires = [];
             inputRects.forEach((r, i) => {
@@ -935,6 +936,33 @@
                 }
             }
         }
+    }
+
+    // data flowing through the network: inputs straight into layer 1, then each layer into the next
+    function drawFlows() {
+        const s = L.s;
+        ctx.lineWidth = 0.9;
+        const feed = [];
+        inputRects.forEach((r, i) => cols[0].forEach((b, j) => {
+            if ((i + j) % 2 === 0) feed.push([r.x + r.w + 1, r.y + r.h * 0.5, b.x - L.nodeW / 2 - 3, b.y + L.headH + L.stripH / 2, false]);
+        }));
+        for (let c = 0; c < NCOL - 1; c++) {
+            for (const a of cols[c]) for (const b of cols[c + 1]) {
+                feed.push([a.x + L.nodeW / 2 + 3, a.y + L.headH + L.stripH / 2, b.x - L.nodeW / 2 - 3, b.y + L.headH + L.stripH / 2, !!(a.task || b.task)]);
+            }
+        }
+        for (const [x1, y1, x2, y2, hot] of feed) {
+            ctx.strokeStyle = rgba(C.accent, hot ? 0.3 : 0.1);
+            bez(x1, y1, x2, y2);
+            ctx.stroke();
+        }
+        feed.forEach(([x1, y1, x2, y2, hot], i) => {
+            for (let k = 0; k < (hot ? 3 : 1); k++) {
+                const q = bezPt(x1, y1, x2, y2, (t * (hot ? 0.35 : 0.15) + hash(i) + k / 3) % 1);
+                ctx.fillStyle = hot ? C.amber : rgba(C.text, 0.45);
+                ctx.fillRect(q.x - 1.5 * s, q.y - 1.5 * s, 3 * s, 3 * s);
+            }
+        });
     }
 
     function drawBus() {
@@ -1150,242 +1178,409 @@
         ctx.restore();
     }
 
-    // ---------------------------------------------------------------- per-role visuals (work as a thin strip or a big panel)
+    // ---------------------------------------------------------------- per-role visuals: things LLM systems actually do
+    // Each works as a thin strip on the node and as a big panel when the node is open. Illustrations, not real telemetry.
+    const VIZ_CAPTION = {
+        beam: 'beam search · width 3', embed: 'embedding space · nearest neighbours', layers: 'transformer layers · attention + MLP',
+        descent: 'gradient descent on the loss surface', tokens: 'tokenizer · text to token ids', moe: 'mixture of experts · top-2 routing',
+        sample: 'sampling the next token', attn: 'attention matrix · causal mask', logits: 'eval scores vs pass threshold',
+        allreduce: 'all-reduce ring across 8 GPUs', specdec: 'speculative decoding · draft and verify', matmul: 'systolic array · matrix multiply',
+        kvcache: 'paged KV cache',
+    };
+    const TOKS = ['the', '▁fast', 'retr', 'ieval', 'shard', '▁KV', 'cache', '##ing', 'token', 'izer', '▁p99', 'lat', 'ency', '▁GPU', 'quant', '▁int8'];
     function drawViz(a, x, y, w, h, mini) {
         if (w < 10 || h < 6) return;
         ctx.save();
         ctx.beginPath();
         ctx.rect(x, y, w, h);
         ctx.clip();
-        ctx.fillStyle = mini ? '#0d141c' : 'transparent';
-        if (mini) ctx.fillRect(x, y, w, h);
+        if (mini) { ctx.fillStyle = '#0d141c'; ctx.fillRect(x, y, w, h); }
         const act = a.health === 'err' ? 0.05 : 0.2 + 0.8 * a.act;
         const sp = t * (0.4 + act);
-        const A = C.accent, s = L.s;
-        const seed = a.seed;
+        const A = C.accent, AM = C.amber, s = L.s, seed = a.seed;
+        let cy0 = y, ch = h;
+        if (!mini) {
+            ctx.font = font(9, '600');
+            ctx.fillStyle = C.dim;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(fitText(VIZ_CAPTION[a.viz] || '', w - 8), x + 4, y + 3);
+            cy0 = y + 15 * s;
+            ch = h - 17 * s;
+        }
+        const Y = cy0, Hh = ch;
         ctx.lineWidth = 1;
+        ctx.textBaseline = 'middle';
         switch (a.viz) {
-            case 'gantt': {
-                const rows = mini ? 2 : 6, rh = h / rows;
-                const now = (sp * 0.08) % 1;
-                for (let i = 0; i < rows; i++) {
-                    const st = hash(seed + i) * 0.6, len = 0.15 + hash(seed + i * 3) * 0.35;
-                    const done = clamp((now - st) / len, 0, 1);
-                    ctx.fillStyle = rgba(A, 0.2);
-                    ctx.fillRect(x + st * w, y + i * rh + rh * 0.2, len * w, rh * 0.6);
-                    ctx.fillStyle = rgba(A, 0.75);
-                    ctx.fillRect(x + st * w, y + i * rh + rh * 0.2, len * w * done, rh * 0.6);
+            case 'beam': {
+                const depth = mini ? 4 : 5;
+                const shown = (sp * 0.35) % (depth + 1.5);
+                const lv = [];
+                for (let l = 0; l <= depth; l++) {
+                    const n = l === 0 ? 1 : Math.min(Math.pow(3, l), mini ? 4 : 9);
+                    lv.push(Array.from({ length: n }, (_, i) => ({ x: x + 4 + (l / depth) * (w - 8), y: Y + ((i + 0.5) / n) * Hh, score: hash(seed + l * 17 + i) })));
                 }
-                ctx.fillStyle = C.amber;
-                ctx.fillRect(x + now * w, y, 1.5, h);
-                break;
-            }
-            case 'docs': {
-                const pages = mini ? 1 : 3, pw = mini ? w : (w - 12) / 3;
-                const scan = (sp * 0.25) % 1;
-                for (let p = 0; p < pages; p++) {
-                    const px = x + p * (pw + 6);
-                    if (!mini) { ctx.strokeStyle = rgba(A, 0.4); ctx.strokeRect(px + 0.5, y + 4, pw - 1, h - 8); }
-                    const lines = mini ? 2 : Math.floor((h - 14) / 7);
-                    for (let i = 0; i < lines; i++) {
-                        const ly = mini ? y + h * (0.3 + i * 0.4) : y + 9 + i * 7;
-                        const lw = (0.5 + hash(seed + p * 31 + i) * 0.45) * (pw - 10);
-                        const lit = Math.abs(i / lines - scan) < (mini ? 0.5 : 0.08) && (p === Math.floor(sp * 0.25) % pages);
-                        ctx.fillStyle = lit ? C.amber : rgba(C.text, 0.25);
-                        ctx.fillRect(px + 5, ly, mini ? lw * ((sp * 0.3 + i * 0.5) % 1) : lw, mini ? 2 : 2.5);
-                    }
+                const best = lv.map((row) => row.reduce((b, p) => (p.score > b.score ? p : b), row[0]));
+                for (let l = 1; l <= depth && l <= shown; l++) {
+                    lv[l].forEach((p, i) => {
+                        const parent = lv[l - 1][Math.floor((i * lv[l - 1].length) / lv[l].length)];
+                        const kept = p.score > 0.45;
+                        ctx.strokeStyle = rgba(A, kept ? 0.5 : 0.12);
+                        ctx.beginPath(); ctx.moveTo(parent.x, parent.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+                        ctx.fillStyle = kept ? rgba(A, 0.9) : rgba(C.faint, 0.6);
+                        ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+                    });
                 }
-                break;
-            }
-            case 'boxes': {
-                const n = mini ? 5 : 6;
-                const pts = Array.from({ length: n }, (_, i) => ({
-                    x: x + w * (mini ? (i + 0.5) / n : 0.15 + 0.7 * hash(seed + i)),
-                    y: y + h * (mini ? 0.5 : 0.15 + 0.7 * hash(seed + i * 7)),
-                }));
-                ctx.strokeStyle = rgba(A, 0.45);
-                for (let i = 0; i < n - 1; i++) { ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[i + 1].x, pts[i + 1].y); ctx.stroke(); }
-                const bw = mini ? Math.min(w / n * 0.5, 18) : 34 * s, bh = mini ? h * 0.55 : 18 * s;
-                pts.forEach((p, i) => {
-                    const lit = Math.floor(sp * 1.2) % n === i;
-                    ctx.fillStyle = lit ? rgba(C.amber, 0.8) : '#132433';
-                    ctx.fillRect(p.x - bw / 2, p.y - bh / 2, bw, bh);
-                    ctx.strokeStyle = rgba(A, 0.7);
-                    ctx.strokeRect(p.x - bw / 2 + 0.5, p.y - bh / 2 + 0.5, bw - 1, bh - 1);
-                });
-                const k = (sp * 1.2) % 1, i0 = Math.floor(sp * 1.2) % (n - 1);
-                ctx.fillStyle = C.amber;
-                ctx.fillRect(lerp(pts[i0].x, pts[i0 + 1].x, k) - 2, lerp(pts[i0].y, pts[i0 + 1].y, k) - 2, 4, 4);
-                break;
-            }
-            case 'net': {
-                // falling loss curve, plus (when large) a rotating wireframe of layers
-                const lw = mini ? w : w * 0.45, lx = mini ? x : x + w - lw;
-                ctx.strokeStyle = C.amber;
+                ctx.strokeStyle = AM;
+                ctx.lineWidth = 2;
                 ctx.beginPath();
-                const N = 40;
-                for (let i = 0; i <= N; i++) {
-                    const k = i / N;
-                    const v = Math.exp(-k * 3 - (sp * 0.05) % 1) * 0.8 + 0.08 + 0.04 * Math.sin(k * 40 + sp * 4) * act;
-                    const px = lx + k * lw, py = y + h - v * h * 0.9 - 2;
-                    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
-                }
+                best.forEach((p, l) => { if (l <= shown) (l ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); });
                 ctx.stroke();
-                if (!mini) wireframe(a, x, y, w * 0.55, h, act);
                 break;
             }
-            case 'pipeline': {
-                const st = mini ? 4 : 5, bw = mini ? 10 : 26 * s, gap = (w - st * bw) / (st - 1);
-                for (let i = 0; i < st; i++) {
-                    ctx.strokeStyle = rgba(A, 0.7);
-                    ctx.strokeRect(x + i * (bw + gap) + 0.5, y + h * 0.25 + 0.5, bw - 1, h * 0.5 - 1);
+            case 'embed': {
+                const n = mini ? 26 : 70;
+                const pts = Array.from({ length: n }, (_, i) => {
+                    const c = i % 4;
+                    return { c, x: x + w * (0.15 + 0.7 * hash(seed + c * 3)) + (hash(seed + i * 7) - 0.5) * w * 0.25,
+                        y: Y + Hh * (0.2 + 0.6 * hash(seed + c * 5 + 1)) + (hash(seed + i * 11) - 0.5) * Hh * 0.35 };
+                });
+                const qx = x + w * (0.5 + 0.38 * Math.sin(sp * 0.3)), qy = Y + Hh * (0.5 + 0.32 * Math.cos(sp * 0.23));
+                const near = pts.map((p) => ({ p, d: (p.x - qx) ** 2 + (p.y - qy) ** 2 })).sort((p, q) => p.d - q.d).slice(0, 5);
+                ctx.strokeStyle = rgba(AM, 0.7);
+                for (const { p } of near) { ctx.beginPath(); ctx.moveTo(qx, qy); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+                for (const p of pts) {
+                    ctx.fillStyle = rgba([A, '#6fb3ff', '#c49bff', C.green][p.c], 0.75);
+                    ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
                 }
-                const dots = mini ? 10 : 24;
-                for (let i = 0; i < dots; i++) {
-                    const k = (sp * 0.18 + i / dots) % 1;
-                    const dy = y + h * (0.35 + 0.3 * hash(seed + i));
-                    ctx.fillStyle = hash(i + Math.floor(sp)) > 0.97 ? C.red : rgba(C.amber, 0.9);
-                    ctx.fillRect(x + k * w - 1.5, dy - 1.5, 3, 3);
-                }
+                ctx.fillStyle = AM;
+                ctx.fillRect(qx - 3, qy - 3, 6, 6);
                 break;
             }
-            case 'trace': {
-                const rows = mini ? 2 : 7, rh = h / rows;
-                for (let i = 0; i < rows; i++) {
-                    const st = i === 0 ? 0 : hash(seed + i) * 0.5, len = i === 0 ? 1 : 0.1 + hash(seed + i * 5) * (1 - st) * 0.8;
-                    const jitter = 0.03 * Math.sin(sp + i);
-                    ctx.fillStyle = rgba(i % 3 === 2 ? C.amber : A, 0.35 + 0.4 * act);
-                    ctx.fillRect(x + (st + jitter) * w, y + i * rh + 1, len * w, rh - 2);
-                }
-                ctx.fillStyle = C.text;
-                ctx.fillRect(x + ((sp * 0.15) % 1) * w, y, 1, h);
-                break;
-            }
-            case 'ui': {
-                const k = (sp * 0.12) % 1;
-                if (!mini) {
-                    ctx.strokeStyle = rgba(A, 0.5);
-                    ctx.strokeRect(x + 4.5, y + 4.5, w - 9, h - 9);
-                    ctx.fillStyle = rgba(A, 0.3);
-                    ctx.fillRect(x + 5, y + 5, w - 10, 9);
-                }
-                const blocks = mini ? 6 : 8;
-                for (let i = 0; i < blocks; i++) {
-                    if (i / blocks > k * 1.2) break;
-                    const bx = mini ? x + (i * w) / blocks + 2 : x + 10 + (i % 4) * ((w - 20) / 4);
-                    const by = mini ? y + h * 0.2 : y + 20 + Math.floor(i / 4) * ((h - 26) / 2);
-                    const bw = mini ? w / blocks - 4 : (w - 20) / 4 - 6, bh = mini ? h * 0.6 : (h - 26) / 2 - 6;
-                    ctx.fillStyle = i === Math.floor(k * 1.2 * blocks) ? rgba(C.amber, 0.7) : rgba(A, 0.3);
-                    ctx.fillRect(bx, by, bw, bh);
-                }
-                break;
-            }
-            case 'radar': {
-                const cx = mini ? x + w / 2 : x + w / 2, cy = mini ? y + h / 2 : y + h / 2;
+            case 'layers': {
                 if (mini) {
-                    const k = (sp * 0.4) % 1;
-                    ctx.fillStyle = rgba(A, 0.5);
-                    ctx.fillRect(x + k * w, y, 2, h);
-                    for (let i = 0; i < 5; i++) {
-                        const bx = x + hash(seed + i) * w;
-                        const age = (k - hash(seed + i)) % 1;
-                        ctx.fillStyle = rgba(i === 2 ? C.red : C.amber, age > 0 && age < 0.4 ? 1 - age * 2.5 : 0);
-                        ctx.fillRect(bx - 2, y + h * (0.3 + 0.4 * hash(seed + i * 3)) - 2, 4, 4);
+                    const n = 12, bw = w / n;
+                    const lit = Math.floor(sp * 2.5) % n;
+                    for (let i = 0; i < n; i++) {
+                        ctx.fillStyle = i === lit ? AM : i < lit ? rgba(A, 0.55) : '#16212c';
+                        ctx.fillRect(x + i * bw + 1, Y + 3, bw - 2, Hh - 6);
                     }
                     break;
                 }
-                const R = Math.min(w, h) * 0.45;
-                ctx.strokeStyle = rgba(A, 0.3);
-                for (let r = 1; r <= 3; r++) { ctx.beginPath(); ctx.arc(cx, cy, (R * r) / 3, 0, TAU); ctx.stroke(); }
-                const ang = sp * 1.5;
-                for (let k = 0; k < 16; k++) {
-                    ctx.fillStyle = rgba(A, 0.18 * (1 - k / 16));
-                    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, ang - (k + 1) * 0.05, ang - k * 0.05); ctx.closePath(); ctx.fill();
+                const sw = w * 0.42, rows = 6, rh = Hh / rows;
+                const lit = Math.floor(sp * 1.5) % rows;
+                for (let r = 0; r < rows; r++) {
+                    const ry = Y + Hh - (r + 1) * rh;
+                    const on = r === lit;
+                    ctx.font = font(8.5);
+                    for (const [k, label] of [[0, 'attn'], [1, 'mlp']]) {
+                        const bx = x + 26 * s + k * (sw - 26 * s) / 2;
+                        ctx.fillStyle = on ? rgba(AM, 0.35) : '#132030';
+                        ctx.fillRect(bx, ry + 2, (sw - 26 * s) / 2 - 4, rh - 4);
+                        ctx.strokeStyle = on ? AM : rgba(A, 0.5);
+                        ctx.strokeRect(bx + 0.5, ry + 2.5, (sw - 26 * s) / 2 - 5, rh - 5);
+                        ctx.fillStyle = C.text;
+                        ctx.textAlign = 'center';
+                        ctx.fillText(label, bx + ((sw - 26 * s) / 2 - 4) / 2, ry + rh / 2);
+                    }
+                    ctx.fillStyle = C.dim;
+                    ctx.textAlign = 'left';
+                    ctx.fillText(r === rows - 1 ? 'L·N' : 'L' + (r + 1), x + 2, ry + rh / 2);
                 }
-                for (let i = 0; i < 7; i++) {
-                    const ba = hash(seed + i) * TAU, br = (0.2 + 0.75 * hash(seed + i * 9)) * R;
-                    const d = ((ang - ba) % TAU + TAU) % TAU;
-                    ctx.fillStyle = rgba(i === 3 ? C.red : C.amber, d < 2 ? 1 - d / 2 : 0.1);
-                    ctx.fillRect(cx + Math.cos(ba) * br - 2.5, cy + Math.sin(ba) * br - 2.5, 5, 5);
-                }
-                break;
-            }
-            case 'tests': {
-                const cols2 = mini ? 30 : 16, rows = mini ? 2 : Math.max(3, Math.floor(h / 12));
-                const cw = w / cols2, ch = h / rows;
-                const total = cols2 * rows, done = Math.floor((sp * 3) % (total + 10));
-                for (let i = 0; i < total; i++) {
-                    const fail = hash(seed + i) > 0.96;
-                    ctx.fillStyle = i < done ? (fail ? C.red : rgba(C.green, 0.8)) : '#1a2430';
-                    ctx.fillRect(x + (i % cols2) * cw + 1, y + Math.floor(i / cols2) * ch + 1, cw - 2, ch - 2);
-                }
-                break;
-            }
-            case 'latency': {
-                const N = mini ? 30 : 60;
-                const slo = y + h * 0.3;
+                ctx.strokeStyle = rgba(AM, 0.6);
                 ctx.setLineDash([3, 3]);
-                ctx.strokeStyle = rgba(C.red, 0.6);
-                ctx.beginPath(); ctx.moveTo(x, slo); ctx.lineTo(x + w, slo); ctx.stroke();
+                ctx.lineDashOffset = -t * 20;
+                ctx.beginPath(); ctx.moveTo(x + 22 * s, Y + Hh); ctx.lineTo(x + 22 * s, Y); ctx.stroke();
                 ctx.setLineDash([]);
-                for (const [k, col, base] of [[0, A, 0.75], [1, C.amber, 0.45]]) {
-                    ctx.strokeStyle = col;
+                wireframe(a, x + sw, Y, w - sw, Hh, act);
+                break;
+            }
+            case 'descent': {
+                const k = (sp * 0.07) % 1;
+                if (mini) {
+                    ctx.strokeStyle = AM;
                     ctx.beginPath();
-                    for (let i = 0; i <= N; i++) {
-                        const n = Math.floor(sp * 3) + i;
-                        const spike = a.health !== 'ok' && i > N - 8 ? 0.3 : 0;
-                        const v = base - spike - 0.08 * Math.sin(n * 0.7 + k) - 0.05 * hash(n + k * 100);
-                        const px = x + (i / N) * w, py = y + h * v;
+                    for (let i = 0; i <= 40; i++) {
+                        const q = i / 40, v = Math.exp(-q * 3 - k) * 0.8 + 0.08 + 0.04 * Math.sin(q * 40 + sp * 4);
+                        const px = x + q * w, py = Y + Hh - v * Hh * 0.9 - 1;
                         if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
                     }
                     ctx.stroke();
+                    break;
                 }
+                const cx = x + w * 0.4, cy = Y + Hh * 0.55, R = Math.min(w * 0.38, Hh * 0.55);
+                for (let r = 1; r <= 7; r++) {
+                    ctx.strokeStyle = rgba(A, 0.08 + 0.05 * (7 - r));
+                    ctx.beginPath(); ctx.ellipse(cx, cy, (R * r) / 7, (R * r) / 7 * 0.6, 0.4, 0, TAU); ctx.stroke();
+                }
+                const pos = (q) => ({ x: cx + R * (1 - q) * Math.cos(q * 9 + seed), y: cy + R * 0.6 * (1 - q) * Math.sin(q * 9 + seed) });
+                ctx.strokeStyle = rgba(AM, 0.6);
+                ctx.beginPath();
+                for (let i = 0; i <= 60; i++) { const p = pos((i / 60) * k); if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); }
+                ctx.stroke();
+                const p = pos(k);
+                ctx.fillStyle = AM;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, TAU); ctx.fill();
+                const lx = x + w * 0.78, lw = w * 0.2;
+                ctx.strokeStyle = A;
+                ctx.beginPath();
+                for (let i = 0; i <= 30; i++) {
+                    const q = (i / 30) * k, v = Math.exp(-q * 3) * 0.8 + 0.1;
+                    const px = lx + (i / 30) * lw, py = Y + Hh - v * Hh * 0.8;
+                    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+                }
+                ctx.stroke();
+                ctx.font = font(8.5);
+                ctx.fillStyle = C.dim;
+                ctx.textAlign = 'left';
+                ctx.fillText(`loss ${(Math.exp(-k * 3) * 0.8 + 0.1).toFixed(3)}`, lx, Y + 6);
                 break;
             }
-            case 'rollout': {
-                const regions = REGIONS.length;
-                const rh = h / regions;
-                const k = (sp * 0.06) % 1.3;
-                REGIONS.forEach((r, i) => {
-                    const p = clamp((k - i * 0.15) / 0.6, 0, 1);
-                    ctx.fillStyle = '#1a2430';
-                    ctx.fillRect(x + (mini ? 0 : 70 * s), y + i * rh + rh * 0.2, w - (mini ? 0 : 70 * s), rh * 0.6);
-                    ctx.fillStyle = p >= 1 ? rgba(C.green, 0.8) : rgba(A, 0.8);
-                    ctx.fillRect(x + (mini ? 0 : 70 * s), y + i * rh + rh * 0.2, (w - (mini ? 0 : 70 * s)) * p, rh * 0.6);
-                    if (!mini) {
-                        ctx.font = font(9);
-                        ctx.fillStyle = C.dim;
+            case 'tokens': {
+                ctx.font = font(mini ? 8.5 : 9.5);
+                const gap = 4, chipH = mini ? Hh - 4 : 18 * s;
+                const rows = mini ? 1 : Math.max(1, Math.floor(Hh / (chipH + 16 * s)));
+                const shift = (sp * 18) % 400;
+                for (let r = 0; r < rows; r++) {
+                    let cx = x + 2 - ((shift + r * 90) % 120);
+                    let i = r * 5 + Math.floor((shift + r * 90) / 120) * 3;
+                    const cy = mini ? Y + 2 : Y + 4 + r * (chipH + 16 * s);
+                    while (cx < x + w) {
+                        const tok = TOKS[Math.floor(hash(i + seed) * TOKS.length)];
+                        const tw = ctx.measureText(tok).width + 8;
+                        ctx.fillStyle = i % 5 === 0 ? rgba(AM, 0.3) : '#132232';
+                        ctx.fillRect(cx, cy, tw, chipH);
+                        ctx.fillStyle = C.text;
                         ctx.textAlign = 'left';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(r, x + 2, y + i * rh + rh / 2);
-                    }
-                });
-                break;
-            }
-            case 'racks': {
-                const units = mini ? 2 : Math.max(4, Math.floor(h / 9)), leds = mini ? 32 : 18;
-                const uh = h / units;
-                for (let u = 0; u < units; u++) {
-                    if (!mini) { ctx.strokeStyle = rgba(A, 0.25); ctx.strokeRect(x + 0.5, y + u * uh + 0.5, w - 1, uh - 1); }
-                    for (let l = 0; l < leds; l++) {
-                        const on = hash(seed + u * 100 + l + Math.floor(sp * (2 + (l % 3)))) > 0.45;
-                        const bad = a.health !== 'ok' && u === 1 && l < 4;
-                        ctx.fillStyle = bad ? C.red : on ? rgba(C.green, 0.85) : '#163024';
-                        ctx.fillRect(x + 4 + (l * (w - 8)) / leds, y + u * uh + uh * 0.3, (w - 8) / leds - 2, uh * 0.4);
+                        ctx.fillText(tok, cx + 4, cy + chipH / 2);
+                        if (!mini) {
+                            ctx.fillStyle = C.dim;
+                            ctx.font = font(8);
+                            ctx.fillText(String(1000 + Math.floor(hash(i * 3 + seed) * 99000)), cx + 2, cy + chipH + 7 * s);
+                            ctx.font = font(9.5);
+                        }
+                        cx += tw + gap;
+                        i++;
                     }
                 }
                 break;
             }
-            case 'checklist': {
-                const rows = mini ? 1 : Math.floor(h / 13);
-                const done = Math.floor(sp * 0.8) % (rows * (mini ? 8 : 1) + 3);
-                for (let i = 0; i < (mini ? 8 : rows); i++) {
-                    const bx = mini ? x + 4 + (i * (w - 8)) / 8 : x + 6, by = mini ? y + h * 0.25 : y + 4 + i * 13;
-                    const sz = mini ? Math.min(h * 0.5, 9) : 8;
-                    ctx.strokeStyle = rgba(A, 0.7);
-                    ctx.strokeRect(bx + 0.5, by + 0.5, sz, sz);
-                    if (i < done) { ctx.fillStyle = C.green; ctx.fillRect(bx + 2, by + 2, sz - 3, sz - 3); }
-                    if (!mini) { ctx.fillStyle = rgba(C.text, i < done ? 0.6 : 0.25); ctx.fillRect(bx + 14, by + 3, (0.4 + hash(seed + i) * 0.5) * (w - 30), 3); }
+            case 'moe': {
+                const E = 8, step = Math.floor(sp * 1.4);
+                const c1 = Math.floor(hash(step + seed) * E), c2 = (c1 + 1 + Math.floor(hash(step * 3 + seed) * (E - 1))) % E;
+                if (mini) {
+                    const bw = w / E;
+                    for (let e = 0; e < E; e++) {
+                        const load = 0.25 + 0.6 * hash(e + seed + step * 0.1);
+                        const on = e === c1 || e === c2;
+                        ctx.fillStyle = on ? AM : rgba(A, 0.35);
+                        ctx.fillRect(x + e * bw + 1, Y + Hh * (1 - load), bw - 2, Hh * load);
+                    }
+                    break;
+                }
+                const rx = x + w * 0.32, ry = Y + Hh / 2, ex = x + w * 0.62, eh = Hh / E;
+                for (let i = 0; i < 6; i++) {
+                    const k = (sp * 0.6 + i / 6) % 1;
+                    ctx.fillStyle = rgba(C.text, 0.7);
+                    ctx.fillRect(x + 4 + k * (rx - x - 14), ry - 2 + (i - 3) * 3, 4, 3);
+                }
+                ctx.fillStyle = '#132232';
+                ctx.strokeStyle = A;
+                ctx.beginPath(); ctx.moveTo(rx - 10, ry); ctx.lineTo(rx, ry - 12); ctx.lineTo(rx + 10, ry); ctx.lineTo(rx, ry + 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.font = font(8.5);
+                for (let e = 0; e < E; e++) {
+                    const ey = Y + e * eh + eh / 2, on = e === c1 || e === c2;
+                    ctx.strokeStyle = on ? AM : rgba(A, 0.15);
+                    ctx.lineWidth = on ? 2 : 1;
+                    ctx.beginPath(); ctx.moveTo(rx + 10, ry); ctx.lineTo(ex, ey); ctx.stroke();
+                    ctx.lineWidth = 1;
+                    ctx.fillStyle = on ? rgba(AM, 0.3) : '#132232';
+                    ctx.fillRect(ex, ey - eh / 2 + 1, w * 0.18, eh - 2);
+                    ctx.fillStyle = on ? AM : C.dim;
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`expert ${e}`, ex + 4, ey);
+                    const load = 0.2 + 0.7 * hash(e + seed + Math.floor(step / 4));
+                    ctx.fillStyle = rgba(A, 0.6);
+                    ctx.fillRect(ex + w * 0.2, ey - 2, (w * 0.16) * load, 4);
+                }
+                break;
+            }
+            case 'sample': {
+                const step = Math.floor(sp * 1.1);
+                const cands = Array.from({ length: 5 }, (_, i) => ({ tok: TOKS[Math.floor(hash(step * 7 + i + seed) * TOKS.length)], v: Math.exp(hash(step * 5 + i) * 3) }));
+                const sum = cands.reduce((q, c) => q + c.v, 0);
+                cands.forEach((c) => { c.p = c.v / sum; });
+                const chosen = cands.reduce((b, c) => (c.p > b.p ? c : b), cands[0]);
+                if (mini) {
+                    const bw = w / 5;
+                    cands.forEach((c, i) => {
+                        ctx.fillStyle = c === chosen ? AM : rgba(A, 0.45);
+                        ctx.fillRect(x + i * bw + 2, Y + Hh * (1 - c.p * 1.4), bw - 4, Hh * c.p * 1.4);
+                    });
+                    break;
+                }
+                const bh = (Hh - 26 * s) / 5;
+                ctx.font = font(9);
+                cands.forEach((c, i) => {
+                    const by = Y + i * bh;
+                    ctx.fillStyle = C.text;
+                    ctx.textAlign = 'right';
+                    ctx.fillText(c.tok, x + 56 * s, by + bh / 2);
+                    ctx.fillStyle = c === chosen ? AM : rgba(A, 0.5);
+                    ctx.fillRect(x + 62 * s, by + 3, (w - 110 * s) * c.p, bh - 6);
+                    ctx.fillStyle = C.dim;
+                    ctx.textAlign = 'left';
+                    ctx.fillText((c.p * 100).toFixed(0) + '%', x + 66 * s + (w - 110 * s) * c.p, by + bh / 2);
+                });
+                const out = Array.from({ length: 8 }, (_, i) => TOKS[Math.floor(hash((step - 8 + i) * 7 + seed) * TOKS.length)]).join(' ');
+                ctx.fillStyle = C.text;
+                ctx.textAlign = 'left';
+                ctx.fillText(fitText('› ' + out + ' ' + chosen.tok + (Math.floor(t * 2) % 2 ? '▍' : ''), w - 8), x + 4, Y + Hh - 10 * s);
+                break;
+            }
+            case 'attn': {
+                const n = mini ? 0 : 14;
+                if (mini) {
+                    const cols2 = Math.floor(w / 6), rows = 2;
+                    for (let i = 0; i < cols2; i++) for (let j = 0; j < rows; j++) {
+                        const v = (0.5 + 0.5 * Math.sin(sp * 2 + i * 0.5 + j * 2 + seed)) * act;
+                        ctx.fillStyle = rgba(v > 0.85 ? AM : A, 0.1 + 0.8 * v);
+                        ctx.fillRect(x + i * 6, Y + j * (Hh / 2) + 1, 5, Hh / 2 - 2);
+                    }
+                    break;
+                }
+                const cell = Math.min((w * 0.6) / n, Hh / n), mx = x + 4, my = Y;
+                const q = Math.floor(sp * 2) % n;
+                for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) {
+                    const v = Math.exp(-Math.abs(i - j) * 0.35) * (0.4 + 0.6 * hash(i * 31 + j + seed)) * act;
+                    ctx.fillStyle = i === q ? rgba(AM, 0.25 + 0.75 * v) : rgba(A, 0.08 + 0.85 * v);
+                    ctx.fillRect(mx + j * cell, my + i * cell, cell - 1, cell - 1);
+                }
+                ctx.font = font(8.5);
+                ctx.fillStyle = C.dim;
+                ctx.textAlign = 'left';
+                ctx.fillText(`query ${q} attends to ${q + 1} tokens`, mx + n * cell + 8, my + 10);
+                ctx.fillText(`head ${Math.floor(hash(seed) * 64)} of 64`, mx + n * cell + 8, my + 24 * s);
+                break;
+            }
+            case 'logits': {
+                const bins = mini ? 24 : 30, bw = w / bins;
+                const mean = 0.62 + 0.08 * Math.sin(sp * 0.3), thr = 0.5;
+                for (let i = 0; i < bins; i++) {
+                    const xv = (i + 0.5) / bins;
+                    const v = Math.exp(-((xv - mean) ** 2) / 0.02) * (0.85 + 0.15 * hash(i + Math.floor(sp)));
+                    ctx.fillStyle = xv < thr ? rgba(C.red, 0.6) : rgba(C.green, 0.65);
+                    ctx.fillRect(x + i * bw + 1, Y + Hh * (1 - v * 0.9), bw - 2, Hh * v * 0.9);
+                }
+                ctx.strokeStyle = AM;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath(); ctx.moveTo(x + thr * w, Y); ctx.lineTo(x + thr * w, Y + Hh); ctx.stroke();
+                ctx.setLineDash([]);
+                if (!mini) {
+                    ctx.font = font(8.5);
+                    ctx.fillStyle = C.dim;
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`pass rate ${Math.round((1 - (thr - mean + 0.4) / 0.8) * 100)}% · 12k prompts`, x + 4, Y + 8);
+                }
+                break;
+            }
+            case 'allreduce': {
+                const G = 8;
+                if (mini) {
+                    const bw = w / G;
+                    for (let i = 0; i < G; i++) {
+                        ctx.strokeStyle = rgba(A, 0.6);
+                        ctx.strokeRect(x + i * bw + 2.5, Y + 2.5, bw - 5, Hh - 5);
+                    }
+                    for (let i = 0; i < G; i++) {
+                        const k = (sp * 0.5 + i / G) % 1;
+                        ctx.fillStyle = AM;
+                        ctx.fillRect(x + k * w - 2, Y + Hh / 2 - 2, 4, 4);
+                    }
+                    break;
+                }
+                const cx = x + w / 2, cy = Y + Hh / 2, R = Math.min(w * 0.36, Hh * 0.42);
+                const pos = (i) => ({ x: cx + R * Math.cos((i / G) * TAU - Math.PI / 2), y: cy + R * Math.sin((i / G) * TAU - Math.PI / 2) });
+                ctx.strokeStyle = rgba(A, 0.35);
+                ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+                ctx.font = font(8.5);
+                for (let i = 0; i < G; i++) {
+                    const p = pos(i);
+                    ctx.fillStyle = '#132232';
+                    ctx.fillRect(p.x - 14, p.y - 9, 28, 18);
+                    ctx.strokeStyle = A;
+                    ctx.strokeRect(p.x - 13.5, p.y - 8.5, 27, 17);
+                    ctx.fillStyle = C.text;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('gpu' + i, p.x, p.y);
+                }
+                for (let i = 0; i < G; i++) {
+                    const k = (sp * 0.4 + i / G) % 1, from = Math.floor(k * G), f = k * G - from;
+                    const p = pos(from), q = pos((from + 1) % G);
+                    ctx.fillStyle = AM;
+                    ctx.fillRect(lerp(p.x, q.x, f) - 3, lerp(p.y, q.y, f) - 3, 6, 6);
+                }
+                ctx.fillStyle = C.dim;
+                ctx.textAlign = 'center';
+                ctx.fillText('gradients', cx, cy);
+                break;
+            }
+            case 'specdec': {
+                const step = Math.floor(sp * 0.9);
+                const accepted = 2 + Math.floor(hash(step + seed) * 4);
+                const n = mini ? 8 : 6;
+                ctx.font = font(mini ? 8 : 9);
+                const drawRow = (yy, rh, label) => {
+                    let cx = x + (label ? 64 * s : 2);
+                    if (label) { ctx.fillStyle = C.dim; ctx.textAlign = 'left'; ctx.fillText(label, x + 2, yy + rh / 2); }
+                    for (let i = 0; i < n; i++) {
+                        const tok = TOKS[Math.floor(hash(step * 9 + i + seed) * TOKS.length)];
+                        const tw = mini ? (w - 4) / n - 3 : ctx.measureText(tok).width + 10;
+                        const state = i < accepted ? 'ok' : i === accepted ? 'no' : 'wait';
+                        ctx.fillStyle = state === 'ok' ? rgba(C.green, 0.35) : state === 'no' ? rgba(C.red, 0.45) : '#132232';
+                        ctx.fillRect(cx, yy, tw, rh);
+                        if (!mini) { ctx.fillStyle = C.text; ctx.textAlign = 'left'; ctx.fillText(tok, cx + 5, yy + rh / 2); }
+                        cx += tw + 3;
+                    }
+                };
+                if (mini) { drawRow(Y + 2, Hh - 4); break; }
+                drawRow(Y + 4, 18 * s, 'draft');
+                const out = Array.from({ length: 10 }, (_, i) => TOKS[Math.floor(hash((step - 1) * 9 + (i % 6) + seed) * TOKS.length)]).join(' ');
+                ctx.fillStyle = C.dim;
+                ctx.textAlign = 'left';
+                ctx.fillText('verify', x + 2, Y + 36 * s);
+                ctx.fillStyle = C.text;
+                ctx.fillText(fitText(out, w - 70 * s), x + 64 * s, Y + 36 * s);
+                ctx.fillStyle = C.green;
+                ctx.fillText(`accepted ${accepted} of ${n} draft tokens · ${(1 + accepted * 0.6).toFixed(1)}x faster`, x + 2, Y + Hh - 8 * s);
+                break;
+            }
+            case 'matmul': {
+                const rows = mini ? 2 : 12, cols2 = mini ? Math.floor(w / 6) : 12;
+                const cw = mini ? 6 : Math.min((w * 0.62) / cols2, Hh / rows), chh = mini ? Hh / 2 : cw;
+                const ox = mini ? x : x + 18 * s, oy = mini ? Y : Y + 4;
+                for (let i = 0; i < rows; i++) for (let j = 0; j < cols2; j++) {
+                    const v = 0.5 + 0.5 * Math.sin((i + j) * 0.6 - sp * 3);
+                    ctx.fillStyle = rgba(v > 0.92 ? AM : A, 0.08 + 0.7 * v * act);
+                    ctx.fillRect(ox + j * cw, oy + i * chh, cw - 1, chh - 1);
+                }
+                if (!mini) {
+                    ctx.font = font(8.5);
+                    ctx.fillStyle = C.dim;
+                    ctx.textAlign = 'left';
+                    ctx.fillText('A ↓   B →   C = A·B', ox + cols2 * cw + 8, oy + 10);
+                    ctx.fillText(`${(act * 1.9).toFixed(2)} PFLOP/s`, ox + cols2 * cw + 8, oy + 26 * s);
+                }
+                break;
+            }
+            case 'kvcache': {
+                const rows = mini ? 1 : 8, cols2 = mini ? 24 : 14;
+                const cw = w / cols2, chh = Hh / rows;
+                const total = rows * cols2, fill = Math.floor((sp * 3) % (total + 8));
+                for (let i = 0; i < total; i++) {
+                    const evicted = hash(seed + i + Math.floor(sp / 6)) > 0.9;
+                    ctx.fillStyle = i < fill ? (evicted ? rgba(AM, 0.7) : rgba(A, 0.55)) : '#16212c';
+                    ctx.fillRect(x + (i % cols2) * cw + 1, Y + Math.floor(i / cols2) * chh + 1, cw - 2, chh - 2);
                 }
                 break;
             }
