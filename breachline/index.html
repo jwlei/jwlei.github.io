@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#020604" />
-    <meta name="description" content="Breachline: type the perfect movie hack at your own pace, press Enter, and watch every phase play out on the other half of the screen." />
+    <meta name="theme-color" content="#0f1113" />
+    <meta name="description" content="Breachline: type the perfect movie hack at your own pace. Each phase runs the moment it is written, and plays out on the operator panels beside it." />
     <title>Breachline · jleiros.com</title>
     <link rel="icon" type="image/svg+xml" href="/media/images/icons/favicon.svg" />
     <link rel="stylesheet" href="breachline.css" />
@@ -15,6 +15,7 @@
             <header class="bar">
                 <a class="back" href="/#garden-section">← jleiros.com</a>
                 <span class="tab">breach.ghost</span>
+                <span class="tab-meta" id="type-pct"></span>
                 <span class="spacer"></span>
                 <label class="cpk">Chars/key
                     <select id="cpk">
@@ -29,33 +30,40 @@
             <div class="code-scroll" id="code-scroll"><div class="code" id="code"></div></div>
             <div class="hint" id="hint">
                 <b>Start typing. Anything.</b>
-                <span>Any key writes the code for you. Press Enter whenever you like to run it, and watch it happen on the other screen.</span>
+                <span>Any key writes the code for you. Each phase runs the moment it is written. Enter fast-forwards the one you are on.</span>
                 <small class="touch-only">Tap here to type, or open the keyboard.</small>
             </div>
-            <button type="button" class="run-hint" id="run-hint" hidden></button>
             <textarea id="sink" class="sink" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Type here"></textarea>
         </section>
 
         <section class="pane ops-pane" aria-label="Operation view">
             <header class="bar ops-bar">
-                <div class="stat target"><span>TARGET</span><b id="t-name">—</b><small id="t-host"></small></div>
-                <div class="stat"><span>STATUS</span><b id="status" class="st-typing">TYPING</b></div>
-                <div class="stat kps"><span>KEYS/S</span><b id="kps">0</b></div>
+                <div class="stat target"><span>target</span><b id="t-name">—</b><small id="t-host"></small></div>
+                <div class="stat"><span>status</span><b id="status" class="st-idle">idle</b></div>
+                <div class="stat kps"><span>keys/s</span><b id="kps">0</b></div>
                 <span class="spacer"></span>
                 <button type="button" class="btn" id="btn-full">Fullscreen</button>
             </header>
-            <div class="stage-line">
-                <span id="stage-num">STAGE 1/10</span>
-                <b id="stage-name">RECON</b>
-                <span id="stage-title" class="stage-title"></span>
-                <span class="spacer"></span>
-                <span id="stage-pct">0%</span>
+            <div class="ops-grid">
+                <div class="panel p-main">
+                    <div class="ptitle">
+                        <span id="stage-num">standby</span>
+                        <b id="stage-name"></b>
+                        <span id="stage-title" class="stage-title"></span>
+                        <span class="spacer"></span>
+                        <span id="stage-pct"></span>
+                    </div>
+                    <pre class="pbody" id="panel"></pre>
+                </div>
+                <div class="panel p-phases">
+                    <div class="ptitle"><span>phases</span></div>
+                    <ol class="checklist" id="checklist"></ol>
+                </div>
+                <div class="panel p-log">
+                    <div class="ptitle"><span>tail -f ghost.log</span><span class="spacer"></span><span id="log-count"></span></div>
+                    <ol class="feed" id="feed"></ol>
+                </div>
             </div>
-            <div class="viewport" id="viewport"><canvas id="ops"></canvas></div>
-            <footer class="ops-foot">
-                <ol class="checklist" id="checklist"></ol>
-                <ol class="feed" id="feed"></ol>
-            </footer>
         </section>
     </div>
 
