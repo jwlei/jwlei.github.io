@@ -1209,6 +1209,8 @@
             ch = h - 17 * s;
         }
         const Y = cy0, Hh = ch;
+        // while a node is still opening the panel is only a few pixels tall: skip until there is room
+        if (Hh < 14) { ctx.restore(); return; }
         ctx.lineWidth = 1;
         ctx.textBaseline = 'middle';
         switch (a.viz) {
@@ -1308,7 +1310,7 @@
                     ctx.stroke();
                     break;
                 }
-                const cx = x + w * 0.4, cy = Y + Hh * 0.55, R = Math.min(w * 0.38, Hh * 0.55);
+                const cx = x + w * 0.4, cy = Y + Hh * 0.55, R = Math.max(4, Math.min(w * 0.38, Hh * 0.55));
                 for (let r = 1; r <= 7; r++) {
                     ctx.strokeStyle = rgba(A, 0.08 + 0.05 * (7 - r));
                     ctx.beginPath(); ctx.ellipse(cx, cy, (R * r) / 7, (R * r) / 7 * 0.6, 0.4, 0, TAU); ctx.stroke();
@@ -1499,7 +1501,7 @@
                     }
                     break;
                 }
-                const cx = x + w / 2, cy = Y + Hh / 2, R = Math.min(w * 0.36, Hh * 0.42);
+                const cx = x + w / 2, cy = Y + Hh / 2, R = Math.max(4, Math.min(w * 0.36, Hh * 0.42));
                 const pos = (i) => ({ x: cx + R * Math.cos((i / G) * TAU - Math.PI / 2), y: cy + R * Math.sin((i / G) * TAU - Math.PI / 2) });
                 ctx.strokeStyle = rgba(A, 0.35);
                 ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
@@ -1591,7 +1593,7 @@
 
     // the "neural net" look: tilted planes of units, wired plane to plane, slowly turning (an illustration)
     function wireframe(a, x, y, w, h, act) {
-        const cx = x + w / 2, cy = y + h / 2, R = Math.min(w * 0.42, h * 0.7);
+        const cx = x + w / 2, cy = y + h / 2, R = Math.max(4, Math.min(w * 0.42, h * 0.7));
         const th = t * 0.5 + a.seed, cosT = Math.cos(th), sinT = Math.sin(th), tilt = 0.45;
         const planes = 4, grid = [4, 3];
         const pts = [];
@@ -2064,7 +2066,16 @@
 
     // ---------------------------------------------------------------- loop
     let last = performance.now();
+    // the next frame is booked first, so one drawing error can never freeze the whole simulation
+    let drawErrorLogged = false;
     function frame(now) {
+        requestAnimationFrame(frame);
+        try { step(now); } catch (err) {
+            ctx.restore();
+            if (!drawErrorLogged) { drawErrorLogged = true; console.error(err); }
+        }
+    }
+    function step(now) {
         const raw = Math.min(0.05, (now - last) / 1000);
         last = now;
         const dt = paused ? 0 : raw * SPEEDS[speedIdx];
@@ -2078,7 +2089,6 @@
         animate(raw);
         draw();
         updateHead(raw);
-        requestAnimationFrame(frame);
     }
 
     setSpeed(speedIdx);
